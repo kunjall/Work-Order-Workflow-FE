@@ -1,25 +1,41 @@
-import logo from './logo.svg';
-import './App.css';
+// App.js
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Login from "./pages/login";
+import { GlobalStyles } from "@mui/material";
+import Background from "./assets/images/background.jpeg";
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <React.Fragment>
+      <GlobalStyles
+        styles={{
+          body: {
+            backgroundImage: `url(${Background})`,
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            backgroundSize: "cover",
+            margin: 0,
+            height: "100%",
+          },
+          html: {
+            height: "100%",
+          },
+          "#root": {
+            height: "100%",
+          },
+        }}
+      />
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            {/* <Route path="/" element={<Home />} /> */}
+          </Routes>
+        </div>
+      </Router>
+    </React.Fragment>
   );
-}
+};
 
 export default App;
