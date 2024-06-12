@@ -1,13 +1,44 @@
-import React from "react";
-import "../assets/styles/login.css";
+import React, { useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
 import ButtonComponent from "../components/buttons/button";
+import OTP from "../components/login/loginOTP";
+import Password from "../components/login/loginPassword";
+import "../assets/styles/login.css";
 import WOW from "../assets/images/wow.png";
+// import AuthContext from "./context/AuthProvider";
 
 export default function Login() {
+  const [loginMethod, setLoginMethod] = useState(null);
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+
+  // const { setAuth } = useContext(AuthContext);
+
+  const handleLoginClick = () => {
+    if (username) {
+      setLoginMethod("password");
+      setError("");
+    } else {
+      setError("Username is required");
+    }
+  };
+
+  const handleOtpClick = () => {
+    if (username) {
+      setLoginMethod("otp");
+      setError("");
+    } else {
+      setError("Username is required");
+    }
+  };
+
+  const handleBackClick = () => {
+    setLoginMethod(null);
+  };
+
   return (
     <React.Fragment>
       <CssBaseline />
@@ -23,38 +54,47 @@ export default function Login() {
               alignItems: "center",
               padding: "20px",
               borderRadius: "8px",
+              position: "relative",
+              overflow: "hidden",
             }}
           >
-            <div className="form">
-              <img src={WOW} alt="wow" />
-              <div className="username">
-                <TextField
-                  id="outlined-basic"
-                  label="Username"
-                  variant="outlined"
-                  fullWidth
-                />
+            {!loginMethod ? (
+              <div className="form">
+                <img src={WOW} alt="wow" />
+                <div className="username">
+                  <TextField
+                    id="outlined-basic"
+                    label="Username"
+                    variant="outlined"
+                    fullWidth
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    error={!!error}
+                    helperText={error}
+                  />
+                </div>
+                <span>
+                  <ButtonComponent
+                    variant="contained"
+                    text="Use Password"
+                    onClick={handleLoginClick}
+                  />
+                  <ButtonComponent
+                    variant="contained"
+                    text="Use OTP"
+                    onClick={handleOtpClick}
+                  />
+                </span>
+                <p>Contact admin if you're unable to login</p>
               </div>
-              <div className="password">
-                <TextField
-                  id="outlined-basic"
-                  label="Password"
-                  variant="outlined"
-                  fullWidth
-                />
+            ) : (
+              <div className="transition-wrapper visible">
+                {loginMethod === "password" && (
+                  <Password onBackClick={handleBackClick} username={username} />
+                )}
+                {loginMethod === "otp" && <OTP onBackClick={handleBackClick} />}
               </div>
-              <span>
-                <ButtonComponent
-                  variant="contained"
-                  text={"Login"}
-                ></ButtonComponent>
-                <ButtonComponent
-                  variant="contained"
-                  text={"Use OTP"}
-                ></ButtonComponent>
-              </span>
-              <p>Contact admin, if you're unable to login</p>
-            </div>
+            )}
           </Box>
         </Container>
       </div>

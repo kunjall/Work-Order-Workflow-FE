@@ -3,6 +3,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
 import { GlobalStyles } from "@mui/material";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Background from "./assets/images/background.jpeg";
 
 const App = () => {
@@ -34,6 +36,7 @@ const App = () => {
           </Routes>
         </div>
       </Router>
+      <ToastContainer />
     </React.Fragment>
   );
 };

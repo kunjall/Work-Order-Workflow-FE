@@ -1,7 +1,7 @@
 import * as React from "react";
 import { styled } from "@mui/material/styles";
 import Button from "@mui/material/Button";
-import Stack from "@mui/material/Stack";
+// import Stack from "@mui/material/Stack";
 import { orange } from "@mui/material/colors";
 
 const HeroBtn = styled(Button)(({ theme }) => ({
@@ -13,11 +13,11 @@ const HeroBtn = styled(Button)(({ theme }) => ({
   },
 }));
 
-const ButtonComponent = ({ text }) => {
+const ButtonComponent = ({ variant, text, onClick }) => {
   return (
-    <Stack spacing={2} direction="row">
-      <HeroBtn variant="contained">{text}</HeroBtn>
-    </Stack>
+    <Button variant={variant} onClick={onClick}>
+      {text}
+    </Button>
   );
 };
 
