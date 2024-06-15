@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import axios from "axios";
 import { IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -7,27 +7,41 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import ButtonComponent from "../buttons/button";
 import WOW from "../../assets/images/wow.png";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../context/authContext";
 
 export default function Password({ onBackClick, username }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const navigate = useNavigate();
   const URL = process.env.REACT_APP_API_URL;
-  console.log(URL);
+  const { login } = useContext(AuthContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${URL}/user/loginUser`, {
-        username,
-        password,
-      });
-      const role = response.data.role;
+      const response = await axios.post(
+        `${URL}/user/loginUser`,
+        { username, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
       if (response.data.error) {
         setError(response.data.error);
+      } else {
+        const token = response.data.token;
+        login(token);
+        const role = response.data.role;
+        const redirectTo = `/dashboard-${role}`;
+        navigate(redirectTo);
       }
     } catch (error) {
       console.error("Login error:", error);
+      setError("An error occurred during login.");
     }
   };
 

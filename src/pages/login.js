@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
@@ -8,14 +8,13 @@ import OTP from "../components/login/loginOTP";
 import Password from "../components/login/loginPassword";
 import "../assets/styles/login.css";
 import WOW from "../assets/images/wow.png";
-// import AuthContext from "./context/AuthProvider";
+import { AuthContext } from "../context/authContext";
 
 export default function Login() {
   const [loginMethod, setLoginMethod] = useState(null);
   const [username, setUsername] = useState("");
+  const { user, logout } = useContext(AuthContext);
   const [error, setError] = useState("");
-
-  // const { setAuth } = useContext(AuthContext);
 
   const handleLoginClick = () => {
     if (username) {
@@ -39,7 +38,7 @@ export default function Login() {
     setLoginMethod(null);
   };
 
-  return (
+  return !user ? (
     <React.Fragment>
       <CssBaseline />
       <div className="container">
@@ -99,5 +98,10 @@ export default function Login() {
         </Container>
       </div>
     </React.Fragment>
+  ) : (
+    <>
+      Already Logged In
+      <button onClick={logout}>Logout</button>
+    </>
   );
 }
