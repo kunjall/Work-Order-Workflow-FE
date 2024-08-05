@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const response = await axios.get(`${URL}/user/validateToken`, {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `${token}` },
           });
           if (response.status === 200) {
             const decoded = jwtDecode(token);
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }) => {
     if (token) {
       try {
         await axios.post(`${URL}/user/logout`, null, {
-          headers: { Authorization: `Bearer ${authToken}` },
+          headers: { Authorization: `${authToken}` },
         });
       } catch (error) {
         console.error("Logout error:", error);

@@ -1,11 +1,10 @@
 import React, { useContext, useEffect } from "react";
 import { AuthContext } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
+import Example from "../bin/binTable";
 
-const Test = () => {
+const Bin = () => {
   const { user } = useContext(AuthContext);
-  // console.log(user);
-  // console.log(logout);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,7 +13,11 @@ const Test = () => {
     }
   }, [user, navigate]);
 
-  return <div>HI</div>;
+  return (
+    <div style={{ marginTop: "100px" }}>
+      <Example />
+    </div>
+  );
 };
 
-export default Test;
+export default Bin;

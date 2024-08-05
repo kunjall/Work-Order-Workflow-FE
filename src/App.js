@@ -2,9 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
 import DashboardAdmin from "./components/dashboard/dashboardAdmin";
-import DashboardWhinch from "./components/inventory/inventoryInward";
 
-import Test from "./components/dashboard/test";
+import Enter from "./components/dashboard/enter";
 import { GlobalStyles } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,6 +11,8 @@ import Background from "./assets/images/background.jpeg";
 import { AuthProvider } from "./context/authContext";
 import WithAuth from "./context/withAuth";
 import Navbar from "./components/navbar/navbar";
+import Bin from "./components/dashboard/bin";
+
 // import Test from "./components/dashboard/test";
 
 const App = () => {
@@ -52,27 +53,20 @@ const App = () => {
                 }
               />
               <Route
-                path="/test"
+                path="/enter"
                 element={
                   <WithAuth role="admin">
                     {/* <DashboardAdmin /> */}
-                    <Test />
+                    <Enter />
                   </WithAuth>
                 }
               />
+
               <Route
-                path="/dashboard-whinch"
+                path="/bin"
                 element={
-                  <WithAuth role="whinch">
-                    <DashboardWhinch />
-                  </WithAuth>
-                }
-              />
-              <Route
-                path="/test2"
-                element={
-                  <WithAuth role="whinch">
-                    <Test />
+                  <WithAuth role="admin">
+                    <Bin />
                   </WithAuth>
                 }
               />

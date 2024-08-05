@@ -35,6 +35,7 @@ export default function Password({ onBackClick, username }) {
       } else {
         const token = response.data.token;
         login(token);
+        localStorage.setItem("username", username);
         const role = response.data.role;
         const redirectTo = `/dashboard-${role}`;
         navigate(redirectTo);

@@ -5,42 +5,59 @@ import WOW from "../../assets/images/wow.png";
 import "../../assets/styles/navbar.css";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import InventoryIcon from "@mui/icons-material/Inventory";
+import EngineeringIcon from "@mui/icons-material/Engineering";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 
 const Navbar = () => {
   const { user } = useContext(AuthContext);
 
   return user ? (
     <div className="header">
-      <img src={WOW}></img>
+      <img src={WOW} alt="logo"></img>
       <nav>
         <ul>
           {user && user.role === "admin" && (
             <>
-              <li>
-                <Link to="/dashboard-admin">Admin Dashboard</Link>
+              <li style={{ fontSize: "15px" }}>
+                <Link
+                  to="/dashboard-admin"
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <span style={{ marginRight: "8px" }}>
+                    <ReceiptLongIcon />
+                  </span>
+                  <span>Admin Dashboard</span>
+                </Link>
               </li>
-              <li>
-                <Link to="/test">Test</Link>
+              <li style={{ fontSize: "15px" }}>
+                <Link
+                  to="/enter"
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <span style={{ marginRight: "8px" }}>
+                    <EngineeringIcon />
+                  </span>
+                  <span>W/O Details</span>
+                </Link>
+              </li>
+              <li style={{ fontSize: "15px" }}>
+                <Link
+                  to="/bin"
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <span style={{ marginRight: "8px" }}>
+                    <FolderOpenIcon />
+                  </span>
+                  <span>Bin</span>
+                </Link>
               </li>
               {/* <li><Link to="/admin-settings">Admin Settings</Link></li> */}
             </>
           )}
           {user && user.role === "whinch" && (
             <>
-              <li>
-                <Link to="/dashboard-whinch">
-                  <InventoryIcon
-                    sx={{
-                      color: "white",
-                      fontSize: "19px",
-                      paddingRight: "10px",
-                      display: "inline-block",
-                      verticalAlign: "middle",
-                    }}
-                  />
-                  Inventory Inward
-                </Link>
-              </li>
+              <li></li>
               <li>
                 <Link to="/test2">Test</Link>
               </li>

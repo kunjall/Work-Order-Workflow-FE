@@ -1,9 +1,10 @@
 import React, { useContext, useEffect } from "react";
 import { AuthContext } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
+import WorkorderNav from "../workorders/workorder_nav";
 
-const DashboardAdmin = () => {
-  const { user, logout } = useContext(AuthContext);
+const Test = () => {
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,10 +15,9 @@ const DashboardAdmin = () => {
 
   return (
     <div>
-      <h1>Admin Dashboard</h1>
-      <button onClick={logout}>Logout</button>
+      <WorkorderNav />
     </div>
   );
 };
 
-export default DashboardAdmin;
+export default Test;
