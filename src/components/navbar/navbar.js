@@ -4,7 +4,6 @@ import { AuthContext } from "../../context/authContext";
 import WOW from "../../assets/images/wow.png";
 import "../../assets/styles/navbar.css";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
-import InventoryIcon from "@mui/icons-material/Inventory";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
@@ -32,13 +31,24 @@ const Navbar = () => {
               </li>
               <li style={{ fontSize: "15px" }}>
                 <Link
-                  to="/enter"
+                  to="/create"
                   style={{ display: "flex", alignItems: "center" }}
                 >
                   <span style={{ marginRight: "8px" }}>
                     <EngineeringIcon />
                   </span>
-                  <span>W/O Details</span>
+                  <span>Create W/O</span>
+                </Link>
+              </li>
+              <li style={{ fontSize: "15px" }}>
+                <Link
+                  to="/find"
+                  style={{ display: "flex", alignItems: "center" }}
+                >
+                  <span style={{ marginRight: "8px" }}>
+                    <FolderOpenIcon />
+                  </span>
+                  <span>Find W/O</span>
                 </Link>
               </li>
               <li style={{ fontSize: "15px" }}>
@@ -52,6 +62,7 @@ const Navbar = () => {
                   <span>Bin</span>
                 </Link>
               </li>
+
               {/* <li><Link to="/admin-settings">Admin Settings</Link></li> */}
             </>
           )}

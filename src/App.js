@@ -12,6 +12,8 @@ import { AuthProvider } from "./context/authContext";
 import WithAuth from "./context/withAuth";
 import Navbar from "./components/navbar/navbar";
 import Bin from "./components/dashboard/bin";
+import Find from "./components/dashboard/find";
+import { Repeat } from "@mui/icons-material";
 
 // import Test from "./components/dashboard/test";
 
@@ -21,8 +23,8 @@ const App = () => {
       <GlobalStyles
         styles={{
           body: {
-            backgroundImage: `url(${Background})`,
-            backgroundRepeat: "no-repeat",
+            // backgroundImage: `url(${Background})`,
+            backgroundRepeat: "repeat",
             backgroundPosition: "center center",
             backgroundSize: "cover",
             margin: 0,
@@ -53,11 +55,20 @@ const App = () => {
                 }
               />
               <Route
-                path="/enter"
+                path="/create"
                 element={
                   <WithAuth role="admin">
                     {/* <DashboardAdmin /> */}
                     <Enter />
+                  </WithAuth>
+                }
+              />
+              <Route
+                path="/find"
+                element={
+                  <WithAuth role="admin">
+                    {/* <DashboardAdmin /> */}
+                    <Find />
                   </WithAuth>
                 }
               />

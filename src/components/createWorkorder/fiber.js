@@ -18,11 +18,13 @@ import {
   Select,
   InputLabel,
   FormControl,
+  Divider, // Added for the horizontal line
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import AddMaterials from "./materialsLineItems";
 
 const DashboardWhinch = () => {
   const { user } = useContext(AuthContext);
@@ -46,6 +48,14 @@ const DashboardWhinch = () => {
   const [homepassCount, setHomepassCount] = useState("");
   const [selectedManager, setSelectedManager] = useState("");
   const [customerProjectManager, setCustomerProjectManager] = useState("");
+  const [materialCodes, setMaterialCodes] = useState([]);
+
+  const [lineItems, setLineItems] = useState([]);
+
+  const handleLineItemsUpdate = (updatedLineItems) => {
+    setLineItems(updatedLineItems);
+    console.log("Line Items received from child:", updatedLineItems);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -113,6 +123,41 @@ const DashboardWhinch = () => {
 
     fetchCustomers();
   }, [user]);
+
+  useEffect(() => {
+    const company = customerName;
+    const fetchMaterial = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/find-material?company=${company}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+
+        const materialArray = response.data.map((material) => ({
+          id: material.item_id,
+          description: material.item_name,
+          uom: material.item_uom,
+        }));
+
+        const uniqueMaterial = Array.from(
+          new Map(
+            materialArray.map((material) => [material.id, material])
+          ).values()
+        );
+
+        setMaterialCodes(uniqueMaterial);
+      } catch (err) {
+        console.error("Error fetching material:", err);
+        setError("Failed to load materials");
+      }
+    };
+
+    fetchMaterial();
+  }, [customerName, user]);
 
   useEffect(() => {
     if (selectedCustomerId) {
@@ -240,7 +285,7 @@ const DashboardWhinch = () => {
               <Grid item xs={12} sm={6} md={6}>
                 <TextField
                   id="work-order-number"
-                  label="Work Order Number"
+                  label="Customer W/O Number"
                   variant="outlined"
                   fullWidth
                   value={workOrderNumber}
@@ -405,6 +450,25 @@ const DashboardWhinch = () => {
                     />
                   )}
                 />
+              </Grid>
+
+              <Grid item xs={12}>
+                <Divider />
+              </Grid>
+              <Grid item xs={12}>
+                <Box sx={{ display: "flex" }}>
+                  <Box sx={{ flex: 1, padding: 2 }}>
+                    <Typography variant="h6">Services</Typography>
+                  </Box>
+                  <Divider orientation="vertical" flexItem />
+                  <Box sx={{ flex: 1, padding: 2 }}>
+                    <Typography variant="h6">Materials</Typography>
+                    <AddMaterials
+                      materialCodes={materialCodes}
+                      onUpdate={handleLineItemsUpdate}
+                    />
+                  </Box>
+                </Box>
               </Grid>
               <Grid
                 item

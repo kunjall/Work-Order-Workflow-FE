@@ -1,8 +1,9 @@
 import React, { useContext, useEffect } from "react";
 import { AuthContext } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
-import WorkorderNav from "../createWorkorder/workorder_nav";
-const Test = () => {
+import FindFiber from "../createWorkorder/findFiber";
+
+const Find = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -13,10 +14,10 @@ const Test = () => {
   }, [user, navigate]);
 
   return (
-    <div>
-      <WorkorderNav />
+    <div style={{ marginTop: "100px" }}>
+      <FindFiber />
     </div>
   );
 };
 
-export default Test;
+export default Find;

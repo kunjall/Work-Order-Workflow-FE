@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
-import Tower from "./fiber";
+import Fiber from "./fiber";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -89,7 +89,7 @@ export default function Verticals() {
           </Tabs>
         </Box>
         <CustomTabPanel value={value} index={0}>
-          <Tower />
+          <Fiber />
         </CustomTabPanel>
       </Box>
     </div>
