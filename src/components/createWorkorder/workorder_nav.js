@@ -15,6 +15,7 @@ function CustomTabPanel(props) {
       id={`simple-tabpanel-${index}`}
       aria-labelledby={`simple-tab-${index}`}
       {...other}
+      style={{ height: "100%", overflowY: "auto" }} // Add scroll here
     >
       {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
@@ -42,8 +43,12 @@ export default function Verticals() {
   };
 
   return (
-    <div style={{ marginTop: "60px" }}>
-      <Box sx={{ width: "100%" }}>
+    <div style={{ marginTop: "60px", height: "calc(100vh - 60px)" }}>
+      {" "}
+      {/* Adjust height */}
+      <Box sx={{ width: "100%", height: "100%" }}>
+        {" "}
+        {/* Full height for the component */}
         <Box>
           <Tabs
             value={value}
@@ -88,9 +93,16 @@ export default function Verticals() {
             />
           </Tabs>
         </Box>
-        <CustomTabPanel value={value} index={0}>
-          <Fiber />
-        </CustomTabPanel>
+        <div style={{ height: "calc(100vh - 120px)", overflowY: "auto" }}>
+          {" "}
+          {/* Scrollable content area */}
+          <CustomTabPanel value={value} index={0}>
+            <Fiber />
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={1}>
+            {/* Add other content for Tower tab */}
+          </CustomTabPanel>
+        </div>
       </Box>
     </div>
   );

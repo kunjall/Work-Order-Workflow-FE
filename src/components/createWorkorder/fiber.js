@@ -18,13 +18,14 @@ import {
   Select,
   InputLabel,
   FormControl,
-  Divider, // Added for the horizontal line
+  Divider,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import AddMaterials from "./materialsLineItems";
+import AddMaterials from "./materials/materialsLineItems";
+import AddServices from "./services/servicesLineItems";
 
 const DashboardWhinch = () => {
   const { user } = useContext(AuthContext);
@@ -49,14 +50,26 @@ const DashboardWhinch = () => {
   const [selectedManager, setSelectedManager] = useState("");
   const [customerProjectManager, setCustomerProjectManager] = useState("");
   const [materialCodes, setMaterialCodes] = useState([]);
-
+  const [services, setServices] = useState([]);
   const [lineItems, setLineItems] = useState([]);
+  const [serviceLineItems, setServiceLineItems] = useState([]);
+  const [totalAmount, setTotalAmount] = useState("");
+  const [vendorOptions, setVendorOptions] = useState([]);
+  const [selectedVendorId, setSelectedVendorId] = useState(null);
+  const [vendorName, setVendorName] = useState("");
+  const [vendorLocation, setVendorLocation] = useState("");
 
   const handleLineItemsUpdate = (updatedLineItems) => {
     setLineItems(updatedLineItems);
-    console.log("Line Items received from child:", updatedLineItems);
   };
 
+  const handleServiceLineItemsUpdate = (updatedServiceLineItems) => {
+    setServiceLineItems(updatedServiceLineItems);
+  };
+
+  const handleTotalAmountChange = (updatedAmount) => {
+    setTotalAmount(updatedAmount);
+  };
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -67,23 +80,21 @@ const DashboardWhinch = () => {
     const fetchCities = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/customer/findCity`,
+          `${process.env.REACT_APP_API_URL}/master/findCity`,
           {
             headers: {
               Authorization: `${localStorage.getItem("token")}`,
             },
           }
         );
-
         const citiesArray = response.data.map((city) => ({
           cityManagerId: city.city_manager_id,
           cityName: city.city_name,
           managerNames: city.manager_name.split(";").map((name) => name.trim()),
         }));
-
         setCityOptions(citiesArray);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     };
 
@@ -94,26 +105,23 @@ const DashboardWhinch = () => {
     const fetchCustomers = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/customer/findCustomer`,
+          `${process.env.REACT_APP_API_URL}/master/findCustomer`,
           {
             headers: {
               Authorization: `${localStorage.getItem("token")}`,
             },
           }
         );
-
         const customersArray = response.data.map((customer) => ({
           name: customer.customer_name,
           id: customer.customer_id,
           state: customer.customer_state,
         }));
-
         const uniqueCustomers = Array.from(
           new Map(
             customersArray.map((customer) => [customer.id, customer])
           ).values()
         );
-
         setCustomers(uniqueCustomers);
       } catch (err) {
         console.error("Error fetching customers:", err);
@@ -122,42 +130,85 @@ const DashboardWhinch = () => {
     };
 
     fetchCustomers();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
-    const company = customerName;
-    const fetchMaterial = async () => {
+    const fetchVendors = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/master/find-material?company=${company}`,
+          `${process.env.REACT_APP_API_URL}/master/find-vendors`,
           {
             headers: {
               Authorization: `${localStorage.getItem("token")}`,
             },
           }
         );
+        const vendorsArray = response.data.map((vendor) => ({
+          vendorId: vendor.vendor_id,
+          vendorName: vendor.vendor_name,
+          vendorLocation: vendor.vendor_location,
+        }));
+        setVendorOptions(vendorsArray);
+      } catch (error) {
+        console.error(error);
+      }
+    };
 
+    fetchVendors();
+  }, []);
+
+  useEffect(() => {
+    const fetchMaterial = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/find-material?company=${customerName}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
         const materialArray = response.data.map((material) => ({
           id: material.item_id,
           description: material.item_name,
           uom: material.item_uom,
         }));
-
-        const uniqueMaterial = Array.from(
-          new Map(
-            materialArray.map((material) => [material.id, material])
-          ).values()
-        );
-
-        setMaterialCodes(uniqueMaterial);
+        setMaterialCodes(materialArray);
       } catch (err) {
         console.error("Error fetching material:", err);
         setError("Failed to load materials");
       }
     };
 
-    fetchMaterial();
-  }, [customerName, user]);
+    if (customerName) fetchMaterial();
+  }, [customerName]);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/find-service?company=${customerName}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const servicesArray = response.data.map((service) => ({
+          id: service.service_id,
+          description: service.service_description,
+          uom: service.service_UOM,
+          rate: service.service_rate,
+        }));
+        setServices(servicesArray);
+      } catch (err) {
+        console.error("Error fetching services:", err);
+        setError("Failed to load services");
+      }
+    };
+
+    if (customerName) fetchServices();
+  }, [customerName]);
 
   useEffect(() => {
     if (selectedCustomerId) {
@@ -182,19 +233,32 @@ const DashboardWhinch = () => {
       setManagerOptions([]);
     }
   }, [selectedCity, cityOptions]);
+
+  useEffect(() => {
+    if (selectedVendorId) {
+      const selectedVendor = vendorOptions.find(
+        (vendor) => vendor.vendorId === selectedVendorId
+      );
+      setVendorName(selectedVendor ? selectedVendor.vendorName : "");
+      setVendorLocation(selectedVendor ? selectedVendor.vendorLocation : "");
+    } else {
+      setVendorName("");
+      setVendorLocation("");
+    }
+  }, [selectedVendorId, vendorOptions]);
+
   const handleSubmit = async () => {
-    // Retrieve data from localStorage or set default values
     const createdBy = localStorage.getItem("username") || "unknown";
-    const createdAt = new Date().toISOString(); // ISO format date for consistency
+    const createdAt = new Date().toISOString();
 
     try {
-      // Send a POST request with the provided data and headers
+      console.log(vendorName);
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/workorder/create`,
         {
           workorder_type: "Fiber",
           workorder_number: workOrderNumber,
-          workorder_status: "Draft",
+          workorder_status: "Submitted",
           gis_code: gisCode,
           route_name: routeName,
           route_length: routeLength,
@@ -210,6 +274,8 @@ const DashboardWhinch = () => {
           customer_approval_date: selectedDate,
           created_by: createdBy,
           created_at: createdAt,
+          total_service_cost: totalAmount,
+          vendor_name: vendorName,
         },
         {
           headers: {
@@ -217,14 +283,64 @@ const DashboardWhinch = () => {
           },
         }
       );
-
-      // Handle successful response
-      console.log(response.data);
-      // navigate("/success"); // Redirect or handle successful submission as needed
+      console.log(response);
     } catch (error) {
-      // Handle errors
       console.error("Error submitting form:", error);
       setError("Failed to submit form");
+    }
+
+    try {
+      const response = lineItems.map(async (item) => {
+        return await axios.post(
+          `${process.env.REACT_APP_API_URL}/workorder/enterMaterial`,
+          {
+            record_id: `${workOrderNumber}_${item.materialCode}`,
+            workorder_id: workOrderNumber,
+            material_id: item.materialCode,
+            material_desc: item.itemName,
+            material_uom: item.itemUom,
+            material_wo_qty: item.itemQTY,
+          },
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      });
+
+      const responses = await Promise.all(response);
+    } catch (error) {
+      console.error("Error submitting materials:", error);
+      setError("Failed to submit materials");
+    }
+
+    try {
+      const response = serviceLineItems.map(async (item) => {
+        return await axios.post(
+          `${process.env.REACT_APP_API_URL}/workorder/enterServices`,
+          {
+            record_id: `${workOrderNumber}_${item.serviceId}`,
+            workorder_id: workOrderNumber,
+            service_id: item.serviceId,
+            service_desc: item.serviceDescription,
+            service_uom: item.serviceUOM,
+            service_rate: item.serviceRate,
+            service_wo_qty: item.serviceQTY,
+            service_price: item.servicePrice,
+          },
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      });
+
+      const responses = await Promise.all(response);
+    } catch (error) {
+      console.error("Error submitting services:", error);
+      setError("Failed to submit services");
     }
   };
 
@@ -451,16 +567,73 @@ const DashboardWhinch = () => {
                   )}
                 />
               </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <Autocomplete
+                  disablePortal
+                  id="vendor-dropdown"
+                  options={vendorOptions}
+                  getOptionLabel={(option) => option.vendorId} // Display vendor ID
+                  onChange={(event, newValue) => {
+                    setSelectedVendorId(newValue ? newValue.vendorId : null);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Vendor ID"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField
+                  id="vendor-name"
+                  label="Vendor Name"
+                  value={vendorName}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField
+                  id="vendor-location"
+                  label="Vendor Location"
+                  value={vendorLocation}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  fullWidth
+                />
+              </Grid>
 
               <Grid item xs={12}>
                 <Divider />
               </Grid>
               <Grid item xs={12}>
-                <Box sx={{ display: "flex" }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "row" },
+                  }}
+                >
                   <Box sx={{ flex: 1, padding: 2 }}>
                     <Typography variant="h6">Services</Typography>
+                    <AddServices
+                      services={services}
+                      onLineItemUpdate={handleServiceLineItemsUpdate}
+                      onAmountUpdate={handleTotalAmountChange}
+                    />
                   </Box>
-                  <Divider orientation="vertical" flexItem />
+                  <Divider
+                    orientation="vertical"
+                    flexItem
+                    sx={{ display: { xs: "none", md: "flex" } }}
+                  />
                   <Box sx={{ flex: 1, padding: 2 }}>
                     <Typography variant="h6">Materials</Typography>
                     <AddMaterials
@@ -470,6 +643,7 @@ const DashboardWhinch = () => {
                   </Box>
                 </Box>
               </Grid>
+
               <Grid
                 item
                 xs={12}

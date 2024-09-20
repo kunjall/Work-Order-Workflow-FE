@@ -7,6 +7,7 @@
   height: 60px;
   display: flex;
   align-items: center;
+  z-index: 1000;
   justify-content: space-between; /* Ensure space between logo and nav */
   font-family: sans-serif;
   padding: 0 20px;
