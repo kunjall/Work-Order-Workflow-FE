@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
-import Fiber from "./fiber";
+import Child from "./Child";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -97,7 +97,7 @@ export default function Verticals() {
           {" "}
           {/* Scrollable content area */}
           <CustomTabPanel value={value} index={0}>
-            <Fiber />
+            <Child />
           </CustomTabPanel>
           <CustomTabPanel value={value} index={1}>
             {/* Add other content for Tower tab */}

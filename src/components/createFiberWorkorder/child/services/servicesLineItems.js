@@ -119,7 +119,22 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
           {index !== 0 && <Divider sx={{ my: 2 }} />}{" "}
           {/* Divider between line items */}
           <Grid container spacing={2} sx={{ marginBottom: 2 }}>
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid
+              item
+              xs={10}
+              sm={2}
+              md={0.1}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography variant="body1" sx={{ fontWeight: "regular" }}>
+                {index + 1}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6} md={2.5}>
               <Autocomplete
                 options={services}
                 getOptionLabel={(option) => `${option.id}`}
@@ -139,7 +154,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={8} md={3.5}>
               <TextField
                 label="Service Desc"
                 value={item.serviceDescription}
@@ -151,7 +166,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={4}>
+            <Grid item xs={12} sm={6} md={1.5}>
               <TextField
                 label="UOM"
                 value={item.serviceUOM}
@@ -163,7 +178,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={1}>
               <TextField
                 label="Rate"
                 value={item.serviceRate}
@@ -175,7 +190,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={1}>
               <TextField
                 label="QTY"
                 value={item.serviceQTY}
@@ -188,7 +203,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={5}>
+            <Grid item xs={12} sm={6} md={1.5}>
               <TextField
                 label="Price"
                 value={item.servicePrice}
@@ -197,7 +212,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={1}>
+            <Grid item xs={12} sm={6} md={0.5}>
               <IconButton onClick={() => handleRemoveLineItem(index)}>
                 <RemoveCircleOutline color="error" />
               </IconButton>

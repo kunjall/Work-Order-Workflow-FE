@@ -8,7 +8,7 @@ import {
 import Box from "@mui/material/Box";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import { AuthContext } from "../../context/authContext";
+import { AuthContext } from "../../../context/authContext";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import {
@@ -18,14 +18,18 @@ import {
   Select,
   InputLabel,
   FormControl,
-  Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  CircularProgress,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import dayjs from "dayjs";
-import AddMaterials from "./materials/materialsLineItems";
-import AddServices from "./services/servicesLineItems";
 
 const DashboardWhinch = () => {
   const { user } = useContext(AuthContext);
@@ -37,7 +41,6 @@ const DashboardWhinch = () => {
   const [customerState, setCustomerState] = useState("");
   const [cityOptions, setCityOptions] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
-  const [managerOptions, setManagerOptions] = useState([]);
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [activity, setActivity] = useState("");
   const [type, setType] = useState("");
@@ -47,29 +50,10 @@ const DashboardWhinch = () => {
   const [routeName, setRouteName] = useState("");
   const [routeLength, setRouteLength] = useState("");
   const [homepassCount, setHomepassCount] = useState("");
-  const [selectedManager, setSelectedManager] = useState("");
   const [customerProjectManager, setCustomerProjectManager] = useState("");
-  const [materialCodes, setMaterialCodes] = useState([]);
-  const [services, setServices] = useState([]);
-  const [lineItems, setLineItems] = useState([]);
-  const [serviceLineItems, setServiceLineItems] = useState([]);
-  const [totalAmount, setTotalAmount] = useState("");
-  const [vendorOptions, setVendorOptions] = useState([]);
-  const [selectedVendorId, setSelectedVendorId] = useState(null);
-  const [vendorName, setVendorName] = useState("");
-  const [vendorLocation, setVendorLocation] = useState("");
+  const [successPopupOpen, setSuccessPopupOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLineItemsUpdate = (updatedLineItems) => {
-    setLineItems(updatedLineItems);
-  };
-
-  const handleServiceLineItemsUpdate = (updatedServiceLineItems) => {
-    setServiceLineItems(updatedServiceLineItems);
-  };
-
-  const handleTotalAmountChange = (updatedAmount) => {
-    setTotalAmount(updatedAmount);
-  };
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -133,84 +117,6 @@ const DashboardWhinch = () => {
   }, []);
 
   useEffect(() => {
-    const fetchVendors = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/master/find-vendors`,
-          {
-            headers: {
-              Authorization: `${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        const vendorsArray = response.data.map((vendor) => ({
-          vendorId: vendor.vendor_id,
-          vendorName: vendor.vendor_name,
-          vendorLocation: vendor.vendor_location,
-        }));
-        setVendorOptions(vendorsArray);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchVendors();
-  }, []);
-
-  useEffect(() => {
-    const fetchMaterial = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/master/find-material?company=${customerName}`,
-          {
-            headers: {
-              Authorization: `${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        const materialArray = response.data.map((material) => ({
-          id: material.item_id,
-          description: material.item_name,
-          uom: material.item_uom,
-        }));
-        setMaterialCodes(materialArray);
-      } catch (err) {
-        console.error("Error fetching material:", err);
-        setError("Failed to load materials");
-      }
-    };
-
-    if (customerName) fetchMaterial();
-  }, [customerName]);
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/master/find-service?company=${customerName}`,
-          {
-            headers: {
-              Authorization: `${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        const servicesArray = response.data.map((service) => ({
-          id: service.service_id,
-          description: service.service_description,
-          uom: service.service_UOM,
-          rate: service.service_rate,
-        }));
-        setServices(servicesArray);
-      } catch (err) {
-        console.error("Error fetching services:", err);
-        setError("Failed to load services");
-      }
-    };
-
-    if (customerName) fetchServices();
-  }, [customerName]);
-
-  useEffect(() => {
     if (selectedCustomerId) {
       const selectedCustomer = customers.find(
         (customer) => customer.id === selectedCustomerId
@@ -223,42 +129,36 @@ const DashboardWhinch = () => {
     }
   }, [selectedCustomerId, customers]);
 
-  useEffect(() => {
-    if (selectedCity) {
-      const selectedCityData = cityOptions.find(
-        (city) => city.cityName === selectedCity
-      );
-      setManagerOptions(selectedCityData ? selectedCityData.managerNames : []);
-    } else {
-      setManagerOptions([]);
-    }
-  }, [selectedCity, cityOptions]);
-
-  useEffect(() => {
-    if (selectedVendorId) {
-      const selectedVendor = vendorOptions.find(
-        (vendor) => vendor.vendorId === selectedVendorId
-      );
-      setVendorName(selectedVendor ? selectedVendor.vendorName : "");
-      setVendorLocation(selectedVendor ? selectedVendor.vendorLocation : "");
-    } else {
-      setVendorName("");
-      setVendorLocation("");
-    }
-  }, [selectedVendorId, vendorOptions]);
+  const resetForm = () => {
+    setSelectedCustomerId("");
+    setCustomerName("");
+    setCustomerState("");
+    setSelectedCity("");
+    setSelectedDate(dayjs());
+    setActivity("");
+    setType("");
+    setWorkOrderNumber("");
+    setGisCode("");
+    setRouteName("");
+    setRouteLength("");
+    setHomepassCount("");
+    setCustomerProjectManager("");
+  };
 
   const handleSubmit = async () => {
     const createdBy = localStorage.getItem("username") || "unknown";
     const createdAt = new Date().toISOString();
 
+    setLoading(true);
+
     try {
-      console.log(vendorName);
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/workorder/create`,
         {
+          workorder_id: workOrderNumber,
           workorder_type: "Fiber",
           workorder_number: workOrderNumber,
-          workorder_status: "Submitted",
+          workorder_status: "Pending Approval",
           gis_code: gisCode,
           route_name: routeName,
           route_length: routeLength,
@@ -268,14 +168,11 @@ const DashboardWhinch = () => {
           customer_id: selectedCustomerId,
           execution_city: selectedCity,
           customer_project_manager: customerProjectManager,
-          internal_project_manager: selectedManager,
           customer_name: customerName,
           customer_state: customerState,
           customer_approval_date: selectedDate,
           created_by: createdBy,
           created_at: createdAt,
-          total_service_cost: totalAmount,
-          vendor_name: vendorName,
         },
         {
           headers: {
@@ -283,65 +180,18 @@ const DashboardWhinch = () => {
           },
         }
       );
-      console.log(response);
+      setSuccessPopupOpen(true);
     } catch (error) {
       console.error("Error submitting form:", error);
       setError("Failed to submit form");
+    } finally {
+      setLoading(false); // Set loading to false after API call is finished
     }
+  };
 
-    try {
-      const response = lineItems.map(async (item) => {
-        return await axios.post(
-          `${process.env.REACT_APP_API_URL}/workorder/enterMaterial`,
-          {
-            record_id: `${workOrderNumber}_${item.materialCode}`,
-            workorder_id: workOrderNumber,
-            material_id: item.materialCode,
-            material_desc: item.itemName,
-            material_uom: item.itemUom,
-            material_wo_qty: item.itemQTY,
-          },
-          {
-            headers: {
-              Authorization: `${localStorage.getItem("token")}`,
-            },
-          }
-        );
-      });
-
-      const responses = await Promise.all(response);
-    } catch (error) {
-      console.error("Error submitting materials:", error);
-      setError("Failed to submit materials");
-    }
-
-    try {
-      const response = serviceLineItems.map(async (item) => {
-        return await axios.post(
-          `${process.env.REACT_APP_API_URL}/workorder/enterServices`,
-          {
-            record_id: `${workOrderNumber}_${item.serviceId}`,
-            workorder_id: workOrderNumber,
-            service_id: item.serviceId,
-            service_desc: item.serviceDescription,
-            service_uom: item.serviceUOM,
-            service_rate: item.serviceRate,
-            service_wo_qty: item.serviceQTY,
-            service_price: item.servicePrice,
-          },
-          {
-            headers: {
-              Authorization: `${localStorage.getItem("token")}`,
-            },
-          }
-        );
-      });
-
-      const responses = await Promise.all(response);
-    } catch (error) {
-      console.error("Error submitting services:", error);
-      setError("Failed to submit services");
-    }
+  const handlePopupClose = () => {
+    setSuccessPopupOpen(false);
+    resetForm(); // Reset form after popup is closed
   };
 
   let theme = createTheme();
@@ -548,101 +398,6 @@ const DashboardWhinch = () => {
                   onChange={(e) => setCustomerProjectManager(e.target.value)}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <Autocomplete
-                  disablePortal
-                  id="manager-dropdown"
-                  options={managerOptions}
-                  getOptionLabel={(option) => option}
-                  onChange={(event, newValue) => {
-                    setSelectedManager(newValue || "");
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Select Manager"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <Autocomplete
-                  disablePortal
-                  id="vendor-dropdown"
-                  options={vendorOptions}
-                  getOptionLabel={(option) => option.vendorId} // Display vendor ID
-                  onChange={(event, newValue) => {
-                    setSelectedVendorId(newValue ? newValue.vendorId : null);
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Select Vendor ID"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField
-                  id="vendor-name"
-                  label="Vendor Name"
-                  value={vendorName}
-                  variant="outlined"
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField
-                  id="vendor-location"
-                  label="Vendor Location"
-                  value={vendorLocation}
-                  variant="outlined"
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  fullWidth
-                />
-              </Grid>
-
-              <Grid item xs={12}>
-                <Divider />
-              </Grid>
-              <Grid item xs={12}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
-                  }}
-                >
-                  <Box sx={{ flex: 1, padding: 2 }}>
-                    <Typography variant="h6">Services</Typography>
-                    <AddServices
-                      services={services}
-                      onLineItemUpdate={handleServiceLineItemsUpdate}
-                      onAmountUpdate={handleTotalAmountChange}
-                    />
-                  </Box>
-                  <Divider
-                    orientation="vertical"
-                    flexItem
-                    sx={{ display: { xs: "none", md: "flex" } }}
-                  />
-                  <Box sx={{ flex: 1, padding: 2 }}>
-                    <Typography variant="h6">Materials</Typography>
-                    <AddMaterials
-                      materialCodes={materialCodes}
-                      onUpdate={handleLineItemsUpdate}
-                    />
-                  </Box>
-                </Box>
-              </Grid>
 
               <Grid
                 item
@@ -659,13 +414,35 @@ const DashboardWhinch = () => {
                     },
                   }}
                   onClick={handleSubmit}
+                  disabled={loading}
                 >
-                  Submit
+                  {loading ? (
+                    <CircularProgress size={24} color="inherit" />
+                  ) : (
+                    "Submit"
+                  )}
                 </Button>
               </Grid>
             </Grid>
           )}
         </Box>
+        <Dialog open={successPopupOpen} onClose={handlePopupClose}>
+          <DialogTitle>Success</DialogTitle>
+          <DialogContent>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <CheckCircleIcon style={{ color: "green" }} />{" "}
+              {/* Green checkmark icon */}
+              <DialogContentText>
+                The work order has been successfully submitted.
+              </DialogContentText>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handlePopupClose} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </ThemeProvider>
   );

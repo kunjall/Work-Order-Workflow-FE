@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
-import { AuthContext } from "../../context/authContext";
+import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-import FindFiber from "../createWorkorder/findFiber";
+import ChildNav from "../components/createFiberWorkorder/child/childNav";
 
 const Find = () => {
   const { user } = useContext(AuthContext);
@@ -14,8 +14,10 @@ const Find = () => {
   }, [user, navigate]);
 
   return (
-    <div style={{ marginTop: "100px" }}>
-      <FindFiber />
+    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
+      <div style={{ position: "fixed", top: 0, width: "100%" }}>
+        <ChildNav />
+      </div>
     </div>
   );
 };

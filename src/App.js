@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
 import DashboardAdmin from "./components/dashboard/dashboardAdmin";
 
-import Enter from "./components/dashboard/enter";
+import Enter from "./pages/createMother";
 import { GlobalStyles } from "@mui/material";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -12,7 +12,9 @@ import { AuthProvider } from "./context/authContext";
 import WithAuth from "./context/withAuth";
 import Navbar from "./components/navbar/navbar";
 import Bin from "./components/dashboard/bin";
-import Find from "./components/dashboard/find";
+import CreateChild from "./pages/createChild";
+import Inventory from "./pages/inventoryInward";
+import Repository from "./pages/repository";
 import { Repeat } from "@mui/icons-material";
 
 // import Test from "./components/dashboard/test";
@@ -55,6 +57,14 @@ const App = () => {
                 }
               />
               <Route
+                path="/inventory-inward"
+                element={
+                  <WithAuth role="admin">
+                    <Inventory />
+                  </WithAuth>
+                }
+              />
+              <Route
                 path="/create"
                 element={
                   <WithAuth role="admin">
@@ -68,7 +78,7 @@ const App = () => {
                 element={
                   <WithAuth role="admin">
                     {/* <DashboardAdmin /> */}
-                    <Find />
+                    <CreateChild />
                   </WithAuth>
                 }
               />
@@ -78,6 +88,14 @@ const App = () => {
                 element={
                   <WithAuth role="admin">
                     <Bin />
+                  </WithAuth>
+                }
+              />
+              <Route
+                path="/repository"
+                element={
+                  <WithAuth role="admin">
+                    <Repository />
                   </WithAuth>
                 }
               />

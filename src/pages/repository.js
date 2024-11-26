@@ -1,9 +1,9 @@
 import React, { useContext, useEffect } from "react";
-import { AuthContext } from "../../context/authContext";
+import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-import WorkorderNav from "../createWorkorder/workorder_nav";
+import RepositoryNav from "../components/repository/repositoryNav";
 
-const Test = () => {
+const Repository = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -15,11 +15,11 @@ const Test = () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <div style={{ position: "fixed", top: 0, width: "100%", zIndex: 1000 }}>
-        <WorkorderNav />
+      <div style={{ position: "fixed", top: 0, width: "100%" }}>
+        <RepositoryNav />
       </div>
     </div>
   );
 };
 
-export default Test;
+export default Repository;
