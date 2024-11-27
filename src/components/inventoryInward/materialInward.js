@@ -127,7 +127,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
 
             <Grid item xs={6} sm={3} md={3}>
               <TextField
-                label="W/O QTY"
+                label="QTY"
                 value={item.itemQTY}
                 onChange={(e) => handleChange(index, "itemQTY", e.target.value)}
                 fullWidth

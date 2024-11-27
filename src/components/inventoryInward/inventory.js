@@ -8,82 +8,57 @@ import {
 import Box from "@mui/material/Box";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import { AuthContext } from "../../../context/authContext";
+import { AuthContext } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import {
   Typography,
   Grid,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
+  Divider,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
-  CircularProgress,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import dayjs from "dayjs";
+import AddMaterials from "./materialInward";
 
-const DashboardWhinch = () => {
+const InventoryInward = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
+  const [warehouses, setWarehouses] = useState([]);
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState(null);
+  const [selectedClientWarehouseId, setSelectedClientWarehouseId] =
+    useState(null);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [customerName, setCustomerName] = useState("");
   const [customerState, setCustomerState] = useState("");
-  const [cityOptions, setCityOptions] = useState([]);
-  const [selectedCity, setSelectedCity] = useState("");
-  const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [activity, setActivity] = useState("");
-  const [type, setType] = useState("");
+  const [dcDate, setDCDate] = useState(dayjs());
+  const [mrsDate, setMRSDate] = useState(dayjs());
+  const [MRSNumber, setMRSNumber] = useState("");
+  const [entryDate, setEntryDate] = useState(dayjs());
+  const [lineItems, setLineItems] = useState([]);
+  const [warehouseState, setWarehouseState] = useState("");
+  const [clientWarehouseState, setClientWarehouseState] = useState("");
+  const [materialCodes, setMaterialCodes] = useState([]);
   const [error, setError] = useState(null);
-  const [workOrderNumber, setWorkOrderNumber] = useState("");
-  const [gisCode, setGisCode] = useState("");
-  const [routeName, setRouteName] = useState("");
-  const [routeLength, setRouteLength] = useState("");
-  const [homepassCount, setHomepassCount] = useState("");
-  const [customerProjectManager, setCustomerProjectManager] = useState("");
+  const [eWayBillNumber, setEWayBillNumber] = useState("");
+  const [deliveryChallanNumber, setdeliveryChallanNumber] = useState("");
   const [successPopupOpen, setSuccessPopupOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [clientWarehouses, setClientWarehouses] = useState([]);
 
   useEffect(() => {
     if (!user) {
       navigate("/login");
     }
   }, [user, navigate]);
-
-  useEffect(() => {
-    const fetchCities = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/master/findCity`,
-          {
-            headers: {
-              Authorization: `${localStorage.getItem("token")}`,
-            },
-          }
-        );
-        const citiesArray = response.data.map((city) => ({
-          cityManagerId: city.city_manager_id,
-          cityName: city.city_name,
-          managerNames: city.manager_name.split(";").map((name) => name.trim()),
-        }));
-        setCityOptions(citiesArray);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchCities();
-  }, []);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -117,6 +92,32 @@ const DashboardWhinch = () => {
   }, []);
 
   useEffect(() => {
+    const fetchMaterial = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/find-material?company=${customerName}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const materialArray = response.data.map((material) => ({
+          id: material.item_id,
+          description: material.item_name,
+          uom: material.item_uom,
+        }));
+        setMaterialCodes(materialArray);
+      } catch (err) {
+        console.error("Error fetching material:", err);
+        setError("Failed to load materials");
+      }
+    };
+
+    if (customerName) fetchMaterial();
+  }, [customerName]);
+
+  useEffect(() => {
     if (selectedCustomerId) {
       const selectedCustomer = customers.find(
         (customer) => customer.id === selectedCustomerId
@@ -129,50 +130,119 @@ const DashboardWhinch = () => {
     }
   }, [selectedCustomerId, customers]);
 
+  useEffect(() => {
+    const fetchWarehouses = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/find-warehouse`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const warehouseArray = response.data.map((warehouse) => ({
+          id: warehouse.warehouse_id,
+          city: warehouse.warehouse_city,
+        }));
+        const uniqueWarehouses = Array.from(
+          new Map(
+            warehouseArray.map((warehouse) => [warehouse.id, warehouse])
+          ).values()
+        );
+        setWarehouses(uniqueWarehouses);
+      } catch (err) {
+        console.error("Error fetching warehouses:", err);
+        setError("Failed to load warehouses");
+      }
+    };
+
+    fetchWarehouses();
+  }, []);
+
+  useEffect(() => {
+    if (selectedWarehouseId) {
+      const selectedWarehouse = warehouses.find(
+        (warehouse) => warehouse.id === selectedWarehouseId
+      );
+      setWarehouseState(selectedWarehouse ? selectedWarehouse.city : "");
+    } else {
+      setWarehouseState("");
+    }
+  }, [selectedWarehouseId, warehouses]);
+
+  useEffect(() => {
+    const fetchClientWarehouses = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/find-client-warehouse?company=${customerName}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        console.log(response);
+        const clientWarehouseArray = response.data.map((warehouse) => ({
+          id: warehouse.warehouse_id,
+          city: warehouse.warehouse_city,
+        }));
+        setClientWarehouses(clientWarehouseArray);
+        console.log(clientWarehouseArray);
+      } catch (err) {
+        console.error("Error fetching warehouse:", err);
+        setError("Failed to load warehouses");
+      }
+    };
+
+    if (customerName) fetchClientWarehouses();
+  }, [customerName]);
+
+  useEffect(() => {
+    if (selectedClientWarehouseId) {
+      const selectedClientWarehouse = clientWarehouses.find(
+        (clientWarehouse) => clientWarehouse.id === selectedClientWarehouseId
+      );
+      setClientWarehouseState(
+        selectedClientWarehouse ? selectedClientWarehouse.city : ""
+      );
+    } else {
+      setClientWarehouseState("");
+    }
+  }, [selectedClientWarehouseId, clientWarehouses]);
+
+  const handleLineItemsUpdate = (updatedLineItems) => {
+    setLineItems(updatedLineItems);
+  };
+
   const resetForm = () => {
-    setSelectedCustomerId("");
-    setCustomerName("");
-    setCustomerState("");
-    setSelectedCity("");
-    setSelectedDate(dayjs());
-    setActivity("");
-    setType("");
-    setWorkOrderNumber("");
-    setGisCode("");
-    setRouteName("");
-    setRouteLength("");
-    setHomepassCount("");
-    setCustomerProjectManager("");
+    setSelectedWarehouseId("");
+    setWarehouseState("");
+    setDCDate(dayjs());
+    setEntryDate(dayjs());
+    setEWayBillNumber("");
+    setdeliveryChallanNumber("");
   };
 
   const handleSubmit = async () => {
     const createdBy = localStorage.getItem("username") || "unknown";
     const createdAt = new Date().toISOString();
-
-    setLoading(true);
-
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/workorder/create`,
+        `${process.env.REACT_APP_API_URL}/inventory/create`,
         {
-          workorder_id: workOrderNumber,
-          workorder_type: "Fiber",
-          workorder_number: workOrderNumber,
-          workorder_status: "Pending Approval",
-          gis_code: gisCode,
-          route_name: routeName,
-          route_length: routeLength,
-          homepass_count: homepassCount,
-          activity: activity,
-          type: type,
+          customer_dc_number: deliveryChallanNumber,
           customer_id: selectedCustomerId,
-          execution_city: selectedCity,
-          customer_project_manager: customerProjectManager,
           customer_name: customerName,
-          customer_state: customerState,
-          customer_approval_date: selectedDate,
-          created_by: createdBy,
-          created_at: createdAt,
+          client_warehouse_id: selectedClientWarehouseId,
+          client_warehouse_city: clientWarehouseState,
+          warehouse_id: selectedWarehouseId,
+          warehouse_city: warehouseState,
+          entry_date: entryDate,
+          dc_date: dcDate,
+          eway_bill_number: eWayBillNumber,
+          mrs_number: MRSNumber,
+          mrs_date: mrsDate,
         },
         {
           headers: {
@@ -180,15 +250,37 @@ const DashboardWhinch = () => {
           },
         }
       );
-      setSuccessPopupOpen(true);
+      const responses = await Promise.all(response);
     } catch (error) {
-      console.error("Error submitting form:", error);
-      setError("Failed to submit form");
-    } finally {
-      setLoading(false); // Set loading to false after API call is finished
+      console.error("Error creating child workorder:", error);
+      // Handle error appropriately
+    }
+
+    try {
+      const response = lineItems.map(async (item) => {
+        return await axios.post(
+          `${process.env.REACT_APP_API_URL}/inventory/enterMaterial`,
+          {
+            record_id: deliveryChallanNumber + "_" + item.materialCode,
+            customer_dc_number: deliveryChallanNumber,
+            material_id: item.materialCode,
+            material_desc: item.itemName,
+            material_uom: item.itemUom,
+            material_wo_qty: item.itemQTY,
+          },
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      });
+      const responses = await Promise.all(response);
+    } catch (error) {
+      console.error("Error submitting materials:", error);
+      setError("Failed to submit materials");
     }
   };
-
   const handlePopupClose = () => {
     setSuccessPopupOpen(false);
     resetForm(); // Reset form after popup is closed
@@ -199,7 +291,13 @@ const DashboardWhinch = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <div>
+      <div
+        style={{
+          marginTop: "90px",
+          height: "calc(100vh - 60px)",
+          marginLeft: "20px",
+        }}
+      >
         <Box sx={{ flexGrow: 1 }}>
           {error ? (
             <Typography color="error">{error}</Typography>
@@ -232,15 +330,54 @@ const DashboardWhinch = () => {
                   variant="outlined"
                   InputProps={{
                     readOnly: true,
+                    style: {
+                      color: "red",
+                      fontWeight: "bold",
+                    },
                   }}
                   fullWidth
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={2}>
                 <TextField
-                  id="customer-state"
+                  id="customer-city"
                   label="Customer State"
                   value={customerState}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                    style: {
+                      color: "red",
+                      fontWeight: "bold",
+                    },
+                  }}
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={clientWarehouses}
+                  getOptionLabel={(option) => option.id.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedClientWarehouseId(newValue ? newValue.id : null);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Client Warehouse ID"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField
+                  id="warehouse-city"
+                  label="Warehouse City"
+                  value={clientWarehouseState}
                   variant="outlined"
                   InputProps={{
                     readOnly: true,
@@ -248,132 +385,13 @@ const DashboardWhinch = () => {
                   fullWidth
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                <TextField
-                  id="work-order-number"
-                  label="Customer W/O Number"
-                  variant="outlined"
-                  fullWidth
-                  value={workOrderNumber}
-                  onChange={(e) => setWorkOrderNumber(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={1}>
-                <TextField
-                  id="gis-code"
-                  label="GIS Code"
-                  variant="outlined"
-                  fullWidth
-                  value={gisCode}
-                  onChange={(e) => setGisCode(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel id="execution-city-label">
-                    Execution City
-                  </InputLabel>
-                  <Select
-                    labelId="execution-city-label"
-                    id="execution-city"
-                    value={selectedCity}
-                    onChange={(event) => setSelectedCity(event.target.value)}
-                    label="Execution City"
-                  >
-                    {cityOptions.map((city) => (
-                      <MenuItem key={city.cityManagerId} value={city.cityName}>
-                        {city.cityName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={5}>
-                <TextField
-                  id="route-name"
-                  label="Route Name"
-                  variant="outlined"
-                  fullWidth
-                  value={routeName}
-                  onChange={(e) => setRouteName(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField
-                  id="route-length"
-                  label="Route Length (m)"
-                  variant="outlined"
-                  type="number"
-                  fullWidth
-                  value={routeLength}
-                  onChange={(e) => setRouteLength(e.target.value)}
-                  InputProps={{
-                    inputProps: {
-                      min: 0,
-                      step: 1,
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField
-                  id="homepass-count"
-                  label="Homepass Count"
-                  variant="outlined"
-                  type="number"
-                  fullWidth
-                  value={homepassCount}
-                  onChange={(e) => setHomepassCount(e.target.value)}
-                  InputProps={{
-                    inputProps: {
-                      min: 0,
-                      step: 1,
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={1}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel id="dropdown-label">Activity</InputLabel>
-                  <Select
-                    labelId="activity-label"
-                    id="activity"
-                    value={activity}
-                    onChange={(event) => setActivity(event.target.value)}
-                    label="Activity"
-                  >
-                    <MenuItem value="FTTH">FTTH</MenuItem>
-                    <MenuItem value="OSP">OSP</MenuItem>
-                    <MenuItem value="FF">FF</MenuItem>
-                    <MenuItem value="LM">LM</MenuItem>
-                    <MenuItem value="FTTB">FTTB</MenuItem>
-                    <MenuItem value="OH">OH</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={1}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel id="dropdown-label">Type</InputLabel>
-                  <Select
-                    labelId="type-label"
-                    id="type"
-                    value={type}
-                    onChange={(event) => setType(event.target.value)}
-                    label="Type"
-                  >
-                    <MenuItem value="Flatbed">Flatbed</MenuItem>
-                    <MenuItem value="IBW">IBW</MenuItem>
-                    <MenuItem value="OH">OH</MenuItem>
-                    <MenuItem value="OSP">OSP</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              <Grid item xs={12} sm={6} md={1.5}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
-                    label="CUST Approval Date"
-                    value={selectedDate}
-                    onChange={(newValue) => setSelectedDate(newValue)}
+                    disabled
+                    label="Entry Date"
+                    value={entryDate}
+                    onChange={(newValue) => setEntryDate(newValue)}
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -384,21 +402,135 @@ const DashboardWhinch = () => {
                         }}
                       />
                     )}
-                    format="DD/MM/YYYY"
+                    format="DD-MMM-YYYY"
                   />
                 </LocalizationProvider>
               </Grid>
               <Grid item xs={12} sm={6} md={2}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={warehouses}
+                  getOptionLabel={(option) => option.id.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedWarehouseId(newValue ? newValue.id : null);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Select Warehouse ID"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
                 <TextField
-                  id="customer-project-manager"
-                  label="Customer Project Manager"
+                  id="warehouse-city"
+                  label="Warehouse City"
+                  value={warehouseState}
                   variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                  }}
                   fullWidth
-                  value={customerProjectManager}
-                  onChange={(e) => setCustomerProjectManager(e.target.value)}
                 />
               </Grid>
 
+              <Grid item xs={12} sm={6} md={3}>
+                <TextField
+                  id="delivery-challan-number"
+                  label="Customer DC Number"
+                  variant="outlined"
+                  fullWidth
+                  value={deliveryChallanNumber}
+                  onChange={(e) => setdeliveryChallanNumber(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="DC Date"
+                    value={dcDate}
+                    onChange={(newValue) => setDCDate(newValue)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="outlined"
+                        fullWidth
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    )}
+                    format="DD-MMM-YYYY"
+                  />
+                </LocalizationProvider>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  id="eway-bill-number"
+                  label="EWay Bill Number"
+                  variant="outlined"
+                  fullWidth
+                  value={eWayBillNumber}
+                  onChange={(e) => setEWayBillNumber(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={5}>
+                <TextField
+                  id="MRS Number"
+                  label="MRS Number"
+                  variant="outlined"
+                  fullWidth
+                  value={MRSNumber}
+                  onChange={(e) => setMRSNumber(e.target.value)}
+                  InputProps={{
+                    inputProps: {
+                      min: 0,
+                      step: 1,
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="MRS Date"
+                    value={mrsDate}
+                    onChange={(newValue) => setMRSDate(newValue)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        variant="outlined"
+                        fullWidth
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    )}
+                    format="DD-MMM-YYYY"
+                  />
+                </LocalizationProvider>
+              </Grid>
+
+              <Grid item xs={11.5}>
+                <Divider
+                  sx={{
+                    borderColor: "#ec7c30",
+                    borderWidth: "1px",
+                  }}
+                />{" "}
+                {/* Horizontal Divider */}
+              </Grid>
+              <Box sx={{ flex: 1, padding: 2 }}>
+                <Typography variant="h6">Materials</Typography>
+                <AddMaterials
+                  materialCodes={materialCodes}
+                  onUpdate={handleLineItemsUpdate}
+                />
+              </Box>
               <Grid
                 item
                 xs={12}
@@ -414,13 +546,8 @@ const DashboardWhinch = () => {
                     },
                   }}
                   onClick={handleSubmit}
-                  disabled={loading}
                 >
-                  {loading ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    "Submit"
-                  )}
+                  Submit
                 </Button>
               </Grid>
             </Grid>
@@ -448,4 +575,4 @@ const DashboardWhinch = () => {
   );
 };
 
-export default DashboardWhinch;
+export default InventoryInward;

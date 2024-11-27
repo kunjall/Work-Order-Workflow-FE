@@ -10,19 +10,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { AuthContext } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
-import {
-  Typography,
-  Grid,
-  MenuItem,
-  Select,
-  InputLabel,
-  Divider,
-  FormControl,
-} from "@mui/material";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { Typography, Grid, Divider, FormControl } from "@mui/material";
 import dayjs from "dayjs";
+import { SettingsInputCompositeSharp } from "@mui/icons-material";
 
 const ChildRepo = () => {
   const { user } = useContext(AuthContext);
@@ -130,19 +120,12 @@ const ChildRepo = () => {
         vendor_id: newValue.vendor_id || "",
         vendor_route_allocation: newValue.vendor_route_allocation || "",
         internal_manager: newValue.internal_manager || "",
-        route_name: newValue.route_name || "",
-        route_length: newValue.route_length || "",
-        homepass_count: newValue.homepass_count || "",
-        activity: newValue.activity || "",
-        execution_city: newValue.execution_city || "",
-        customer_approval_date: newValue.customer_approval_date
-          ? dayjs(newValue.customer_approval_date)
-          : null,
-        customer_project_manager: newValue.customer_project_manager || "",
       });
     } else {
       setSelectedWorkOrder(null);
       setFormData({});
+      setChildMaterials([]);
+      setChildServices([]);
     }
   };
 
