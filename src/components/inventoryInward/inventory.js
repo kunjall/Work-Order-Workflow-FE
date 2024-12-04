@@ -48,6 +48,9 @@ const InventoryInward = () => {
   const [warehouseState, setWarehouseState] = useState("");
   const [clientWarehouseState, setClientWarehouseState] = useState("");
   const [materialCodes, setMaterialCodes] = useState([]);
+  const [reviewers, setReviewers] = useState([]);
+  const [selectedReviewerEmail, setSelectedReviewerEmail] = useState(null);
+  const [reviewerName, setReviewerName] = useState("");
   const [error, setError] = useState(null);
   const [eWayBillNumber, setEWayBillNumber] = useState("");
   const [deliveryChallanNumber, setdeliveryChallanNumber] = useState("");
@@ -118,6 +121,36 @@ const InventoryInward = () => {
   }, [customerName]);
 
   useEffect(() => {
+    const fetchReviewers = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=Inventory&city=${warehouseState}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const reviewerArray = response.data.map((reviewer) => ({
+          id: reviewer.record_id,
+          type: reviewer.type,
+          reviewer_email: reviewer.reviewer_email,
+          approver_email: reviewer.approver_email,
+          city: reviewer.city,
+          reviewer_name: reviewer.reviewer_name,
+          approver_name: reviewer.approver_name,
+        }));
+        setReviewers(reviewerArray);
+      } catch (err) {
+        console.error("Error fetching reviewer:", err);
+        setError("Failed to load reviewer");
+      }
+    };
+
+    if (warehouseState) fetchReviewers();
+  }, [warehouseState]);
+
+  useEffect(() => {
     if (selectedCustomerId) {
       const selectedCustomer = customers.find(
         (customer) => customer.id === selectedCustomerId
@@ -170,6 +203,20 @@ const InventoryInward = () => {
       setWarehouseState("");
     }
   }, [selectedWarehouseId, warehouses]);
+
+  useEffect(() => {
+    if (selectedReviewerEmail) {
+      console.log(selectedReviewerEmail);
+      const selectedReviewer = reviewers.find(
+        (reviewer) => reviewer.reviewer_email === selectedReviewerEmail
+      );
+      setReviewerName(selectedReviewer ? selectedReviewer.reviewer_name : "");
+      console.log(reviewerName);
+    } else {
+      setReviewerName("");
+      console.log("test");
+    }
+  }, [selectedReviewerEmail, reviewers]);
 
   useEffect(() => {
     const fetchClientWarehouses = async () => {
@@ -243,6 +290,11 @@ const InventoryInward = () => {
           eway_bill_number: eWayBillNumber,
           mrs_number: MRSNumber,
           mrs_date: mrsDate,
+          inventory_inward_status: "Pending for Reciept",
+          created_by: createdBy,
+          created_at: createdAt,
+          inventory_reviewer_email: selectedReviewerEmail,
+          inventory_reviewer_name: reviewerName,
         },
         {
           headers: {
@@ -513,6 +565,44 @@ const InventoryInward = () => {
                     format="DD-MMM-YYYY"
                   />
                 </LocalizationProvider>
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={reviewers}
+                  getOptionLabel={(option) => option.reviewer_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedReviewerEmail(
+                      newValue ? newValue.reviewer_email : null
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Reviewer Email"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  id="reviewer-name"
+                  label="Reviewer Name"
+                  value={reviewerName}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                    style: {
+                      color: "red",
+                      fontWeight: "bold",
+                    },
+                  }}
+                  fullWidth
+                />
               </Grid>
 
               <Grid item xs={11.5}>

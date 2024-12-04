@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./pages/login";
-import DashboardAdmin from "./components/dashboard/dashboardAdmin";
+import Requests from "./pages/dashboard";
 
 import Enter from "./pages/createMother";
 import { GlobalStyles } from "@mui/material";
@@ -52,7 +52,7 @@ const App = () => {
                 path="/dashboard-admin"
                 element={
                   <WithAuth role="admin">
-                    <DashboardAdmin />
+                    <Requests />
                   </WithAuth>
                 }
               />

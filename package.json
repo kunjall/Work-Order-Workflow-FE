@@ -4,21 +4,20 @@
   "private": true,
   "dependencies": {
     "@date-io/date-fns": "^3.0.0",
-    "@emotion/react": "^11.13.0",
-    "@emotion/styled": "^11.13.0",
-    "@mui/icons-material": "^5.15.19",
+    "@emotion/react": "^11.13.5",
+    "@emotion/styled": "^11.13.5",
+    "@mui/icons-material": "^5.16.7",
     "@mui/lab": "^5.0.0-alpha.173",
-    "@mui/material": "^5.16.6",
-    "@mui/x-date-pickers": "^7.12.0",
+    "@mui/material": "^5.16.8",
+    "@mui/x-date-pickers": "^7.23.0",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
-    "date-fns": "^3.6.0",
     "dayjs": "^1.11.12",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
-    "material-react-table": "^2.13.1",
+    "material-react-table": "^2.13.3",
     "mui-one-time-password-input": "^2.0.2",
     "react": "^18.3.1",
     "react-datepicker": "^7.3.0",
@@ -52,5 +51,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
   }
 }
