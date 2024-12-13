@@ -67,7 +67,7 @@ const Navbar = () => {
                   <span style={{ marginRight: "8px" }}>
                     <EngineeringIcon />
                   </span>
-                  <span>Mother W/O</span>
+                  <span>Create MWO</span>
                 </Link>
               </li>
               <li style={{ fontSize: "16px" }}>
@@ -82,7 +82,7 @@ const Navbar = () => {
                   <span style={{ marginRight: "8px" }}>
                     <FolderOpenIcon />
                   </span>
-                  <span>Child W/O</span>
+                  <span>Create CWO</span>
                 </Link>
               </li>
               <li style={{ fontSize: "16x" }}>

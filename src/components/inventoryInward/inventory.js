@@ -37,6 +37,7 @@ const InventoryInward = () => {
   const [selectedClientWarehouseId, setSelectedClientWarehouseId] =
     useState(null);
   const [customers, setCustomers] = useState([]);
+
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [customerName, setCustomerName] = useState("");
   const [customerState, setCustomerState] = useState("");
@@ -56,6 +57,7 @@ const InventoryInward = () => {
   const [deliveryChallanNumber, setdeliveryChallanNumber] = useState("");
   const [successPopupOpen, setSuccessPopupOpen] = useState(false);
   const [clientWarehouses, setClientWarehouses] = useState([]);
+  let inventoryId = null;
 
   useEffect(() => {
     if (!user) {
@@ -273,7 +275,16 @@ const InventoryInward = () => {
 
   const handleSubmit = async () => {
     const createdBy = localStorage.getItem("username") || "unknown";
-    const createdAt = new Date().toISOString();
+    const createdAt = new Date().toLocaleString("en-US", {
+      day: "2-digit",
+      month: "short", // e.g., "Dec"
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true, // AM/PM format
+      timeZone: "UTC", // Adjust to UTC
+    });
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/inventory/create`,
@@ -293,8 +304,8 @@ const InventoryInward = () => {
           inventory_inward_status: "Pending for Reciept",
           created_by: createdBy,
           created_at: createdAt,
-          inventory_reviewer_email: selectedReviewerEmail,
-          inventory_reviewer_name: reviewerName,
+          inventory_receiver_email: selectedReviewerEmail,
+          inventory_receiver_name: reviewerName,
         },
         {
           headers: {
@@ -302,37 +313,45 @@ const InventoryInward = () => {
           },
         }
       );
-      const responses = await Promise.all(response);
+      inventoryId = response.data;
+      console.log("Inventory ID:", inventoryId);
+      console.log("Create Response:", response.data);
     } catch (error) {
       console.error("Error creating child workorder:", error);
       // Handle error appropriately
     }
-
     try {
-      const response = lineItems.map(async (item) => {
-        return await axios.post(
-          `${process.env.REACT_APP_API_URL}/inventory/enterMaterial`,
-          {
-            record_id: deliveryChallanNumber + "_" + item.materialCode,
-            customer_dc_number: deliveryChallanNumber,
-            material_id: item.materialCode,
-            material_desc: item.itemName,
-            material_uom: item.itemUom,
-            material_wo_qty: item.itemQTY,
-          },
-          {
-            headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+      // Ensure the lineItems are mapped and awaited correctly
+      const responses = await Promise.all(
+        lineItems.map(async (item) => {
+          console.log("Sending inventory_id:", inventoryId); // Log to ensure inventoryId is being passed
+          const response = await axios.post(
+            `${process.env.REACT_APP_API_URL}/inventory/enterMaterial`,
+            {
+              record_id: `${deliveryChallanNumber}_${item.materialCode}`,
+              customer_dc_number: deliveryChallanNumber,
+              material_id: item.materialCode,
+              material_desc: item.itemName,
+              material_uom: item.itemUom,
+              material_wo_qty: item.itemQTY,
+              inventory_id: inventoryId, // Ensure inventoryId is being passed
             },
-          }
-        );
-      });
-      const responses = await Promise.all(response);
+            {
+              headers: {
+                Authorization: `${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          return response; // Return the response so Promise.all can capture it
+        })
+      );
+      console.log("All material responses:", responses);
     } catch (error) {
       console.error("Error submitting materials:", error);
       setError("Failed to submit materials");
     }
   };
+
   const handlePopupClose = () => {
     setSuccessPopupOpen(false);
     resetForm(); // Reset form after popup is closed

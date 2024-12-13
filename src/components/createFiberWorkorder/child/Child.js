@@ -27,6 +27,8 @@ import dayjs from "dayjs";
 import AddMaterials from "./materials/materialsLineItems";
 import AddServices from "./services/servicesLineItems";
 import StatusModal from "../statusPopUp";
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 const DashboardWhinch = () => {
   const { user } = useContext(AuthContext);
@@ -392,6 +394,62 @@ const DashboardWhinch = () => {
     setSuccess(false);
   };
 
+  const handlePrintPdf = () => {
+    const doc = new jsPDF();
+
+    // Capture the heading and active tab name
+    const heading = "Child Workorder";
+    const tabName = "Fiber Rollout";
+
+    // Add Heading and Active Tab Name to the PDF
+    doc.setFontSize(16);
+    doc.text(heading, 10, 10);
+    doc.setFontSize(12);
+    doc.text(tabName, 10, 20);
+
+    // Capture the content area as a PNG image
+    const contentElement = document.querySelector("#fiber-rollout");
+
+    // Adjust canvas size to capture the full scrollable area
+    html2canvas(contentElement, {
+      scale: 2, // Use scale for higher quality
+      logging: true,
+      useCORS: true,
+      height: contentElement.scrollHeight, // Ensure the entire content is captured
+    }).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+
+      // Add the image to the PDF
+      doc.addImage(imgData, "PNG", 10, 30, 180, 0); // Adjust image positioning
+
+      // Add footer with page number on the right side
+      const totalPages = doc.internal.getNumberOfPages(); // Get the total number of pages
+
+      // Loop through all pages to add footer with page number on the right side
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i); // Set the current page
+        const pageWidth = doc.internal.pageSize.width; // Get page width
+        const pageHeight = doc.internal.pageSize.height; // Get page height
+
+        // Add page number to footer, aligned to the right
+        doc.setFontSize(10);
+        const pageNumberText = `Page ${i} of ${totalPages}`;
+        const textWidth = doc.getTextWidth(pageNumberText); // Get the width of the text
+        const margin = 10; // Set margin from the right edge
+
+        // Position the text to the right
+        doc.text(
+          pageNumberText,
+          pageWidth - textWidth - margin,
+          pageHeight - 10
+        ); // Position the footer on the right
+      }
+
+      // Save the PDF
+      doc.save("workorder.pdf");
+    });
+  };
+
   const handleGoToDashboard = () => {
     window.location.href = "../../dashboard/dashboardAdmin.js";
   };
@@ -401,7 +459,7 @@ const DashboardWhinch = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <div>
+      <div id="fiber-rollout">
         <Box sx={{ flexGrow: 1 }}>
           {error ? (
             <Typography color="error">{error}</Typography>
@@ -687,6 +745,25 @@ const DashboardWhinch = () => {
                 >
                   Submit
                 </Button>
+                <Grid
+                  item
+                  xs={12}
+                  sx={{ display: "flex", justifyContent: "center" }}
+                >
+                  <Button
+                    variant="contained"
+                    sx={{
+                      backgroundColor: "#4CAF50", // You can adjust color
+                      color: "white",
+                      "&:hover": {
+                        backgroundColor: "#45a049", // Hover effect color
+                      },
+                    }}
+                    onClick={handlePrintPdf}
+                  >
+                    Print
+                  </Button>
+                </Grid>
               </Grid>
               <StatusModal
                 open={modalOpen}

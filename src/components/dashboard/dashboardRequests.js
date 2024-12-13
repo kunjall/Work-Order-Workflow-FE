@@ -6,21 +6,69 @@ import {
   MRT_GlobalFilterTextField,
   MRT_ToggleFiltersButton,
 } from "material-react-table";
-import {
-  Box,
-  Button,
-  lighten,
-  MenuItem,
-  ListItemIcon,
-  Typography,
-} from "@mui/material";
-import { AccountCircle, Send, WidthFull } from "@mui/icons-material";
-
+import { Box, lighten, Typography } from "@mui/material";
+import InventoryModal from "./inventoryModal";
 const Example = () => {
   const [tableData, setTableData] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const username = useMemo(() => localStorage.getItem("username"), []);
+  const [inventoryMaterial, setInventoryMaterial] = useState([]);
+  const [selectedRow, setSelectedRow] = useState(null);
+  const [open, setOpen] = useState(false);
+  const [approvers, setApprovers] = useState([]);
+  const [approver, setApprover] = useState("");
+  const [comment, setComment] = useState("");
+  const [selectedApproverEmail, setSelectedApproverEmail] = useState("");
+  const [approverName, setApproverName] = useState("");
+
+  const handleOpenModal = (row) => {
+    setSelectedRow(row); // Store the row's data
+    setOpen(true); // Open the modal
+  };
+
+  useEffect(() => {
+    // Reset the comment whenever a new request is selected
+    setComment("");
+  }, [selectedRow]);
+
+  const handleCloseModal = () => {
+    setOpen(false); // Close the modal
+  };
+  useEffect(() => {
+    if (selectedRow != null) {
+      console.log(selectedRow);
+      const fetchInventoryMaterial = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/inventory/get-inventory-materials?inventory_id=${selectedRow.inventory_id}`,
+            {
+              headers: {
+                Authorization: `${localStorage.getItem("token")}`,
+              },
+            }
+          );
+
+          const inventoryMaterialArray = response.data.map((material) => ({
+            record_id: material.record_id,
+            inventory_id: material.inventory_id,
+            customer_dc_number: material.customer_dc_number,
+            material_id: material.material_id,
+            material_desc: material.material_desc,
+            material_uom: material.material_uom,
+            material_wo_qty: material.material_wo_qty,
+          }));
+          console.log(inventoryMaterialArray);
+          setInventoryMaterial(inventoryMaterialArray);
+        } catch (err) {
+          console.error("Error fetching inventory materials:", err);
+          setError("Failed to load inventory materials");
+        }
+      };
+
+      fetchInventoryMaterial();
+    }
+  }, [selectedRow]);
 
   // Fetch data from the API
   useEffect(() => {
@@ -30,7 +78,7 @@ const Example = () => {
       try {
         // Fetching data for "Pending for Receipt"
         const response1 = await axios.get(
-          `${process.env.REACT_APP_API_URL}/inventory/get-inventory-reciever?user=${username}&inventorystatus=Pending for Reciept`,
+          `${process.env.REACT_APP_API_URL}/inventory/get-inventory-receiver?user=${username}&inventorystatus=Pending for Reciept`,
           {
             headers: { Authorization: `${localStorage.getItem("token")}` },
           }
@@ -38,7 +86,7 @@ const Example = () => {
 
         // Fetching data for "Pending Approval"
         const response2 = await axios.get(
-          `${process.env.REACT_APP_API_URL}/inventory/get-inventory-reciever?user=${username}&inventorystatus=Pending Approval`,
+          `${process.env.REACT_APP_API_URL}/inventory/get-inventory-receiver?user=${username}&inventorystatus=Pending Approval`,
           {
             headers: { Authorization: `${localStorage.getItem("token")}` },
           }
@@ -52,6 +100,7 @@ const Example = () => {
             ...response2.data,
           ]);
           setIsLoading(false);
+          console.log(tableData);
         }
       } catch (err) {
         if (isMounted) {
@@ -67,6 +116,81 @@ const Example = () => {
     };
   }, [username]);
 
+  useEffect(() => {
+    if (selectedRow != null && selectedRow.warehouse_city != null) {
+      console.log(selectedRow);
+      const fetchApprovers = async () => {
+        try {
+          console.log(selectedRow, "117");
+          console.log(selectedRow.warehouse_city);
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=Inventory&city=${selectedRow.warehouse_city}`,
+            {
+              headers: {
+                Authorization: `${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          const approverArray = response.data.map((reviewer) => ({
+            id: reviewer.record_id,
+            type: reviewer.type,
+            reviewer_email: reviewer.reviewer_email,
+            approver_email: reviewer.approver_email,
+            city: reviewer.city,
+            reviewer_name: reviewer.reviewer_name,
+            approver_name: reviewer.approver_name,
+          }));
+          console.log(approverArray, "138");
+          setApprovers(approverArray);
+        } catch (err) {
+          console.error("Error fetching reviewer:", err);
+          setError("Failed to load reviewer");
+        }
+      };
+
+      fetchApprovers();
+    }
+  }, [selectedRow]);
+
+  const handleApprove = async () => {
+    console.log("Approved with comment:", comment);
+    const receivedBy = localStorage.getItem("username") || "unknown";
+    const receivedAt = new Date().toLocaleString("en-US", {
+      day: "2-digit",
+      month: "short", // e.g., "Dec"
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true, // AM/PM format
+      timeZone: "UTC", // Adjust to UTC
+    });
+    console.log(receivedAt, receivedBy);
+
+    try {
+      const response = await axios.patch(
+        `${process.env.REACT_APP_API_URL}/inventory/updateReceived`,
+        {
+          inventory_id: selectedRow.inventory_id, // Ensure this is passed to your modal
+          inventory_inward_status: "Pending for approval",
+          received_at: receivedAt,
+          received_by: receivedBy,
+          inventory_approver_email: selectedApproverEmail,
+          inventory_approver_name: approverName,
+          receiver_comments: comment,
+        },
+        {
+          headers: {
+            Authorization: `${localStorage.getItem("token")}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error submitting materials:", error);
+      setError("Failed to submit materials");
+    }
+  };
+
   // Define columns
   const columns = useMemo(
     () => [
@@ -74,7 +198,20 @@ const Example = () => {
         accessorKey: "inventory_id",
         header: "Inventory Inward ID",
         size: 200,
+        Cell: ({ row }) => (
+          <span
+            style={{
+              color: "#007BFF",
+              textDecoration: "underline",
+              cursor: "pointer",
+            }}
+            onClick={() => handleOpenModal(row.original)} // Pass the row's data
+          >
+            {row.original.inventory_id}
+          </span>
+        ),
       },
+
       {
         accessorKey: "customer_dc_number",
         header: "Customer DC Number",
@@ -145,12 +282,12 @@ const Example = () => {
       },
       {
         accessorKey: "inventory_reviewer_email",
-        header: "Reciever Email",
+        header: "Receiver Email",
         size: 250,
       },
       {
         accessorKey: "inventory_reviewer_name",
-        header: "Reciever Name",
+        header: "Receiver Name",
         size: 200,
       },
       {
@@ -186,7 +323,7 @@ const Example = () => {
     enableGrouping: true,
     enableColumnPinning: true,
     enableFacetedValues: true,
-    enableRowSelection: true,
+    enableRowSelection: false,
     initialState: {
       showColumnFilters: false,
       showGlobalFilter: false,
@@ -265,6 +402,20 @@ const Example = () => {
             </Box>
           </Box>
         )}
+      />
+      <InventoryModal
+        open={open}
+        onClose={handleCloseModal}
+        rowData={selectedRow}
+        inventoryMaterial={inventoryMaterial}
+        setComment={setComment}
+        comment={comment}
+        handleApprove={handleApprove}
+        approvers={approvers}
+        setSelectedApproverEmail={setSelectedApproverEmail}
+        setApproverName={setApproverName}
+
+        // Pass the selected row data
       />
     </Box>
   );

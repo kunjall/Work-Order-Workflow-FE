@@ -15,7 +15,9 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.2",
     "dayjs": "^1.11.12",
+    "html2canvas": "^1.4.1",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^2.5.2",
     "jwt-decode": "^4.0.0",
     "material-react-table": "^2.13.3",
     "mui-one-time-password-input": "^2.0.2",
@@ -24,6 +26,7 @@
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
     "react-scripts": "5.0.1",
+    "react-to-print": "^3.0.2",
     "react-toastify": "^10.0.5",
     "sequelize": "^6.37.3",
     "web-vitals": "^2.1.4"

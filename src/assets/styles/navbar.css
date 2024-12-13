@@ -36,3 +36,21 @@
   color: white;
   text-decoration: none;
 }
+
+@media print {
+  .header {
+    position: fixed; /* Ensure it stays at the top */
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+
+  .header + * {
+    /* Target the content below the navbar */
+    margin-top: 100px; /* Adjust this to avoid overlapping */
+  }
+
+  .header:not(:first-child) {
+    display: none !important; /* Hide navbar on subsequent pages */
+  }
+}
