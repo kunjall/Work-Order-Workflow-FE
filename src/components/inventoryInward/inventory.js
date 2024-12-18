@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import utc from "dayjs/plugin/utc";
+import timezone from "dayjs/plugin/timezone";
 import {
   createTheme,
   responsiveFontSizes,
@@ -58,6 +60,9 @@ const InventoryInward = () => {
   const [successPopupOpen, setSuccessPopupOpen] = useState(false);
   const [clientWarehouses, setClientWarehouses] = useState([]);
   let inventoryId = null;
+
+  dayjs.extend(utc); // Add UTC plugin
+  dayjs.extend(timezone);
 
   useEffect(() => {
     if (!user) {
@@ -267,8 +272,11 @@ const InventoryInward = () => {
   const resetForm = () => {
     setSelectedWarehouseId("");
     setWarehouseState("");
-    setDCDate(dayjs());
-    setEntryDate(dayjs());
+
+    // Reset date fields to current date, formatted in your desired format
+    setDCDate(dayjs().format("MMM DD, YYYY, hh:mm:ss A")); // Adjusted for your date format
+    setEntryDate(dayjs().format("MMM DD, YYYY, hh:mm:ss A")); // Adjusted for your date format
+
     setEWayBillNumber("");
     setdeliveryChallanNumber("");
   };
@@ -281,10 +289,47 @@ const InventoryInward = () => {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
-      hour12: true, // AM/PM format
-      timeZone: "UTC", // Adjust to UTC
+      hour12: false, // AM/PM format
+      timeZone: "IST", // Adjust to UTC
     });
+    const entryDateFormatted = dayjs(entryDate)
+      .tz("Asia/Kolkata")
+      .format("MMM DD, YYYY, HH:mm")
+      .toLocaleString("en-US", {
+        day: "2-digit",
+        month: "short", // e.g., "Dec"
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, // AM/PM format
+        timeZone: "IST", // Adjust to UTC
+      });
+
+    const dcDateformatted = dayjs(dcDate)
+      .tz("Asia/Kolkata")
+      .format("MMM DD, YYYY, HH:mm")
+      .toLocaleString("en-US", {
+        day: "2-digit",
+        month: "short", // e.g., "Dec"
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, // AM/PM format
+        timeZone: "IST",
+      });
+
+    const mrsDateFormatted = dayjs(mrsDate)
+      .tz("Asia/Kolkata")
+      .format("MMM DD, YYYY, HH:mm")
+      .toLocaleString("en-US", {
+        day: "2-digit",
+        month: "short", // e.g., "Dec"
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, // AM/PM format
+        timeZone: "IST",
+      });
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/inventory/create`,
@@ -296,12 +341,12 @@ const InventoryInward = () => {
           client_warehouse_city: clientWarehouseState,
           warehouse_id: selectedWarehouseId,
           warehouse_city: warehouseState,
-          entry_date: entryDate,
-          dc_date: dcDate,
+          entry_date: entryDateFormatted,
+          dc_date: dcDateformatted,
           eway_bill_number: eWayBillNumber,
           mrs_number: MRSNumber,
-          mrs_date: mrsDate,
-          inventory_inward_status: "Pending for Reciept",
+          mrs_date: mrsDateFormatted,
+          inventory_inward_status: "Pending for receipt",
           created_by: createdBy,
           created_at: createdAt,
           inventory_receiver_email: selectedReviewerEmail,
@@ -473,7 +518,6 @@ const InventoryInward = () => {
                         }}
                       />
                     )}
-                    format="DD-MMM-YYYY"
                   />
                 </LocalizationProvider>
               </Grid>

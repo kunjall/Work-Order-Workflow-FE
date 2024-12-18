@@ -84,7 +84,7 @@ const App = () => {
               />
 
               <Route
-                path="/bin"
+                path="/locator"
                 element={
                   <WithAuth role="admin">
                     <Bin />

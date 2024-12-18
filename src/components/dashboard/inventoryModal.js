@@ -36,9 +36,8 @@ const formatDate = (isoDateString) => {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
-    hour12: true, // AM/PM format
-    timeZone: "UTC",
+    hour12: false, // AM/PM format
+    timeZone: "IST",
   }).format(date);
 };
 
@@ -50,24 +49,77 @@ const InventoryModal = ({
   setComment,
   comment,
   handleApprove,
+  handleReject,
   setSelectedApproverEmail,
   approvers,
   setApproverName,
+  inventoryStatus,
+  username,
 }) => {
+  // Function to determine styles based on the status
+  const getStatusStyles = (status) => {
+    if (status.toLowerCase().includes("pending")) {
+      return {
+        backgroundColor: "#ec7c30",
+        color: "white",
+      };
+    } else if (status.toLowerCase().includes("rejected")) {
+      return {
+        backgroundColor: "red",
+        color: "white",
+      };
+    } else if (status.toLowerCase().includes("approved")) {
+      return {
+        backgroundColor: "green",
+        color: "white",
+      };
+    }
+    return {
+      backgroundColor: "gray",
+      color: "white",
+    }; // Default style
+  };
+
+  const statusStyles = getStatusStyles(inventoryStatus);
+
+  const isActionAllowed =
+    inventoryStatus.toLowerCase().includes("pending") &&
+    rowData &&
+    rowData.created_by !== username;
+
   const handleApproveButton = () => {
+    if (!isActionAllowed) return;
     console.log(comment);
     handleApprove();
     onClose();
   };
 
-  const handleReject = () => {
+  const handleRejectButton = () => {
+    if (!isActionAllowed) return;
     console.log("Rejected with comment:");
+    handleReject();
     onClose();
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="ld" fullWidth>
-      <DialogContent sx={{ padding: "24px" }}>
+    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+      <DialogContent sx={{ padding: "24px", position: "relative" }}>
+        {/* Status Box */}
+        <Box
+          sx={{
+            position: "absolute",
+            top: "16px",
+            right: "16px",
+            padding: "8px 16px",
+            borderRadius: "8px",
+            ...statusStyles,
+          }}
+        >
+          <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+            {inventoryStatus}
+          </Typography>
+        </Box>
+
         <Grid container spacing={3}>
           <Grid item xs={6}>
             <Typography
@@ -77,12 +129,64 @@ const InventoryModal = ({
               Details
             </Typography>
             {rowData ? (
-              <Grid container spacing={2}>
-                {Object.entries(rowData).map(([key, value]) => (
-                  <Grid item xs={5} key={key}>
+              <Grid container spacing={3}>
+                {[
+                  "customer_name",
+
+                  "inventory_id",
+                  "client_warehouse_city",
+                  "customer_dc_number",
+                  "dc_date",
+
+                  "warehouse_city",
+
+                  "created_by",
+                  "created_at",
+                  "inventory_inward_status",
+
+                  "received_by",
+                  "received_at",
+                  "receiver_comments",
+                  "approved_by",
+                  "approved_at",
+                  "approver_comments",
+
+                  ...Object.keys(rowData).filter(
+                    (key) =>
+                      ![
+                        "inventory_id",
+                        "customer_dc_number",
+                        "customer_id",
+                        "customer_name",
+                        "warehouse_id",
+                        "warehouse_city",
+                        "entry_date",
+                        "dc_date",
+                        "eway_bill_number",
+                        "mrs_number",
+                        "mrs_date",
+                        "client_warehouse_id",
+                        "client_warehouse_city",
+                        "inventory_inward_status",
+                        "created_by",
+                        "created_at",
+                        "received_by",
+                        "received_at",
+                        "receiver_comments",
+                        "approved_by",
+                        "approved_at",
+                        "approver_comments",
+                        "inventory_approver_name",
+                        "inventory_receiver_email",
+                        "inventory_receiver_name",
+                        "inventory_approver_email",
+                      ].includes(key)
+                  ), // Include remaining keys not in the explicit order
+                ].map((key) => (
+                  <Grid item xs={4} key={key}>
                     <Typography
                       variant="body2"
-                      color="textSecondary"
+                      color="purple"
                       sx={{
                         fontWeight: "bold",
                         textTransform: "capitalize",
@@ -96,12 +200,15 @@ const InventoryModal = ({
                       sx={{
                         padding: "4px 8px",
                         borderRadius: "4px",
+                        color: key.toLowerCase().includes("customer")
+                          ? "red"
+                          : "inherit",
                       }}
                     >
                       {key.toLowerCase().includes("date") ||
                       key.toLowerCase().includes("time")
-                        ? formatDate(value)
-                        : value || "N/A"}
+                        ? formatDate(rowData[key])
+                        : rowData[key] || "N/A"}
                     </Typography>
                   </Grid>
                 ))}
@@ -116,7 +223,7 @@ const InventoryModal = ({
               variant="h6"
               sx={{ fontWeight: "bold", marginBottom: "16px" }}
             >
-              Materials
+              Materials Inward
             </Typography>
             {inventoryMaterial && inventoryMaterial.length > 0 ? (
               <TableContainer component={Paper} sx={{ maxHeight: "400px" }}>
@@ -144,31 +251,31 @@ const InventoryModal = ({
             ) : (
               <Typography>No materials available.</Typography>
             )}
-
             {/* Approvers Dropdown */}
-            <Box sx={{ marginTop: "16px" }}>
-              <Autocomplete
-                disablePortal
-                id="combo-box-demo"
-                options={approvers}
-                getOptionLabel={(option) => option.approver_email.toString()}
-                onChange={(event, newValue) => {
-                  setSelectedApproverEmail(
-                    newValue ? newValue.approver_email : null
-                  );
-                  setApproverName(newValue.approver_name);
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Approver Email"
-                    variant="outlined"
-                    fullWidth
-                  />
-                )}
-              />
-            </Box>
-
+            {inventoryStatus.toLowerCase() === "pending for receipt" && (
+              <Box sx={{ marginTop: "16px" }}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={approvers}
+                  getOptionLabel={(option) => option.approver_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedApproverEmail(
+                      newValue ? newValue.approver_email : null
+                    );
+                    setApproverName(newValue ? newValue.approver_name : "");
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Approver Email"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+            )}
             {/* Comment Box */}
             <Box sx={{ marginTop: "16px" }}>
               <TextField
@@ -199,17 +306,19 @@ const InventoryModal = ({
             fontWeight: "bold",
             textTransform: "none",
           }}
+          disabled={!isActionAllowed}
         >
           Accept
         </Button>
         <Button
           variant="contained"
           color="error"
-          onClick={handleReject}
+          onClick={handleRejectButton}
           sx={{
             fontWeight: "bold",
             textTransform: "none",
           }}
+          disabled={!isActionAllowed}
         >
           Reject
         </Button>

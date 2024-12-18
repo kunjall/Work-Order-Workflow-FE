@@ -37,7 +37,7 @@ const Navbar = () => {
                   <span style={{ marginRight: "8px" }}>
                     <ReceiptLongIcon />
                   </span>
-                  <span>Admin Dashboard</span>
+                  <span>Bin</span>
                 </Link>
               </li>
               <li style={{ fontSize: "16px" }}>
@@ -87,7 +87,7 @@ const Navbar = () => {
               </li>
               <li style={{ fontSize: "16x" }}>
                 <Link
-                  to="/bin"
+                  to="/locator"
                   style={{
                     display: "flex",
                     alignItems: "center",
