@@ -15,6 +15,7 @@ import Bin from "./components/dashboard/bin";
 import CreateChild from "./pages/createChild";
 import Inventory from "./pages/inventoryInward";
 import Repository from "./pages/repository";
+import MRS from "./pages/createMRS";
 import { Repeat } from "@mui/icons-material";
 
 // import Test from "./components/dashboard/test";
@@ -88,6 +89,14 @@ const App = () => {
                 element={
                   <WithAuth role="admin">
                     <Bin />
+                  </WithAuth>
+                }
+              />
+              <Route
+                path="/MRS"
+                element={
+                  <WithAuth role="admin">
+                    <MRS />
                   </WithAuth>
                 }
               />

@@ -10,6 +10,9 @@ import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import { AuthContext } from "../../../context/authContext";
 import { useNavigate } from "react-router-dom";
+import AddMaterials from "../materials/materialsLineItems";
+import AddServices from "../services/servicesLineItems";
+
 import Button from "@mui/material/Button";
 import {
   Typography,
@@ -24,6 +27,7 @@ import {
   DialogContentText,
   DialogTitle,
   CircularProgress,
+  Divider,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -39,12 +43,18 @@ const DashboardWhinch = () => {
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [customerName, setCustomerName] = useState("");
   const [customerState, setCustomerState] = useState("");
+  const [totalAmount, setTotalAmount] = useState("");
+  const [totalMaterialAmount, setTotalMaterialAmount] = useState("");
   const [cityOptions, setCityOptions] = useState([]);
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [activity, setActivity] = useState("");
   const [type, setType] = useState("");
   const [error, setError] = useState(null);
+  const [services, setServices] = useState([]);
+  const [serviceLineItems, setServiceLineItems] = useState([]);
+  const [materialCodes, setMaterialCodes] = useState([]);
+  const [lineItems, setLineItems] = useState([]);
   const [workOrderNumber, setWorkOrderNumber] = useState("");
   const [gisCode, setGisCode] = useState("");
   const [routeName, setRouteName] = useState("");
@@ -53,6 +63,8 @@ const DashboardWhinch = () => {
   const [customerProjectManager, setCustomerProjectManager] = useState("");
   const [successPopupOpen, setSuccessPopupOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  let mwoId = null;
 
   useEffect(() => {
     if (!user) {
@@ -71,11 +83,42 @@ const DashboardWhinch = () => {
             },
           }
         );
-        const citiesArray = response.data.map((city) => ({
-          cityManagerId: city.city_manager_id,
-          cityName: city.city_name,
-          managerNames: city.manager_name.split(";").map((name) => name.trim()),
+
+        console.log(response.data); // Debugging to check data structure
+
+        // Group cities by their name and merge manager lists
+        const cityMap = response.data.reduce((acc, city) => {
+          const cityName = city.city_name;
+          const managers = Array.isArray(city.manager_name)
+            ? city.manager_name.map((name) => name.trim())
+            : typeof city.manager_name === "string"
+            ? [city.manager_name.trim()] // Convert string to array
+            : []; // Fallback if null/undefined
+
+          if (!acc[cityName]) {
+            acc[cityName] = {
+              cityManagerId: city.city_manager_id, // Optional: keep only the first city's ID
+              cityName: cityName,
+              managerNames: new Set(managers), // Use a Set to ensure uniqueness
+              type: city.type,
+            };
+          } else {
+            // Merge managers into the existing Set
+            managers.forEach((manager) =>
+              acc[cityName].managerNames.add(manager)
+            );
+          }
+
+          return acc;
+        }, {});
+
+        // Convert the city map back to an array, with unique managers for each city
+        const citiesArray = Object.values(cityMap).map((city) => ({
+          ...city,
+          managerNames: Array.from(city.managerNames), // Convert Set back to array
         }));
+
+        console.log(citiesArray); // Check the processed city data
         setCityOptions(citiesArray);
       } catch (error) {
         console.error(error);
@@ -84,6 +127,59 @@ const DashboardWhinch = () => {
 
     fetchCities();
   }, []);
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/find-service?company=${customerName}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const servicesArray = response.data.map((service) => ({
+          id: service.service_id,
+          description: service.service_description,
+          uom: service.service_UOM,
+          rate: service.service_rate,
+        }));
+        setServices(servicesArray);
+      } catch (err) {
+        console.error("Error fetching services:", err);
+        setError("Failed to load services");
+      }
+    };
+
+    if (customerName) fetchServices();
+  }, [customerName]);
+
+  useEffect(() => {
+    const fetchMaterial = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/find-material?company=${customerName}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const materialArray = response.data.map((material) => ({
+          id: material.item_id,
+          description: material.item_name,
+          uom: material.item_uom,
+          rate: material.item_rate,
+        }));
+        setMaterialCodes(materialArray);
+      } catch (err) {
+        console.error("Error fetching material:", err);
+        setError("Failed to load materials");
+      }
+    };
+
+    if (customerName) fetchMaterial();
+  }, [customerName]);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -144,6 +240,28 @@ const DashboardWhinch = () => {
     setHomepassCount("");
     setCustomerProjectManager("");
   };
+  const handleServiceLineItemsUpdate = (updatedServiceLineItems) => {
+    setServiceLineItems(updatedServiceLineItems);
+  };
+
+  const handleTotalAmountChange = (updatedAmount) => {
+    setTotalAmount(updatedAmount);
+  };
+
+  const handleTotalMaterialAmountChange = (updatedAmount) => {
+    setTotalMaterialAmount(updatedAmount);
+  };
+
+  const handleLineItemsUpdate = (updatedLineItems) => {
+    setLineItems(updatedLineItems);
+  };
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+
+  console.log(serviceLineItems);
 
   const handleSubmit = async () => {
     const createdBy = localStorage.getItem("username") || "unknown";
@@ -155,7 +273,7 @@ const DashboardWhinch = () => {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/workorder/create`,
         {
-          workorder_id: workOrderNumber,
+          mwo_number: workOrderNumber,
           workorder_type: "Fiber",
           workorder_number: workOrderNumber,
           workorder_status: "Pending Approval",
@@ -167,6 +285,8 @@ const DashboardWhinch = () => {
           type: type,
           customer_id: selectedCustomerId,
           execution_city: selectedCity,
+          total_service_cost: totalAmount,
+          total_material_cost: totalMaterialAmount,
           customer_project_manager: customerProjectManager,
           customer_name: customerName,
           customer_state: customerState,
@@ -180,12 +300,74 @@ const DashboardWhinch = () => {
           },
         }
       );
+      mwoId = response.data;
       setSuccessPopupOpen(true);
     } catch (error) {
       console.error("Error submitting form:", error);
       setError("Failed to submit form");
     } finally {
       setLoading(false); // Set loading to false after API call is finished
+    }
+
+    try {
+      const response = serviceLineItems.map(async (item) => {
+        console.log(serviceLineItems);
+        console.log(item);
+        return await axios.post(
+          `${process.env.REACT_APP_API_URL}/workorder/motherEnterServices`,
+          {
+            record_id: `${workOrderNumber}_${item.serviceId}`,
+            mwo_number: workOrderNumber,
+            service_id: item.serviceId,
+            service_desc: item.serviceDescription,
+            service_uom: item.serviceUOM,
+            service_rate: item.serviceRate,
+            service_wo_qty: item.serviceQTY,
+            service_bal_qty: item.serviceQTY,
+            service_price: item.servicePrice,
+            mwo_id: mwoId,
+          },
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      });
+      const responses = await Promise.all(response);
+    } catch (error) {
+      console.error("Error submitting services:", error);
+      setError("Failed to submit services");
+    }
+
+    try {
+      console.log(lineItems);
+      const response = lineItems.map(async (item) => {
+        return await axios.post(
+          `${process.env.REACT_APP_API_URL}/workorder/motherEnterMaterial`,
+          {
+            record_id: `${workOrderNumber}_${item.materialCode}`,
+            mwo_number: workOrderNumber,
+            material_id: item.materialCode,
+            material_desc: item.itemName,
+            material_uom: item.itemUom,
+            material_wo_qty: item.itemQTY,
+            material_bal_qty: item.itemQTY,
+            mwo_id: mwoId,
+            material_price: item.itemPrice,
+            material_rate: item.itemRate,
+          },
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+      });
+      const responses = await Promise.all(response);
+    } catch (error) {
+      console.error("Error submitting materials:", error);
+      setError("Failed to submit materials");
     }
   };
 
@@ -397,6 +579,40 @@ const DashboardWhinch = () => {
                   value={customerProjectManager}
                   onChange={(e) => setCustomerProjectManager(e.target.value)}
                 />
+              </Grid>
+              <Grid item xs={12}>
+                <Divider
+                // style={{ backgroundColor: "#EC7C30", height: "4px" }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: { xs: "column", md: "column" },
+                  }}
+                >
+                  <Box sx={{ flex: 1, padding: 2 }}>
+                    <Typography variant="h6">Services</Typography>
+                    <AddServices
+                      services={services}
+                      onLineItemUpdate={handleServiceLineItemsUpdate}
+                      onAmountUpdate={handleTotalAmountChange}
+                    />
+                  </Box>
+                  <Divider
+                    flexItem
+                    sx={{ display: { xs: "none", md: "flex" } }}
+                  />
+                  <Box sx={{ flex: 1, padding: 2 }}>
+                    <Typography variant="h6">Materials</Typography>
+                    <AddMaterials
+                      materialCodes={materialCodes}
+                      onUpdate={handleLineItemsUpdate}
+                      onAmountUpdate={handleTotalMaterialAmountChange}
+                    />
+                  </Box>
+                </Box>
               </Grid>
 
               <Grid

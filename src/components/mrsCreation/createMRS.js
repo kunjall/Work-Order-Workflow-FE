@@ -14,19 +14,65 @@ import { Typography, Grid, Divider, FormControl } from "@mui/material";
 import dayjs from "dayjs";
 import { SettingsInputCompositeSharp } from "@mui/icons-material";
 
-const ChildRepo = () => {
+const CreateMRS = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [workOrders, setWorkOrders] = useState([]);
   const [childServices, setChildServices] = useState([]);
   const [childMaterials, setChildMaterials] = useState([]);
+  const [warehouses, setWarehouses] = useState([]);
+  const [warehouseState, setWarehouseState] = useState("");
 
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState(null);
+  const [selectedClientWarehouseId, setSelectedClientWarehouseId] =
+    useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
   const [selectedVendorId, setSelectedVendorId] = useState(null);
   const [formData, setFormData] = useState({});
   const [vendorOptions, setVendorOptions] = useState([]);
   const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchWarehouses = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/find-warehouse`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const warehouseArray = response.data.map((warehouse) => ({
+          id: warehouse.warehouse_id,
+          city: warehouse.warehouse_city,
+        }));
+        const uniqueWarehouses = Array.from(
+          new Map(
+            warehouseArray.map((warehouse) => [warehouse.id, warehouse])
+          ).values()
+        );
+        setWarehouses(uniqueWarehouses);
+      } catch (err) {
+        console.error("Error fetching warehouses:", err);
+        setError("Failed to load warehouses");
+      }
+    };
+
+    fetchWarehouses();
+  }, []);
+
+  useEffect(() => {
+    if (selectedWarehouseId) {
+      const selectedWarehouse = warehouses.find(
+        (warehouse) => warehouse.id === selectedWarehouseId
+      );
+      setWarehouseState(selectedWarehouse ? selectedWarehouse.city : "");
+    } else {
+      setWarehouseState("");
+    }
+  }, [selectedWarehouseId, warehouses]);
 
   // Fetch work orders on component mount
   useEffect(() => {
@@ -78,7 +124,7 @@ const ChildRepo = () => {
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/workorder/find-child-services`,
             {
-              params: { cwo_id: selectedWorkOrder.cwo_id },
+              params: { mwo_number: selectedWorkOrder.mwo_number },
               headers: { Authorization: `${localStorage.getItem("token")}` },
             }
           );
@@ -91,13 +137,10 @@ const ChildRepo = () => {
 
       const fetchChildMaterials = async () => {
         try {
-          console.log(formData);
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/workorder/find-child-material`,
             {
-              params: {
-                cwo_id: selectedWorkOrder.cwo_id, // Ensures cwo_id is a number
-              },
+              params: { mwo_number: selectedWorkOrder.mwo_number },
               headers: { Authorization: `${localStorage.getItem("token")}` },
             }
           );
@@ -119,11 +162,11 @@ const ChildRepo = () => {
     if (newValue) {
       setSelectedWorkOrder(newValue);
       setFormData({
-        cwo_id: newValue.cwo_id || "",
         mwo_number: newValue.mwo_number || "",
         vendor_id: newValue.vendor_id || "",
         vendor_route_allocation: newValue.vendor_route_allocation || "",
         internal_manager: newValue.internal_manager || "",
+        execution_city: newValue.execution_city || "",
       });
     } else {
       setSelectedWorkOrder(null);
@@ -154,10 +197,10 @@ const ChildRepo = () => {
             <Grid item xs={12} sm={6}>
               <Autocomplete
                 options={workOrders}
-                getOptionLabel={(option) => String(option.cwo_id)}
+                getOptionLabel={(option) => option.mwo_number}
                 onChange={handleWorkOrderSelect}
                 isOptionEqualToValue={(option, value) =>
-                  option.cwo_id === value.cwo_id
+                  option.mwo_number === value.mwo_number
                 }
                 renderInput={(params) => (
                   <TextField
@@ -171,15 +214,6 @@ const ChildRepo = () => {
             </Grid>
 
             {/* Work Order Details */}
-            <Grid item xs={12} sm={6} md={2}>
-              <TextField
-                label="MWO number"
-                value={formData.mwo_number || ""}
-                InputProps={{ readOnly: true }}
-                variant="outlined"
-                fullWidth
-              />
-            </Grid>
             <Grid item xs={12} sm={6} md={2}>
               <FormControl fullWidth variant="outlined">
                 <Autocomplete
@@ -213,6 +247,15 @@ const ChildRepo = () => {
                 fullWidth
               />
             </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                label="Execution City"
+                value={formData.execution_city || ""}
+                InputProps={{ readOnly: true }}
+                variant="outlined"
+                fullWidth
+              />
+            </Grid>
 
             <Grid item xs={12} sm={6} md={3}>
               <TextField
@@ -223,65 +266,54 @@ const ChildRepo = () => {
                 fullWidth
               />
             </Grid>
-
-            <Grid item xs={12}>
-              <Typography variant="h6">Services</Typography>
-              <Grid container spacing={2} mt={1}>
-                {childServices.map((service, index) => (
-                  <React.Fragment key={service.record_id}>
-                    <Grid item xs={12} sm={6} md={2}>
-                      <TextField
-                        label="Code"
-                        value={service.service_id || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        label="Description"
-                        value={service.service_desc || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
-                      <TextField
-                        label="Quantity"
-                        value={service.service_wo_qty || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
-                      <TextField
-                        label="UOM"
-                        value={service.service_uom || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
-                      <TextField
-                        label="Price"
-                        value={service.service_price || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <Divider />
-                    </Grid>
-                  </React.Fragment>
-                ))}
-              </Grid>
+            <Grid item xs={12} sm={6} md={2}>
+              <Autocomplete
+                disablePortal
+                id="combo-box-demo"
+                options={warehouses}
+                getOptionLabel={(option) => option.id.toString()}
+                onChange={(event, newValue) => {
+                  setSelectedWarehouseId(newValue ? newValue.id : null);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="From Warehouse"
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
+              />
             </Grid>
 
+            <Grid item xs={12} sm={6} md={2}>
+              <Autocomplete
+                disablePortal
+                id="combo-box-demo"
+                options={warehouses}
+                getOptionLabel={(option) => option.id.toString()}
+                onChange={(event, newValue) => {
+                  setSelectedWarehouseId(newValue ? newValue.id : null);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="To Warehouse"
+                    variant="outlined"
+                    fullWidth
+                  />
+                )}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={2}>
+              {/* <TextField
+                        label="Description"
+                        value={ || ""}
+                        InputProps={{ readOnly: true }}
+                        variant="outlined"
+                        fullWidth
+                      /> */}
+            </Grid>
             <Grid item xs={12}>
               <Typography variant="h6">Materials</Typography>
               <Grid container spacing={2} mt={1}>
@@ -323,6 +355,7 @@ const ChildRepo = () => {
                         fullWidth
                       />
                     </Grid>
+
                     <Grid item xs={12}>
                       <Divider />
                     </Grid>
@@ -337,4 +370,4 @@ const ChildRepo = () => {
   );
 };
 
-export default ChildRepo;
+export default CreateMRS;

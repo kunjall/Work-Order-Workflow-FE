@@ -8,6 +8,7 @@ import EngineeringIcon from "@mui/icons-material/Engineering";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 
 const Navbar = () => {
   const { user } = useContext(AuthContext);
@@ -37,7 +38,7 @@ const Navbar = () => {
                   <span style={{ marginRight: "8px" }}>
                     <ReceiptLongIcon />
                   </span>
-                  <span>Bin</span>
+                  <span>Actions</span>
                 </Link>
               </li>
               <li style={{ fontSize: "16px" }}>
@@ -98,6 +99,21 @@ const Navbar = () => {
                     <FolderOpenIcon />
                   </span>
                   <span>Locator</span>
+                </Link>
+              </li>
+              <li style={{ fontSize: "16x" }}>
+                <Link
+                  to="/MRS"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    ...getActiveStyle("/bin"),
+                  }}
+                >
+                  <span style={{ marginRight: "8px" }}>
+                    <LocalShippingIcon />
+                  </span>
+                  <span>MRS</span>
                 </Link>
               </li>
               <li style={{ fontSize: "16px" }}>

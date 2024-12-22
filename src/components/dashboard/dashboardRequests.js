@@ -337,6 +337,7 @@ const Example = ({ refreshKey }) => {
       header: "MAT Inward Id",
       width: "20px",
       size: 50,
+      filterFn: "contains",
       Cell: ({ row }) => (
         <span
           style={{
@@ -351,116 +352,174 @@ const Example = ({ refreshKey }) => {
       ),
     },
     {
-      accessorKey: "inventory_inward_status",
-      header: "Inward Status",
-      size: 200,
-    },
-    {
-      accessorKey: "entry_date",
-      header: "Entry Date",
-      size: 150,
-      Cell: ({ cell }) => new Date(cell.getValue()).toLocaleDateString(), // Format date
-    },
-
-    {
-      accessorKey: "customer_dc_number",
-      header: "Customer DC Number",
-      filterVariant: "select",
-      size: 200,
-    },
-    {
-      accessorKey: "dc_date",
-      header: "DC Date",
-      size: 150,
-      Cell: ({ cell }) => new Date(cell.getValue()).toLocaleDateString(), // Format date
-    },
-
-    {
-      accessorKey: "customer_id",
-      header: "Customer ID",
-      size: 150,
-    },
-    {
-      accessorKey: "customer_name",
-      header: "Customer Name",
-      filterVariant: "multi-select",
-
-      size: 250,
-    },
-    {
-      accessorKey: "warehouse_id",
-      header: "Warehouse ID",
-      size: 150,
-    },
-    {
       accessorKey: "warehouse_city",
       header: "Warehouse City",
       size: 200,
+      filterFn: "contains",
     },
 
     {
-      accessorKey: "eway_bill_number",
-      header: "Eway Bill Number",
+      accessorKey: "inventory_inward_status",
+      header: "Inward Status",
       size: 200,
-    },
-    {
-      accessorKey: "mrs_number",
-      header: "MRS Number",
-      size: 150,
-    },
-
-    {
-      accessorKey: "client_warehouse_id",
-      header: "Cust. Warehouse ID",
-      size: 150,
-    },
-    {
-      accessorKey: "client_warehouse_city",
-      header: "Cust. Warehouse City",
-      size: 200,
-    },
-    {
-      accessorKey: "inventory_receiver_name",
-      header: "Receiver Name",
-      size: 200,
-    },
-    {
-      accessorKey: "inventory_approver_name",
-      header: "Approver Name",
-      size: 200,
+      filterFn: "contains",
     },
     {
       accessorKey: "created_by",
       header: "Created By",
       size: 150,
+      filterFn: "contains",
     },
+
+    // {
+    //   accessorKey: "received_by",
+    //   header: "Received By",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+
+    // {
+    //   accessorKey: "approved_by",
+    //   header: "Approved By",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
     {
       accessorKey: "created_at",
       header: "Created Dt",
       size: 150,
-      Cell: ({ cell }) => new Date(cell.getValue()).toLocaleString(), // Format date and time
+      Cell: ({ cell }) => cell.getValue(), // Format date
+      // filterFn: "contains",
     },
+    // {
+    //   accessorKey: "received_at",
+    //   header: "Received Dt",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+    // {
+    //   accessorKey: "approved_at",
+    //   header: "Approved Dt",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+    // {
+    //   accessorKey: "entry_date",
+    //   header: "Entry Date",
+    //   size: 150,
+    //   Cell: ({ cell }) => cell.getValue(), // Format date
+    //   filterFn: "contains",
+    // },
+    {
+      accessorKey: "inventory_receiver_name",
+      header: "Receiver Name",
+      size: 200,
+      // filterFn: "contains",
+    },
+    {
+      accessorKey: "inventory_approver_name",
+      header: "Approver Name",
+      size: 200,
+      // filterFn: "contains",
+    },
+    // {
+    //   accessorKey: "customer_dc_number",
+    //   header: "Customer DC Number",
+    //   size: 200,
+    //   filterFn: "contains",
+    // },
+    // {
+    //   accessorKey: "dc_date",
+    //   header: "DC Date",
+    //   size: 150,
+    //   Cell: ({ cell }) => cell.getValue(), // Format date
+    //   filterFn: "contains",
+    // },
 
+    // {
+    //   accessorKey: "customer_id",
+    //   header: "Customer ID",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
     {
-      accessorKey: "received_by",
-      header: "Received By",
-      size: 150,
+      accessorKey: "customer_name",
+      header: "Customer Name",
+      filterVariant: "multi-select",
+      filterFn: "contains",
+      size: 250,
     },
-    {
-      accessorKey: "received_at",
-      header: "Received Dt",
-      size: 150,
-    },
-    {
-      accessorKey: "approved_by",
-      header: "Approved By",
-      size: 150,
-    },
-    {
-      accessorKey: "approved_at",
-      header: "Approved Dt",
-      size: 150,
-    },
+    // {
+    //   accessorKey: "warehouse_id",
+    //   header: "Warehouse ID",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+
+    // {
+    //   accessorKey: "eway_bill_number",
+    //   header: "Eway Bill Number",
+    //   size: 200,
+    //   filterFn: "contains",
+    // },
+    // {
+    //   accessorKey: "mrs_number",
+    //   header: "MRS Number",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+
+    // {
+    //   accessorKey: "client_warehouse_id",
+    //   header: "Cust. Warehouse ID",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+    // {
+    //   accessorKey: "client_warehouse_city",
+    //   header: "Cust. Warehouse City",
+    //   size: 200,
+    //   filterFn: "contains",
+    // },
+
+    // {
+    //   accessorKey: "created_by",
+    //   header: "Created By",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+    // {
+    //   accessorKey: "created_at",
+    //   header: "Created Dt",
+    //   size: 150,
+    //   Cell: ({ cell }) => cell.getValue(), // Format date
+    //   filterFn: "contains",
+    // },
+
+    // {
+    //   accessorKey: "received_by",
+    //   header: "Received By",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+    // {
+    //   accessorKey: "received_at",
+    //   header: "Received Dt",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+    // {
+    //   accessorKey: "approved_by",
+    //   header: "Approved By",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
+    // {
+    //   accessorKey: "approved_at",
+    //   header: "Approved Dt",
+    //   size: 150,
+    //   filterFn: "contains",
+    // },
 
     // {
     //   accessorKey: "material_id",
@@ -483,16 +542,6 @@ const Example = ({ refreshKey }) => {
     //   size: 150,
     // },
   ]);
-
-  const csvConfig = mkConfig({
-    fieldSeparator: ",",
-    quoteStrings: '"',
-    decimalSeparator: ".",
-    showLabels: true,
-    useBom: true,
-    filename: "inventory_data", // Name of the CSV file
-    useKeysAsHeaders: true,
-  });
 
   const handleExportRows = (rows) => {
     const flattened = [];
@@ -541,14 +590,21 @@ const Example = ({ refreshKey }) => {
     enableGrouping: false,
     // getSubRows: (row) => row.materials,
     // enableExpanding: true,
+
     enableColumnPinning: true,
     enableFacetedValues: true,
-    enableRowSelection: false,
+    enableRowSelection: true,
     paginateExpandedRows: false,
+    filterFns: {
+      customFilterFn: (row, id, filterValue) => {
+        return row.getValue(id) === filterValue;
+      },
+    },
     initialState: {
       showColumnFilters: false,
-      showGlobalFilter: false,
+      showGlobalFilter: true,
       density: "compact",
+      filterFn: "contains",
     },
     paginationDisplayMode: "pages",
     positionToolbarAlertBanner: "bottom",

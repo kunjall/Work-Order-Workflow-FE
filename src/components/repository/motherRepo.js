@@ -97,10 +97,10 @@ const DashboardWhinch = () => {
             <Grid item xs={12} sm={6}>
               <Autocomplete
                 options={workOrders}
-                getOptionLabel={(option) => option.workorder_id}
+                getOptionLabel={(option) => option.mwo_number}
                 onChange={handleWorkOrderSelect}
                 isOptionEqualToValue={(option, value) =>
-                  option.workorder_id === value.workorder_id
+                  option.mwo_number === value.mwo_number
                 }
                 renderInput={(params) => (
                   <TextField

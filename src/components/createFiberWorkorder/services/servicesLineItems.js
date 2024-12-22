@@ -7,6 +7,7 @@ import {
   Typography,
   Autocomplete,
   Divider,
+  Alert,
 } from "@mui/material";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 
@@ -21,12 +22,12 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
       servicePrice: "",
     },
   ]);
-
   const [totalAmount, setTotalAmount] = useState(0);
+  const [error, setError] = useState(null); // To track if there's an error
 
   useEffect(() => {
-    onLineItemUpdate(lineItems);
-    calculateTotal();
+    onLineItemUpdate(lineItems); // Send the initial items to the parent on load
+    calculateTotal(); // Calculate total initially
   }, [lineItems, onLineItemUpdate]);
 
   const handleAddLineItem = () => {
@@ -74,12 +75,23 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
         rate: serviceRate,
       } = service;
 
+      // Check for duplicate serviceId
+      const isDuplicate = lineItems.some(
+        (item, i) => i !== index && item.serviceId === serviceId
+      );
+
+      if (isDuplicate) {
+        setError("This service has already been added.");
+        return;
+      } else {
+        setError(null); // Clear error if no duplicate
+      }
+
       const updatedLineItems = lineItems.map((item, i) =>
         i === index
           ? { ...item, serviceId, serviceDescription, serviceUOM, serviceRate }
           : item
       );
-
       setLineItems(updatedLineItems);
     } else {
       const updatedLineItems = lineItems.map((item, i) =>
@@ -95,7 +107,6 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
             }
           : item
       );
-
       setLineItems(updatedLineItems);
     }
   };
@@ -112,8 +123,23 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
     calculateTotal();
   }, [lineItems]); // Recalculate total every time line items change
 
+  const isAddDisabled = lineItems.some(
+    (item) =>
+      !item.serviceId ||
+      !item.serviceQTY ||
+      !item.servicePrice ||
+      !item.serviceRate ||
+      !item.serviceUOM ||
+      !item.serviceDescription
+  );
+
   return (
     <Box sx={{ flex: 1, padding: 2 }}>
+      {error && (
+        <Alert severity="error" sx={{ marginBottom: 2 }}>
+          {error}
+        </Alert>
+      )}
       {lineItems.map((item, index) => (
         <Box key={index}>
           {index !== 0 && <Divider sx={{ my: 2 }} />}{" "}
@@ -221,7 +247,11 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
         </Box>
       ))}
       <Box mt={2}>
-        <IconButton color="primary" onClick={handleAddLineItem}>
+        <IconButton
+          color="primary"
+          onClick={handleAddLineItem}
+          disabled={isAddDisabled}
+        >
           <AddCircleOutline />
           <Typography>Add Line Item</Typography>
         </IconButton>
