@@ -102,7 +102,7 @@ const InventoryModal = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="ld" fullWidth>
       <DialogContent sx={{ padding: "24px", position: "relative" }}>
         {/* Status Box */}
         <Box

@@ -63,6 +63,9 @@ const DashboardWhinch = () => {
   const [customerProjectManager, setCustomerProjectManager] = useState("");
   const [successPopupOpen, setSuccessPopupOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [approvers, setApprovers] = useState([]);
+  const [selectedApproverEmail, setSelectedApproverEmail] = useState(null);
+  const [approverName, setApproverName] = useState("");
 
   let mwoId = null;
 
@@ -71,6 +74,51 @@ const DashboardWhinch = () => {
       navigate("/login");
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    const fetchApprovers = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=MWO&city=${selectedCity}`,
+          {
+            headers: {
+              Authorization: `${localStorage.getItem("token")}`,
+            },
+          }
+        );
+        const reviewerArray = response.data.map((reviewer) => ({
+          id: reviewer.record_id,
+          type: reviewer.type,
+          approver_email: reviewer.approver_email,
+          city: reviewer.city,
+          approver_name: reviewer.approver_name,
+        }));
+        setApprovers(reviewerArray);
+      } catch (err) {
+        console.error("Error fetching reviewer:", err);
+        setError("Failed to load reviewer");
+      }
+    };
+
+    if (selectedCity) fetchApprovers();
+  }, [selectedCity]);
+
+  console.log(approvers);
+
+  useEffect(() => {
+    if (selectedApproverEmail) {
+      console.log(selectedApproverEmail);
+      const selectedReviewer = approvers.find(
+        (reviewer) => reviewer.approver_email === selectedApproverEmail
+      );
+      setApproverName(selectedReviewer ? selectedReviewer.approver_name : "");
+      console.log(approverName);
+    } else {
+      setSelectedApproverEmail("");
+      setApproverName("");
+      console.log("test");
+    }
+  }, [selectedApproverEmail, approvers]);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -239,6 +287,8 @@ const DashboardWhinch = () => {
     setRouteLength("");
     setHomepassCount("");
     setCustomerProjectManager("");
+    setApproverName("");
+    setSelectedApproverEmail("");
   };
   const handleServiceLineItemsUpdate = (updatedServiceLineItems) => {
     setServiceLineItems(updatedServiceLineItems);
@@ -263,111 +313,175 @@ const DashboardWhinch = () => {
 
   console.log(serviceLineItems);
 
+  // const handleSubmit = async () => {
+  //   const createdBy = localStorage.getItem("username") || "unknown";
+  //   const createdAt = new Date().toISOString();
+
+  //   setLoading(true);
+
+  //   try {
+  //     const response = await axios.post(
+  //       `${process.env.REACT_APP_API_URL}/workorder/create`,
+  //       {
+  //         mwo_number: workOrderNumber,
+  //         workorder_type: "Fiber",
+  //         workorder_number: workOrderNumber,
+  //         mwo_status: "Pending Approval",
+  //         gis_code: gisCode,
+  //         route_name: routeName,
+  //         route_length: routeLength,
+  //         homepass_count: homepassCount,
+  //         activity: activity,
+  //         type: type,
+  //         customer_id: selectedCustomerId,
+  //         execution_city: selectedCity,
+  //         total_service_cost: totalAmount,
+  //         total_material_cost: totalMaterialAmount,
+  //         customer_project_manager: customerProjectManager,
+  //         customer_name: customerName,
+  //         customer_state: customerState,
+  //         customer_approval_date: selectedDate,
+  //         created_by: createdBy,
+  //         created_at: createdAt,
+  //       },
+  //       {
+  //         headers: {
+  //           Authorization: `${localStorage.getItem("token")}`,
+  //         },
+  //       }
+  //     );
+  //     mwoId = response.data;
+  //     setSuccessPopupOpen(true);
+  //   } catch (error) {
+  //     console.error("Error submitting form:", error);
+  //     setError("Failed to submit form");
+  //   } finally {
+  //     setLoading(false); // Set loading to false after API call is finished
+  //   }
+
+  //   try {
+  //     const response = serviceLineItems.map(async (item) => {
+  //       console.log(serviceLineItems);
+  //       console.log(item);
+  //       return await axios.post(
+  //         `${process.env.REACT_APP_API_URL}/workorder/motherEnterServices`,
+  //         {
+  //           record_id: `${workOrderNumber}_${item.serviceId}`,
+  //           mwo_number: workOrderNumber,
+  //           service_id: item.serviceId,
+  //           service_desc: item.serviceDescription,
+  //           service_uom: item.serviceUOM,
+  //           service_rate: item.serviceRate,
+  //           service_wo_qty: item.serviceQTY,
+  //           service_bal_qty: item.serviceQTY,
+  //           service_price: item.servicePrice,
+  //           mwo_id: mwoId,
+  //         },
+  //         {
+  //           headers: {
+  //             Authorization: `${localStorage.getItem("token")}`,
+  //           },
+  //         }
+  //       );
+  //     });
+  //     const responses = await Promise.all(response);
+  //   } catch (error) {
+  //     console.error("Error submitting services:", error);
+  //     setError("Failed to submit services");
+  //   }
+
+  //   try {
+  //     console.log(lineItems);
+  //     const response = lineItems.map(async (item) => {
+  //       return await axios.post(
+  //         `${process.env.REACT_APP_API_URL}/workorder/motherEnterMaterial`,
+  //         {
+  //           record_id: `${workOrderNumber}_${item.materialCode}`,
+  //           mwo_number: workOrderNumber,
+  //           material_id: item.materialCode,
+  //           material_desc: item.itemName,
+  //           material_uom: item.itemUom,
+  //           material_wo_qty: item.itemQTY,
+  //           material_bal_qty: item.itemQTY,
+  //           mwo_id: mwoId,
+  //           material_price: item.itemPrice,
+  //           material_rate: item.itemRate,
+  //         },
+  //         {
+  //           headers: {
+  //             Authorization: `${localStorage.getItem("token")}`,
+  //           },
+  //         }
+  //       );
+  //     });
+  //     const responses = await Promise.all(response);
+  //   } catch (error) {
+  //     console.error("Error submitting materials:", error);
+  //     setError("Failed to submit materials");
+  //   }
+  // };
+
   const handleSubmit = async () => {
     const createdBy = localStorage.getItem("username") || "unknown";
-    const createdAt = new Date().toISOString();
-
+    const createdAt = new Date()
+      .toLocaleString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      })
+      .replace(",", "");
     setLoading(true);
+
+    // Construct the request body
+    const requestData = {
+      mwo_number: workOrderNumber,
+      workorder_type: "Fiber",
+      mwo_status: "Pending for approval",
+      gis_code: gisCode,
+      route_name: routeName,
+      route_length: routeLength,
+      homepass_count: homepassCount,
+      activity: activity,
+      type: type,
+      customer_id: selectedCustomerId,
+      execution_city: selectedCity,
+      total_service_cost: totalAmount,
+      total_material_cost: totalMaterialAmount,
+      customer_project_manager: customerProjectManager,
+      customer_name: customerName,
+      customer_state: customerState,
+      customer_approval_date: selectedDate,
+      mwo_approver_email: selectedApproverEmail,
+      mwo_approver_name: approverName,
+      created_by: createdBy,
+      created_at: createdAt,
+      materialRecords: lineItems, // Directly use the material line items
+      serviceRecords: serviceLineItems, // Directly use the service line items
+    };
 
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/workorder/create`,
-        {
-          mwo_number: workOrderNumber,
-          workorder_type: "Fiber",
-          workorder_number: workOrderNumber,
-          workorder_status: "Pending Approval",
-          gis_code: gisCode,
-          route_name: routeName,
-          route_length: routeLength,
-          homepass_count: homepassCount,
-          activity: activity,
-          type: type,
-          customer_id: selectedCustomerId,
-          execution_city: selectedCity,
-          total_service_cost: totalAmount,
-          total_material_cost: totalMaterialAmount,
-          customer_project_manager: customerProjectManager,
-          customer_name: customerName,
-          customer_state: customerState,
-          customer_approval_date: selectedDate,
-          created_by: createdBy,
-          created_at: createdAt,
-        },
+        requestData,
         {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
         }
       );
-      mwoId = response.data;
-      setSuccessPopupOpen(true);
+
+      // Handle success response
+      if (response.status === 201) {
+        setSuccessPopupOpen(true);
+      }
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error submitting data:", error);
       setError("Failed to submit form");
     } finally {
-      setLoading(false); // Set loading to false after API call is finished
-    }
-
-    try {
-      const response = serviceLineItems.map(async (item) => {
-        console.log(serviceLineItems);
-        console.log(item);
-        return await axios.post(
-          `${process.env.REACT_APP_API_URL}/workorder/motherEnterServices`,
-          {
-            record_id: `${workOrderNumber}_${item.serviceId}`,
-            mwo_number: workOrderNumber,
-            service_id: item.serviceId,
-            service_desc: item.serviceDescription,
-            service_uom: item.serviceUOM,
-            service_rate: item.serviceRate,
-            service_wo_qty: item.serviceQTY,
-            service_bal_qty: item.serviceQTY,
-            service_price: item.servicePrice,
-            mwo_id: mwoId,
-          },
-          {
-            headers: {
-              Authorization: `${localStorage.getItem("token")}`,
-            },
-          }
-        );
-      });
-      const responses = await Promise.all(response);
-    } catch (error) {
-      console.error("Error submitting services:", error);
-      setError("Failed to submit services");
-    }
-
-    try {
-      console.log(lineItems);
-      const response = lineItems.map(async (item) => {
-        return await axios.post(
-          `${process.env.REACT_APP_API_URL}/workorder/motherEnterMaterial`,
-          {
-            record_id: `${workOrderNumber}_${item.materialCode}`,
-            mwo_number: workOrderNumber,
-            material_id: item.materialCode,
-            material_desc: item.itemName,
-            material_uom: item.itemUom,
-            material_wo_qty: item.itemQTY,
-            material_bal_qty: item.itemQTY,
-            mwo_id: mwoId,
-            material_price: item.itemPrice,
-            material_rate: item.itemRate,
-          },
-          {
-            headers: {
-              Authorization: `${localStorage.getItem("token")}`,
-            },
-          }
-        );
-      });
-      const responses = await Promise.all(response);
-    } catch (error) {
-      console.error("Error submitting materials:", error);
-      setError("Failed to submit materials");
+      setLoading(false);
     }
   };
 
@@ -578,6 +692,44 @@ const DashboardWhinch = () => {
                   fullWidth
                   value={customerProjectManager}
                   onChange={(e) => setCustomerProjectManager(e.target.value)}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={approvers}
+                  getOptionLabel={(option) => option.approver_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedApproverEmail(
+                      newValue ? newValue.approver_email : null
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Approver Email"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  id="approver-name"
+                  label="Approver Name"
+                  value={approverName}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                    style: {
+                      color: "red",
+                      fontWeight: "bold",
+                    },
+                  }}
+                  fullWidth
                 />
               </Grid>
               <Grid item xs={12}>

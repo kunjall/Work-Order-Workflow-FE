@@ -20,7 +20,7 @@ const DenseTable = () => {
             },
           }
         );
-        console.log(response.data); // Log data to check for workorder_status
+        console.log(response.data); // Log data to check for mwo_status
         setWorkorders(response.data);
       } catch (error) {
         console.log(error);
@@ -54,7 +54,7 @@ const DenseTable = () => {
       ),
     },
     { accessorKey: "workorder_type", header: "Workorder Type" },
-    { accessorKey: "workorder_status", header: "Workorder Status" },
+    { accessorKey: "mwo_status", header: "Workorder Status" },
     { accessorKey: "customer_id", header: "Customer ID" },
     { accessorKey: "gis_code", header: "GIS Code" },
     { accessorKey: "route_name", header: "Route Name" },

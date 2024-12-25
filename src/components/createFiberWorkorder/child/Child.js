@@ -36,11 +36,7 @@ const DashboardWhinch = () => {
 
   const [customerName, setCustomerName] = useState("");
   const [managerOptions, setManagerOptions] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [activity, setActivity] = useState("");
-  const [type, setType] = useState("");
   const [error, setError] = useState(null);
-  const [workOrderNumber, setWorkOrderNumber] = useState("");
   const [cityOptions, setCityOptions] = useState([]);
   const [selectedManager, setSelectedManager] = useState("");
   // const [materialCodes, setMaterialCodes] = useState([]);
@@ -59,6 +55,10 @@ const DashboardWhinch = () => {
   const [motherMaterials, setMotherMaterials] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [approvers, setApprovers] = useState([]);
+  const [selectedApproverEmail, setSelectedApproverEmail] = useState(null);
+  const [approverName, setApproverName] = useState("");
+
   const [serviceLineItems, setServiceLineItems] = useState(
     motherServices.map(() => ({ cwo_qty: "" }))
   );
@@ -160,6 +160,54 @@ const DashboardWhinch = () => {
     fetchCities();
   }, []);
 
+  useEffect(
+    () => {
+      const fetchApprovers = async () => {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=CWO&city=${formData.execution_city}`,
+            {
+              headers: {
+                Authorization: `${localStorage.getItem("token")}`,
+              },
+            }
+          );
+          const reviewerArray = response.data.map((reviewer) => ({
+            id: reviewer.record_id,
+            type: reviewer.type,
+            approver_email: reviewer.approver_email,
+            city: reviewer.city,
+            approver_name: reviewer.approver_name,
+          }));
+          setApprovers(reviewerArray);
+        } catch (err) {
+          console.error("Error fetching reviewer:", err);
+          setError("Failed to load reviewer");
+        }
+      };
+
+      if (formData.execution_city) fetchApprovers();
+    },
+    [formData.execution_city],
+    selectedWorkOrder
+  );
+
+  console.log(approvers);
+
+  useEffect(() => {
+    if (selectedApproverEmail) {
+      console.log(selectedApproverEmail);
+      const selectedReviewer = approvers.find(
+        (reviewer) => reviewer.approver_email === selectedApproverEmail
+      );
+      setApproverName(selectedReviewer ? selectedReviewer.approver_name : "");
+      console.log(approverName);
+    } else {
+      setApproverName("");
+      console.log("test");
+    }
+  }, [selectedApproverEmail, approvers]);
+
   useEffect(() => {
     const fetchWorkOrders = async () => {
       try {
@@ -182,6 +230,7 @@ const DashboardWhinch = () => {
   // Handle work order selection
   const handleWorkOrderSelect = (event, newValue) => {
     if (newValue) {
+      console.log(newValue);
       setSelectedWorkOrder(newValue);
       setFormData({
         mwo_id: newValue.mwo_id,
@@ -201,6 +250,7 @@ const DashboardWhinch = () => {
         customer_project_manager: newValue.customer_project_manager || "",
       });
       setCustomerName(newValue.customer_name);
+      console.log(customerName);
     } else {
       setSelectedVendorId(null);
       setvendorRouteAllocation("");
@@ -224,6 +274,9 @@ const DashboardWhinch = () => {
       setMotherServices([]);
       setMaterialLineItems([]);
       setServiceLineItems([]);
+      setSelectedApproverEmail(null);
+      setApprovers([]);
+      setApproverName(null);
     }
   };
 
@@ -232,6 +285,7 @@ const DashboardWhinch = () => {
     services: false,
     materials: false,
   });
+  console.log(customerName);
 
   useEffect(() => {
     if (!user) {
@@ -274,32 +328,6 @@ const DashboardWhinch = () => {
     fetchVendors();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchMaterial = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/master/find-material?company=${customerName}`,
-  //         {
-  //           headers: {
-  //             Authorization: `${localStorage.getItem("token")}`,
-  //           },
-  //         }
-  //       );
-  //       const materialArray = response.data.map((material) => ({
-  //         id: material.item_id,
-  //         description: material.item_name,
-  //         uom: material.item_uom,
-  //       }));
-  //       setMaterialCodes(materialArray);
-  //     } catch (err) {
-  //       console.error("Error fetching material:", err);
-  //       setError("Failed to load materials");
-  //     }
-  //   };
-
-  //   if (customerName) fetchMaterial();
-  // }, [customerName]);
-
   useEffect(() => {
     if (serviceLineItems.length < 1) {
       setServiceLineItems(
@@ -335,74 +363,48 @@ const DashboardWhinch = () => {
           material_wo_qty: material.material_wo_qty || "",
           material_rate: material.material_rate || "",
           material_cwo_qty: "",
+          material_cwo_price: "",
         }))
       );
     }
   }, [motherMaterials, materialLineItems]);
 
-  // useEffect(() => {
-  //   const fetchServices = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/master/find-service?company=${customerName}`,
-  //         {
-  //           headers: {
-  //             Authorization: `${localStorage.getItem("token")}`,
-  //           },
-  //         }
-  //       );
-  //       const servicesArray = response.data.map((service) => ({
-  //         id: service.service_id,
-  //         description: service.service_description,
-  //         uom: service.service_UOM,
-  //         rate: service.service_rate,
-  //       }));
-  //       setServices(servicesArray);
-  //     } catch (err) {
-  //       console.error("Error fetching services:", err);
-  //       setError("Failed to load services");
-  //     }
-  //   };
-
-  //   if (customerName) fetchServices();
-  // }, [customerName]);
-
   useEffect(() => {
-    if (selectedWorkOrder) {
-      const fetchMotherServices = async () => {
-        try {
-          const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/workorder/find-mother-services`,
-            {
-              params: { mwo_id: formData.mwo_id },
-              headers: { Authorization: `${localStorage.getItem("token")}` },
-            }
-          );
-          setMotherServices(response.data);
-        } catch (err) {
-          console.error("Failed to fetch child services:", err);
-          setError("Failed to load child services");
-        }
-      };
+    const fetchMotherServices = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/workorder/find-mother-services`,
+          {
+            params: { mwo_id: formData.mwo_id },
+            headers: { Authorization: `${localStorage.getItem("token")}` },
+          }
+        );
+        setMotherServices(response.data);
+      } catch (err) {
+        console.error("Failed to fetch child services:", err);
+        setError("Failed to load child services");
+      }
+    };
 
-      const fetchMotherMaterials = async () => {
-        try {
-          const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/workorder/find-mother-material`,
-            {
-              params: {
-                mwo_id: formData.mwo_id, // Ensures cwo_id is a number
-              },
-              headers: { Authorization: `${localStorage.getItem("token")}` },
-            }
-          );
-          setMotherMaterials(response.data);
-        } catch (err) {
-          console.error("Failed to fetch child materials:", err);
-          setError("Failed to load child materials");
-        }
-      };
+    const fetchMotherMaterials = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/workorder/find-mother-material`,
+          {
+            params: {
+              mwo_id: formData.mwo_id, // Ensures cwo_id is a number
+            },
+            headers: { Authorization: `${localStorage.getItem("token")}` },
+          }
+        );
+        setMotherMaterials(response.data);
+      } catch (err) {
+        console.error("Failed to fetch child materials:", err);
+        setError("Failed to load child materials");
+      }
+    };
 
+    if (selectedWorkOrder && formData.mwo_id) {
       fetchMotherMaterials();
       fetchMotherServices();
     }
@@ -440,158 +442,21 @@ const DashboardWhinch = () => {
     }
   }, [formData.execution_city, cityOptions]);
 
-  // const handleSubmit = async () => {
-  //   if (!vendorRouteAllocationError) {
-  //     const createdBy = localStorage.getItem("username") || "unknown";
-  //     const createdAt = new Date().toISOString();
-  //     setModalOpen(true);
-
-  //     // Initialize success flag
-  //     let allRequestsSuccessful = true;
-
-  //     let cwoId; // To store child work order ID for subsequent API calls
-
-  //     try {
-  //       // Step 1: Create child work order
-  //       const response = await axios.post(
-  //         `${process.env.REACT_APP_API_URL}/workorder/createChild`,
-  //         {
-  //           mwo_number: `${formData.mwo_number}`,
-  //           vendor_id: selectedVendorId,
-  //           vendor_route_allocation: vendorRouteAllocation,
-  //           total_service_cost: totalAmount,
-  //           internal_manager: selectedManager,
-  //           execution_city: formData.execution_city,
-  //           workorder_type: formData.workorder_type,
-  //           cwo_number: childWorkOrderNumber,
-  //           total_material_cost: totalMaterialAmount,
-  //         },
-  //         {
-  //           headers: {
-  //             Authorization: `${localStorage.getItem("token")}`,
-  //           },
-  //         }
-  //       );
-  //       cwoId = response.data;
-  //       setStatus((prevStatus) => ({ ...prevStatus, workorder: true }));
-
-  //       // Step 2: Enter materials
-  //       const materialResponses = await Promise.all(
-  //         materialLineItems.map((item) =>
-  //           axios.post(
-  //             `${process.env.REACT_APP_API_URL}/workorder/enterMaterial`,
-  //             {
-  //               record_id: `${childWorkOrderNumber}_${item.material_id}`,
-  //               mwo_number: formData.mwo_number,
-  //               material_id: item.material_id,
-  //               material_desc: item.material_desc,
-  //               material_uom: item.material_uom,
-  //               material_wo_qty: item.cwo_qty,
-  //               material_bal_qty: item.cwo_qty,
-  //               material_rate: item.material_rate,
-  //               material_price: item.material_cwo_price,
-  //               vendor_id: selectedVendorId,
-  //               cwo_id: cwoId,
-  //               cwo_number: childWorkOrderNumber,
-  //             },
-  //             {
-  //               headers: {
-  //                 Authorization: `${localStorage.getItem("token")}`,
-  //               },
-  //             }
-  //           )
-  //         )
-  //       );
-
-  //       setStatus((prevStatus) => ({ ...prevStatus, materials: true }));
-
-  //       // Step 3: Enter services
-  //       const serviceResponses = await Promise.all(
-  //         serviceLineItems.map((item) =>
-  //           axios.post(
-  //             `${process.env.REACT_APP_API_URL}/workorder/enterServices`,
-  //             {
-  //               record_id: `${childWorkOrderNumber}_${item.service_id}`,
-  //               mwo_number: formData.mwo_number,
-  //               service_id: item.service_id,
-  //               service_desc: item.service_desc,
-  //               service_uom: item.service_uom,
-  //               service_wo_qty: item.cwo_qty,
-  //               service_bal_qty: item.cwo_qty,
-  //               service_price: item.service_cwo_price,
-  //               service_rate: item.service_rate,
-  //               vendor_id: selectedVendorId,
-  //               cwo_id: cwoId,
-  //               cwo_number: childWorkOrderNumber,
-  //             },
-  //             {
-  //               headers: {
-  //                 Authorization: `${localStorage.getItem("token")}`,
-  //               },
-  //             }
-  //           )
-  //         )
-  //       );
-
-  //       setStatus((prevStatus) => ({ ...prevStatus, services: true }));
-
-  //       // Step 4: Update material balance
-  //       await Promise.all(
-  //         materialLineItems.map((item) =>
-  //           axios.patch(
-  //             `${process.env.REACT_APP_API_URL}/workorder/update-mother-mat-bal`,
-  //             {
-  //               cwo_qty: item.cwo_qty,
-  //               record_id: `${formData.mwo_number}_${item.material_id}`,
-  //             },
-  //             {
-  //               headers: {
-  //                 Authorization: `${localStorage.getItem("token")}`,
-  //               },
-  //             }
-  //           )
-  //         )
-  //       );
-
-  //       // Step 5: Update service balance
-  //       await Promise.all(
-  //         serviceLineItems.map((item) =>
-  //           axios.patch(
-  //             `${process.env.REACT_APP_API_URL}/workorder/update-mother-service-bal`,
-  //             {
-  //               cwo_qty: item.cwo_qty,
-  //               record_id: `${formData.mwo_number}_${item.service_id}`,
-  //             },
-  //             {
-  //               headers: {
-  //                 Authorization: `${localStorage.getItem("token")}`,
-  //               },
-  //             }
-  //           )
-  //         )
-  //       );
-
-  //       // If all API requests are successful, set success state
-  //       setSuccess(true);
-  //     } catch (error) {
-  //       // If any API request fails, handle the rollback
-  //       console.error("Error occurred during the transaction:", error);
-  //       setError("Transaction failed, rolling back.");
-  //       setModalOpen(true);
-  //       setSuccess(false);
-
-  //       // Here you can add any logic to undo or reset previous changes if required
-  //       // e.g., reset previous state, call an API to cancel changes, etc.
-  //     }
-  //   }
-  // };
-
   const handleSubmit = async () => {
     const createdBy = localStorage.getItem("username") || "unknown";
-    const createdAt = new Date().toISOString();
+    const createdAt = new Date().toLocaleString("en-US", {
+      day: "2-digit",
+      month: "short", // e.g., "Dec"
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // AM/PM format
+      timeZone: "IST", // Adjust to UTC
+    });
 
     // Construct the request body
     const requestData = {
+      mwo_id: formData.mwo_id,
       mwo_number: formData.mwo_number,
       vendor_id: selectedVendorId,
       vendor_route_allocation: vendorRouteAllocation,
@@ -604,7 +469,11 @@ const DashboardWhinch = () => {
       materialItems: materialLineItems, // Array of material line items
       serviceItems: serviceLineItems, // Array of service line items
       created_by: createdBy,
+      cwo_approver_email: selectedApproverEmail,
+      cwo_approver_name: approverName,
       created_at: createdAt,
+      customer_name: customerName,
+      cwo_status: "Pending for approval",
     };
 
     try {
@@ -657,7 +526,7 @@ const DashboardWhinch = () => {
               <Grid item xs={12} sm={6} md={2}>
                 <Autocomplete
                   options={workOrders}
-                  getOptionLabel={(option) => "MWO_" + option.mwo_id.toString()} // Display mwo_id as a string
+                  getOptionLabel={(option) => "MWO-" + option.mwo_id.toString()} // Display mwo_id as a string
                   onChange={handleWorkOrderSelect}
                   isOptionEqualToValue={
                     (option, value) =>
@@ -905,6 +774,44 @@ const DashboardWhinch = () => {
                       step: 1,
                     },
                   }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={4}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={approvers}
+                  getOptionLabel={(option) => option.approver_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedApproverEmail(
+                      newValue ? newValue.approver_email : null
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Approver Email"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Grid>
+
+              <Grid item xs={12} sm={6} md={4}>
+                <TextField
+                  id="approver-name"
+                  label="Approver Name"
+                  value={approverName}
+                  variant="outlined"
+                  InputProps={{
+                    readOnly: true,
+                    style: {
+                      color: "red",
+                      fontWeight: "bold",
+                    },
+                  }}
+                  fullWidth
                 />
               </Grid>
               <Grid item xs={12}>

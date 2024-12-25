@@ -1,7 +1,9 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-import DashboardRequests from "../components/dashboard/dashboardRequests";
+import DashboardRequests from "../components/dashboard/Inventory/dashboardRequestsInventory";
+import DashboardRequestsMwo from "../components/dashboard/MWO/dashboardRequestsMwo";
+import DashboardRequestsCwo from "../components/dashboard/CWO/dashboardRequestsCwo";
 import CachedIcon from "@mui/icons-material/Cached";
 import { Box, lighten, Typography, Button, IconButton } from "@mui/material";
 
@@ -23,9 +25,10 @@ const Requests = () => {
       case "Inventory":
         return <DashboardRequests key={refreshKey} />; // Current inventory component
       case "MWO":
-        return "mwo";
+        // return <DashboardRequestsMwo key={refreshKey} />;
+        return <DashboardRequestsMwo key={refreshKey} />;
       case "CWO":
-        return "CWO";
+        return <DashboardRequestsCwo key={refreshKey} />;
       default:
         return null;
     }
