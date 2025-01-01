@@ -289,111 +289,61 @@ const InventoryInward = () => {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
-    const entryDateFormatted = dayjs(entryDate)
-      .tz("Asia/Kolkata")
-      .format("MMM DD, YYYY, HH:mm")
-      .toLocaleString("en-US", {
-        day: "2-digit",
-        month: "short", // e.g., "Dec"
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false, // AM/PM format
-        timeZone: "IST", // Adjust to UTC
-      });
 
-    const dcDateformatted = dayjs(dcDate)
-      .tz("Asia/Kolkata")
-      .format("MMM DD, YYYY, HH:mm")
-      .toLocaleString("en-US", {
-        day: "2-digit",
-        month: "short", // e.g., "Dec"
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false, // AM/PM format
-        timeZone: "IST",
-      });
+    const formatDate = (date) =>
+      dayjs(date).tz("Asia/Kolkata").format("MMM DD, YYYY, HH:mm");
 
-    const mrsDateFormatted = dayjs(mrsDate)
-      .tz("Asia/Kolkata")
-      .format("MMM DD, YYYY, HH:mm")
-      .toLocaleString("en-US", {
-        day: "2-digit",
-        month: "short", // e.g., "Dec"
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false, // AM/PM format
-        timeZone: "IST",
-      });
+    const entryDateFormatted = formatDate(entryDate);
+    const dcDateFormatted = formatDate(dcDate);
+    const mrsDateFormatted = formatDate(mrsDate);
+
     try {
+      // Prepare materials array for the new backend structure
+      const materials = lineItems.map((item) => ({
+        material_id: item.materialCode,
+        material_desc: item.itemName,
+        material_uom: item.itemUom,
+        material_wo_qty: item.itemQTY,
+      }));
+
+      const payload = {
+        customer_dc_number: deliveryChallanNumber,
+        customer_id: selectedCustomerId,
+        customer_name: customerName,
+        client_warehouse_id: selectedClientWarehouseId,
+        client_warehouse_city: clientWarehouseState,
+        warehouse_id: selectedWarehouseId,
+        warehouse_city: warehouseState,
+        entry_date: entryDateFormatted,
+        dc_date: dcDateFormatted,
+        eway_bill_number: eWayBillNumber,
+        mrs_number: MRSNumber,
+        mrs_date: mrsDateFormatted,
+        inventory_inward_status: "Pending for receipt",
+        created_by: createdBy,
+        created_at: createdAt,
+        inventory_receiver_email: selectedReviewerEmail,
+        inventory_receiver_name: reviewerName,
+        materials, // Pass materials array
+      };
+
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/inventory/create`,
-        {
-          customer_dc_number: deliveryChallanNumber,
-          customer_id: selectedCustomerId,
-          customer_name: customerName,
-          client_warehouse_id: selectedClientWarehouseId,
-          client_warehouse_city: clientWarehouseState,
-          warehouse_id: selectedWarehouseId,
-          warehouse_city: warehouseState,
-          entry_date: entryDateFormatted,
-          dc_date: dcDateformatted,
-          eway_bill_number: eWayBillNumber,
-          mrs_number: MRSNumber,
-          mrs_date: mrsDateFormatted,
-          inventory_inward_status: "Pending for receipt",
-          created_by: createdBy,
-          created_at: createdAt,
-          inventory_receiver_email: selectedReviewerEmail,
-          inventory_receiver_name: reviewerName,
-        },
+        `${process.env.REACT_APP_API_URL}/inventory/create`, // Updated endpoint
+        payload,
         {
           headers: {
             Authorization: `${localStorage.getItem("token")}`,
           },
         }
       );
-      inventoryId = response.data;
-      console.log("Inventory ID:", inventoryId);
-      console.log("Create Response:", response.data);
+
+      console.log("Transaction Response:", response.data);
     } catch (error) {
-      console.error("Error creating child workorder:", error);
-      // Handle error appropriately
-    }
-    try {
-      // Ensure the lineItems are mapped and awaited correctly
-      const responses = await Promise.all(
-        lineItems.map(async (item) => {
-          console.log("Sending inventory_id:", inventoryId); // Log to ensure inventoryId is being passed
-          const response = await axios.post(
-            `${process.env.REACT_APP_API_URL}/inventory/enterMaterial`,
-            {
-              record_id: `${deliveryChallanNumber}_${item.materialCode}`,
-              customer_dc_number: deliveryChallanNumber,
-              material_id: item.materialCode,
-              material_desc: item.itemName,
-              material_uom: item.itemUom,
-              material_wo_qty: item.itemQTY,
-              inventory_id: inventoryId, // Ensure inventoryId is being passed
-            },
-            {
-              headers: {
-                Authorization: `${localStorage.getItem("token")}`,
-              },
-            }
-          );
-          return response; // Return the response so Promise.all can capture it
-        })
-      );
-      console.log("All material responses:", responses);
-    } catch (error) {
-      console.error("Error submitting materials:", error);
-      setError("Failed to submit materials");
+      console.error("Error submitting inventory transaction:", error);
+      setError("Failed to submit inventory transaction");
     }
   };
 

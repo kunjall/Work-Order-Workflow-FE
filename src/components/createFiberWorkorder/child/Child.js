@@ -102,6 +102,7 @@ const DashboardWhinch = () => {
     homepass_count: "",
     activity: "",
     execution_city: "",
+    state: "",
     customer_approval_date: null,
     customer_project_manager: "",
   });
@@ -119,8 +120,12 @@ const DashboardWhinch = () => {
           }
         );
 
+        const filteredCities = response.data.filter(
+          (city) => city.company === "The Pinnacle Search"
+        );
+
         // Group cities by their name and merge manager lists
-        const cityMap = response.data.reduce((acc, city) => {
+        const cityMap = filteredCities.reduce((acc, city) => {
           const cityName = city.city_name;
           const managers = Array.isArray(city.manager_name)
             ? city.manager_name.map((name) => name.trim())
@@ -158,7 +163,7 @@ const DashboardWhinch = () => {
     };
 
     fetchCities();
-  }, []);
+  }, [selectedWorkOrder]);
 
   useEffect(
     () => {
@@ -192,19 +197,14 @@ const DashboardWhinch = () => {
     selectedWorkOrder
   );
 
-  console.log(approvers);
-
   useEffect(() => {
     if (selectedApproverEmail) {
-      console.log(selectedApproverEmail);
       const selectedReviewer = approvers.find(
         (reviewer) => reviewer.approver_email === selectedApproverEmail
       );
       setApproverName(selectedReviewer ? selectedReviewer.approver_name : "");
-      console.log(approverName);
     } else {
       setApproverName("");
-      console.log("test");
     }
   }, [selectedApproverEmail, approvers]);
 
@@ -230,7 +230,6 @@ const DashboardWhinch = () => {
   // Handle work order selection
   const handleWorkOrderSelect = (event, newValue) => {
     if (newValue) {
-      console.log(newValue);
       setSelectedWorkOrder(newValue);
       setFormData({
         mwo_id: newValue.mwo_id,
@@ -244,13 +243,13 @@ const DashboardWhinch = () => {
         homepass_count: newValue.homepass_count || "",
         activity: newValue.activity || "",
         execution_city: newValue.execution_city || "",
+        state: newValue.state || "",
         customer_approval_date: newValue.customer_approval_date
           ? dayjs(newValue.customer_approval_date)
           : null,
         customer_project_manager: newValue.customer_project_manager || "",
       });
       setCustomerName(newValue.customer_name);
-      console.log(customerName);
     } else {
       setSelectedVendorId(null);
       setvendorRouteAllocation("");
@@ -267,6 +266,7 @@ const DashboardWhinch = () => {
         homepass_count: "",
         activity: "",
         execution_city: "",
+        state: "",
         customer_approval_date: null,
         customer_project_manager: "",
       });
@@ -285,7 +285,6 @@ const DashboardWhinch = () => {
     services: false,
     materials: false,
   });
-  console.log(customerName);
 
   useEffect(() => {
     if (!user) {
@@ -462,7 +461,9 @@ const DashboardWhinch = () => {
       vendor_route_allocation: vendorRouteAllocation,
       total_service_cost: totalAmount,
       internal_manager: selectedManager,
+      route_name: formData.route_name,
       execution_city: formData.execution_city,
+      state: formData.state,
       workorder_type: formData.workorder_type,
       cwo_number: childWorkOrderNumber,
       total_material_cost: totalMaterialAmount,
@@ -473,6 +474,7 @@ const DashboardWhinch = () => {
       cwo_approver_name: approverName,
       created_at: createdAt,
       customer_name: customerName,
+      vendor_name: vendorName,
       cwo_status: "Pending for approval",
     };
 
@@ -637,6 +639,16 @@ const DashboardWhinch = () => {
                   disabled
                   label="Execution City"
                   value={formData.execution_city}
+                  InputProps={{ readOnly: true }}
+                  variant="outlined"
+                  fullWidth
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={2}>
+                <TextField
+                  disabled
+                  label="Execution State"
+                  value={formData.state}
                   InputProps={{ readOnly: true }}
                   variant="outlined"
                   fullWidth

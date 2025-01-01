@@ -28,6 +28,7 @@ import {
   DialogTitle,
   CircularProgress,
   Divider,
+  Container,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -66,6 +67,7 @@ const DashboardWhinch = () => {
   const [approvers, setApprovers] = useState([]);
   const [selectedApproverEmail, setSelectedApproverEmail] = useState(null);
   const [approverName, setApproverName] = useState("");
+  const [selectedState, setSelectedState] = useState("");
 
   let mwoId = null;
 
@@ -149,6 +151,7 @@ const DashboardWhinch = () => {
               cityName: cityName,
               managerNames: new Set(managers), // Use a Set to ensure uniqueness
               type: city.type,
+              state: city.state,
             };
           } else {
             // Merge managers into the existing Set
@@ -305,6 +308,20 @@ const DashboardWhinch = () => {
   const handleLineItemsUpdate = (updatedLineItems) => {
     setLineItems(updatedLineItems);
   };
+
+  const handleCityChange = (event) => {
+    const cityName = event.target.value;
+    setSelectedCity(cityName);
+
+    // Find the state corresponding to the selected city
+    const city = cityOptions.find((c) => c.cityName === cityName);
+    if (city) {
+      setSelectedState(city.state);
+    } else {
+      setSelectedState(""); // Clear state if no city matches
+    }
+  };
+
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -458,6 +475,7 @@ const DashboardWhinch = () => {
       mwo_approver_name: approverName,
       created_by: createdBy,
       created_at: createdAt,
+      state: selectedState,
       materialRecords: lineItems, // Directly use the material line items
       serviceRecords: serviceLineItems, // Directly use the service line items
     };
@@ -501,243 +519,303 @@ const DashboardWhinch = () => {
             <Typography color="error">{error}</Typography>
           ) : (
             <Grid container spacing={2}>
-              <Grid item xs={12} sm={6} md={2}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-demo"
-                  options={customers}
-                  getOptionLabel={(option) => option.id.toString()}
-                  onChange={(event, newValue) => {
-                    setSelectedCustomerId(newValue ? newValue.id : null);
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Select Customer ID"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField
-                  id="customer-name"
-                  label="Customer Name"
-                  value={customerName}
-                  variant="outlined"
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField
-                  id="customer-state"
-                  label="Customer State"
-                  value={customerState}
-                  variant="outlined"
-                  InputProps={{
-                    readOnly: true,
-                  }}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={6}>
-                <TextField
-                  id="work-order-number"
-                  label="Customer W/O Number"
-                  variant="outlined"
-                  fullWidth
-                  value={workOrderNumber}
-                  onChange={(e) => setWorkOrderNumber(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={1}>
-                <TextField
-                  id="gis-code"
-                  label="GIS Code"
-                  variant="outlined"
-                  fullWidth
-                  value={gisCode}
-                  onChange={(e) => setGisCode(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel id="execution-city-label">
-                    Execution City
-                  </InputLabel>
-                  <Select
-                    labelId="execution-city-label"
-                    id="execution-city"
-                    value={selectedCity}
-                    onChange={(event) => setSelectedCity(event.target.value)}
-                    label="Execution City"
-                  >
-                    {cityOptions.map((city) => (
-                      <MenuItem key={city.cityManagerId} value={city.cityName}>
-                        {city.cityName}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={5}>
-                <TextField
-                  id="route-name"
-                  label="Route Name"
-                  variant="outlined"
-                  fullWidth
-                  value={routeName}
-                  onChange={(e) => setRouteName(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField
-                  id="route-length"
-                  label="Route Length (m)"
-                  variant="outlined"
-                  type="number"
-                  fullWidth
-                  value={routeLength}
-                  onChange={(e) => setRouteLength(e.target.value)}
-                  InputProps={{
-                    inputProps: {
-                      min: 0,
-                      step: 1,
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField
-                  id="homepass-count"
-                  label="Homepass Count"
-                  variant="outlined"
-                  type="number"
-                  fullWidth
-                  value={homepassCount}
-                  onChange={(e) => setHomepassCount(e.target.value)}
-                  InputProps={{
-                    inputProps: {
-                      min: 0,
-                      step: 1,
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={1}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel id="dropdown-label">Activity</InputLabel>
-                  <Select
-                    labelId="activity-label"
-                    id="activity"
-                    value={activity}
-                    onChange={(event) => setActivity(event.target.value)}
-                    label="Activity"
-                  >
-                    <MenuItem value="FTTH">FTTH</MenuItem>
-                    <MenuItem value="OSP">OSP</MenuItem>
-                    <MenuItem value="FF">FF</MenuItem>
-                    <MenuItem value="LM">LM</MenuItem>
-                    <MenuItem value="FTTB">FTTB</MenuItem>
-                    <MenuItem value="OH">OH</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={1}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel id="dropdown-label">Type</InputLabel>
-                  <Select
-                    labelId="type-label"
-                    id="type"
-                    value={type}
-                    onChange={(event) => setType(event.target.value)}
-                    label="Type"
-                  >
-                    <MenuItem value="Flatbed">Flatbed</MenuItem>
-                    <MenuItem value="IBW">IBW</MenuItem>
-                    <MenuItem value="OH">OH</MenuItem>
-                    <MenuItem value="OSP">OSP</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    label="CUST Approval Date"
-                    value={selectedDate}
-                    onChange={(newValue) => setSelectedDate(newValue)}
-                    renderInput={(params) => (
+              {/* Sticky container for fields from customer to approver_name */}
+              <Grid
+                item
+                xs={12}
+                sx={{
+                  position: "sticky",
+                  top: 0,
+                  backgroundColor: "white",
+                  zIndex: 10,
+                }}
+              >
+                <Box sx={{ borderBottom: "1px solid #ddd", padding: 2 }}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={2}>
+                      <Autocomplete
+                        disablePortal
+                        id="combo-box-demo"
+                        options={customers}
+                        getOptionLabel={(option) => option.id.toString()}
+                        onChange={(event, newValue) => {
+                          setSelectedCustomerId(newValue ? newValue.id : null);
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Select Customer ID"
+                            variant="outlined"
+                            fullWidth
+                            InputProps={{
+                              ...params.InputProps,
+                              sx: { height: 40 }, // Adjust height for input box
+                            }}
+                            InputLabelProps={{
+                              sx: { fontSize: "14px", top: "-5px" }, // Adjust label position and font size
+                            }}
+                          />
+                        )}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
                       <TextField
-                        {...params}
+                        id="customer-name"
+                        label="Customer Name"
+                        value={customerName}
+                        variant="outlined"
+                        InputProps={{
+                          readOnly: true,
+                          sx: { height: 40 },
+                        }}
+                        InputLabelProps={{
+                          sx: { fontSize: "14px", top: "-5px" }, // Adjust label position and font size
+                        }}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
+                      <TextField
+                        id="customer-state"
+                        label="Customer State"
+                        value={customerState}
+                        variant="outlined"
+                        InputProps={{
+                          readOnly: true,
+                          sx: { height: 40 },
+                        }}
+                        InputLabelProps={{
+                          sx: { fontSize: "14px", top: "-5px" }, // Adjust label position and font size
+                        }}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                      <TextField
+                        id="work-order-number"
+                        label="Customer W/O Number"
                         variant="outlined"
                         fullWidth
+                        value={workOrderNumber}
+                        onChange={(e) => setWorkOrderNumber(e.target.value)}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={1}>
+                      <TextField
+                        id="gis-code"
+                        label="GIS Code"
+                        variant="outlined"
+                        fullWidth
+                        value={gisCode}
+                        InputProps={{
+                          sx: { height: 40 },
+                        }}
                         InputLabelProps={{
-                          shrink: true,
+                          sx: { fontSize: "14px", top: "-5px" }, // Adjust label position and font size
+                        }}
+                        onChange={(e) => setGisCode(e.target.value)}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
+                      <FormControl variant="outlined" fullWidth>
+                        <InputLabel id="execution-city-label">
+                          Execution City
+                        </InputLabel>
+                        <Select
+                          labelId="execution-city-label"
+                          id="execution-city"
+                          value={selectedCity}
+                          onChange={handleCityChange}
+                          label="Execution City"
+                        >
+                          {cityOptions.map((city) => (
+                            <MenuItem
+                              key={city.cityManagerId}
+                              value={city.cityName}
+                            >
+                              {city.cityName}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
+                      <TextField
+                        id="state"
+                        label="State"
+                        variant="outlined"
+                        fullWidth
+                        disabled
+                        value={selectedState}
+                        InputProps={{
+                          readOnly: true,
                         }}
                       />
-                    )}
-                    format="DD/MM/YYYY"
-                  />
-                </LocalizationProvider>
-              </Grid>
-              <Grid item xs={12} sm={6} md={2}>
-                <TextField
-                  id="customer-project-manager"
-                  label="Customer Project Manager"
-                  variant="outlined"
-                  fullWidth
-                  value={customerProjectManager}
-                  onChange={(e) => setCustomerProjectManager(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-demo"
-                  options={approvers}
-                  getOptionLabel={(option) => option.approver_email.toString()}
-                  onChange={(event, newValue) => {
-                    setSelectedApproverEmail(
-                      newValue ? newValue.approver_email : null
-                    );
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Approver Email"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={5}>
+                      <TextField
+                        id="route-name"
+                        label="Route Name"
+                        variant="outlined"
+                        fullWidth
+                        value={routeName}
+                        onChange={(e) => setRouteName(e.target.value)}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
+                      <TextField
+                        id="route-length"
+                        label="Route Length (m)"
+                        variant="outlined"
+                        type="number"
+                        fullWidth
+                        value={routeLength}
+                        onChange={(e) => setRouteLength(e.target.value)}
+                        InputProps={{
+                          inputProps: {
+                            min: 0,
+                            step: 1,
+                          },
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
+                      <TextField
+                        id="homepass-count"
+                        label="Homepass Count"
+                        variant="outlined"
+                        type="number"
+                        fullWidth
+                        value={homepassCount}
+                        onChange={(e) => setHomepassCount(e.target.value)}
+                        InputProps={{
+                          inputProps: {
+                            min: 0,
+                            step: 1,
+                          },
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={1}>
+                      <FormControl variant="outlined" fullWidth>
+                        <InputLabel id="dropdown-label">Activity</InputLabel>
+                        <Select
+                          labelId="activity-label"
+                          id="activity"
+                          value={activity}
+                          onChange={(event) => setActivity(event.target.value)}
+                          label="Activity"
+                        >
+                          <MenuItem value="FTTH">FTTH</MenuItem>
+                          <MenuItem value="OSP">OSP</MenuItem>
+                          <MenuItem value="FF">FF</MenuItem>
+                          <MenuItem value="LM">LM</MenuItem>
+                          <MenuItem value="FTTB">FTTB</MenuItem>
+                          <MenuItem value="OH">OH</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={1}>
+                      <FormControl variant="outlined" fullWidth>
+                        <InputLabel id="dropdown-label">Type</InputLabel>
+                        <Select
+                          labelId="type-label"
+                          id="type"
+                          value={type}
+                          onChange={(event) => setType(event.target.value)}
+                          label="Type"
+                        >
+                          <MenuItem value="Flatbed">Flatbed</MenuItem>
+                          <MenuItem value="IBW">IBW</MenuItem>
+                          <MenuItem value="OH">OH</MenuItem>
+                          <MenuItem value="OSP">OSP</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          label="CUST Approval Date"
+                          value={selectedDate}
+                          onChange={(newValue) => setSelectedDate(newValue)}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              variant="outlined"
+                              fullWidth
+                              InputLabelProps={{
+                                shrink: true,
+                              }}
+                            />
+                          )}
+                          format="DD/MM/YYYY"
+                        />
+                      </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={2}>
+                      <TextField
+                        id="customer-project-manager"
+                        label="Customer Project Manager"
+                        variant="outlined"
+                        fullWidth
+                        value={customerProjectManager}
+                        onChange={(e) =>
+                          setCustomerProjectManager(e.target.value)
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Autocomplete
+                        disablePortal
+                        id="combo-box-demo"
+                        options={approvers}
+                        getOptionLabel={(option) =>
+                          option.approver_email.toString()
+                        }
+                        onChange={(event, newValue) => {
+                          setSelectedApproverEmail(
+                            newValue ? newValue.approver_email : null
+                          );
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Approver Email"
+                            variant="outlined"
+                            fullWidth
+                          />
+                        )}
+                      />
+                    </Grid>
+
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        id="approver-name"
+                        label="Approver Name"
+                        value={approverName}
+                        variant="outlined"
+                        InputProps={{
+                          readOnly: true,
+                          style: {
+                            color: "red",
+                            fontWeight: "bold",
+                          },
+                        }}
+                        fullWidth
+                      />
+                    </Grid>
+                  </Grid>
+                </Box>
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4}>
-                <TextField
-                  id="approver-name"
-                  label="Approver Name"
-                  value={approverName}
-                  variant="outlined"
-                  InputProps={{
-                    readOnly: true,
-                    style: {
-                      color: "red",
-                      fontWeight: "bold",
-                    },
-                  }}
-                  fullWidth
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <Divider
-                // style={{ backgroundColor: "#EC7C30", height: "4px" }}
-                />
-              </Grid>
-              <Grid item xs={12}>
+              {/* Scrollable content below */}
+              <Grid
+                item
+                xs={12}
+                sx={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}
+              >
+                <Divider />
                 <Box
                   sx={{
                     display: "flex",
@@ -794,6 +872,8 @@ const DashboardWhinch = () => {
             </Grid>
           )}
         </Box>
+
+        {/* Success Dialog */}
         <Dialog open={successPopupOpen} onClose={handlePopupClose}>
           <DialogTitle>Success</DialogTitle>
           <DialogContent>

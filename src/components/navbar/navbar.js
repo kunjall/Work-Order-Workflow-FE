@@ -9,6 +9,9 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import PendingActionsIcon from "@mui/icons-material/PendingActions";
+import RouterIcon from "@mui/icons-material/Router";
+import WarehouseIcon from "@mui/icons-material/Warehouse";
 
 const Navbar = () => {
   const { user } = useContext(AuthContext);
@@ -36,7 +39,7 @@ const Navbar = () => {
                   }}
                 >
                   <span style={{ marginRight: "8px" }}>
-                    <ReceiptLongIcon />
+                    <PendingActionsIcon />
                   </span>
                   <span>Actions</span>
                 </Link>
@@ -51,7 +54,7 @@ const Navbar = () => {
                   }}
                 >
                   <span style={{ marginRight: "8px" }}>
-                    <ReceiptLongIcon />
+                    <WarehouseIcon />
                   </span>
                   <span>Inventory Inward</span>
                 </Link>
@@ -81,24 +84,9 @@ const Navbar = () => {
                   }}
                 >
                   <span style={{ marginRight: "8px" }}>
-                    <FolderOpenIcon />
+                    <RouterIcon />
                   </span>
                   <span>Create CWO</span>
-                </Link>
-              </li>
-              <li style={{ fontSize: "16x" }}>
-                <Link
-                  to="/locator"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/bin"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <FolderOpenIcon />
-                  </span>
-                  <span>Locator</span>
                 </Link>
               </li>
               <li style={{ fontSize: "16x" }}>
@@ -107,15 +95,31 @@ const Navbar = () => {
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    ...getActiveStyle("/bin"),
+                    ...getActiveStyle("/MRS"),
                   }}
                 >
                   <span style={{ marginRight: "8px" }}>
                     <LocalShippingIcon />
                   </span>
-                  <span>MRS</span>
+                  <span>MM</span>
                 </Link>
               </li>
+              <li style={{ fontSize: "16x" }}>
+                <Link
+                  to="/locator"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    ...getActiveStyle("/locator"),
+                  }}
+                >
+                  <span style={{ marginRight: "8px" }}>
+                    <FolderOpenIcon />
+                  </span>
+                  <span>Locator</span>
+                </Link>
+              </li>
+
               <li style={{ fontSize: "16px" }}>
                 <Link
                   to="/repository"
