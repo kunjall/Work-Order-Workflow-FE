@@ -36,7 +36,7 @@ const ChildRepo = () => {
           `${process.env.REACT_APP_API_URL}/master/find-vendors`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -60,7 +60,7 @@ const ChildRepo = () => {
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/workorder/find-child-workorder`,
           {
-            headers: { Authorization: `${localStorage.getItem("token")}` },
+            headers: { Authorization: user.authToken },
           }
         );
         setWorkOrders(response.data);
@@ -79,7 +79,7 @@ const ChildRepo = () => {
             `${process.env.REACT_APP_API_URL}/workorder/find-child-services`,
             {
               params: { cwo_id: selectedWorkOrder.cwo_id },
-              headers: { Authorization: `${localStorage.getItem("token")}` },
+              headers: { Authorization: user.authToken },
             }
           );
           setChildServices(response.data);
@@ -98,7 +98,7 @@ const ChildRepo = () => {
               params: {
                 cwo_id: selectedWorkOrder.cwo_id, // Ensures cwo_id is a number
               },
-              headers: { Authorization: `${localStorage.getItem("token")}` },
+              headers: { Authorization: user.authToken },
             }
           );
           setChildMaterials(response.data);

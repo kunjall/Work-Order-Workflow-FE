@@ -39,7 +39,7 @@ const DashboardWhinch = () => {
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/workorder/find-workorder`,
           {
-            headers: { Authorization: `${localStorage.getItem("token")}` },
+            headers: { Authorization: user.authToken },
           }
         );
         setWorkOrders(response.data);

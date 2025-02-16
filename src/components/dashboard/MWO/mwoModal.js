@@ -46,6 +46,9 @@ const MwoModal = ({
   handleReject,
   mwoStatus,
   username,
+  setSelectedApproverEmail,
+  approvers,
+  setApproverName,
 }) => {
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
@@ -62,7 +65,9 @@ const MwoModal = ({
   const isActionAllowed =
     mwoStatus.toLowerCase().includes("pending") &&
     rowData &&
-    rowData.created_by !== username;
+    rowData.created_by !== username &&
+    (mwoStatus.toLowerCase() !== "pending for approval" ||
+      username === rowData.mwo_approver_email);
 
   const handleApproveButton = () => {
     if (!isActionAllowed) return;
@@ -211,6 +216,54 @@ const MwoModal = ({
               </TableContainer>
             ) : (
               <Typography>No services available.</Typography>
+            )}
+            {mwoStatus.toLowerCase().includes("deployment head") && (
+              <Box sx={{ marginTop: "16px" }}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={approvers}
+                  getOptionLabel={(option) => option.approver_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedApproverEmail(
+                      newValue ? newValue.approver_email : null
+                    );
+                    setApproverName(newValue ? newValue.approver_name : "");
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Head row"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+            )}
+            {mwoStatus.toLowerCase().includes("row") && (
+              <Box sx={{ marginTop: "16px" }}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={approvers}
+                  getOptionLabel={(option) => option.approver2_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedApproverEmail(
+                      newValue ? newValue.approver2_email : null
+                    );
+                    setApproverName(newValue ? newValue.approver2_name : "");
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Billing Spoc"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
             )}
 
             <Box sx={{ mt: 3 }}>

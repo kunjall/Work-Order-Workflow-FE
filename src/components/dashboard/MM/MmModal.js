@@ -41,11 +41,11 @@ const formatDate = (isoDateString) => {
   }).format(date);
 };
 
-const InventoryModal = ({
+const MmModal = ({
   open,
   onClose,
   rowData,
-  inventoryMaterial,
+  mmMaterial,
   setComment,
   comment,
   handleApprove,
@@ -53,9 +53,11 @@ const InventoryModal = ({
   setSelectedApproverEmail,
   approvers,
   setApproverName,
-  inventoryStatus,
+  mmStatus,
   username,
+  handleProvidedQtyChange,
 }) => {
+  console.log(mmMaterial);
   // Function to determine styles based on the status
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
@@ -77,23 +79,43 @@ const InventoryModal = ({
     return {
       backgroundColor: "gray",
       color: "white",
-    };
+    }; // Default style
   };
 
-  const statusStyles = getStatusStyles(inventoryStatus);
+  const statusStyles = getStatusStyles(mmStatus);
 
   const isActionAllowed =
-    inventoryStatus.toLowerCase().includes("pending") &&
+    mmStatus.toLowerCase().includes("pending") &&
     rowData &&
-    username !== rowData.created_by &&
-    (inventoryStatus.toLowerCase() !== "pending for approval" ||
-      username === rowData.inventory_approver_email);
+    rowData.requested_by !== username &&
+    ((mmStatus.toLowerCase().includes("pending with deployment head") &&
+      username === rowData?.mm_approver1_email) ||
+      (mmStatus.toLowerCase().includes("pending with material incharge") &&
+        username === rowData?.mm_approver2_email) ||
+      (mmStatus.toLowerCase().includes("pending with material head") &&
+        username === rowData?.mm_approver3_email));
 
   const handleApproveButton = () => {
-    if (!isActionAllowed) return;
-    console.log(comment);
-    handleApprove();
-    onClose();
+    //   const lowerCaseStatus = mmStatus.toLowerCase();
+
+    // // Check if username should match specific approver emails based on status
+    // const isApproverAllowed =
+    //   (lowerCaseStatus.includes("pending with deployment head") &&
+    //     username === rowData?.mm_approver1_email) ||
+    //   (lowerCaseStatus.includes("pending with material incharge") &&
+    //     username === rowData?.mm_approver2_email) ||
+    //   (lowerCaseStatus.includes("pending with material head") &&
+    //     username === rowData?.mm_approver3_email);
+    if (
+      (mmStatus.includes("acknowledgement") &&
+        username === rowData.requested_by) ||
+      isActionAllowed
+    ) {
+      handleApprove(); // Call the approve function
+      onClose(); // Close the modal or form
+    } else {
+      return; // Do nothing if action is not allowed
+    }
   };
 
   const handleRejectButton = () => {
@@ -118,7 +140,7 @@ const InventoryModal = ({
           }}
         >
           <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-            {inventoryStatus}
+            {mmStatus}
           </Typography>
         </Box>
 
@@ -134,30 +156,14 @@ const InventoryModal = ({
               <Grid container spacing={3}>
                 {[
                   "customer_name",
-
-                  "inventory_id",
-                  "client_warehouse_city",
-                  "customer_dc_number",
-                  "dc_date",
-                  "warehouse_id",
-                  "warehouse_city",
-
-                  "created_by",
-                  "created_at",
-                  "inventory_inward_status",
-
-                  "received_by",
-                  "received_at",
-                  "receiver_comments",
-                  "approved_by",
-                  "approved_at",
-                  "approver_comments",
+                  "locator_name",
+                  "mm_status",
+                  "requested_by",
+                  "requested_at",
 
                   ...Object.keys(rowData).filter(
                     (key) =>
                       ![
-                        "inventory_id",
-                        "customer_dc_number",
                         "customer_id",
                         "customer_name",
                         "warehouse_id",
@@ -167,25 +173,18 @@ const InventoryModal = ({
                         "eway_bill_number",
                         "mrs_number",
                         "mrs_date",
-                        "client_warehouse_id",
-                        "client_warehouse_city",
-                        "inventory_inward_status",
-                        "created_by",
-                        "created_at",
+                        "requested_by",
+                        "requested_at",
                         "received_by",
                         "received_at",
                         "receiver_comments",
                         "approved_by",
                         "approved_at",
                         "approver_comments",
-                        "inventory_approver_name",
-                        "inventory_receiver_email",
-                        "inventory_receiver_name",
-                        "inventory_approver_email",
                       ].includes(key)
                   ), // Include remaining keys not in the explicit order
                 ].map((key) => (
-                  <Grid item xs={4} key={key}>
+                  <Grid item xs={6} key={key}>
                     <Typography
                       variant="body2"
                       color="purple"
@@ -227,24 +226,67 @@ const InventoryModal = ({
             >
               Materials Inward
             </Typography>
-            {inventoryMaterial && inventoryMaterial.length > 0 ? (
-              <TableContainer component={Paper} sx={{ maxHeight: "400px" }}>
+            {mmMaterial && mmMaterial.length > 0 ? (
+              <TableContainer component={Paper}>
                 <Table stickyHeader>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Material ID</TableCell>
-                      <TableCell>Material Description</TableCell>
+                      <TableCell>Material Code</TableCell>
+                      <TableCell>Material Desc</TableCell>
                       <TableCell>UOM</TableCell>
-                      <TableCell>Quantity</TableCell>
+                      <TableCell>Req QTY</TableCell>
+                      <TableCell>CWO Bal QTY</TableCell>
+                      <TableCell>Locator Stock</TableCell>
+                      {mmStatus === "Pending with material head" && (
+                        <TableCell>MRS QTY Approved</TableCell>
+                      )}
+                      {mmStatus.includes("acknowledgement") && (
+                        <TableCell>Issued QTY</TableCell>
+                      )}
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {inventoryMaterial.map((material) => (
+                    {mmMaterial.map((material, index) => (
                       <TableRow key={material.record_id}>
                         <TableCell>{material.material_id}</TableCell>
                         <TableCell>{material.material_desc}</TableCell>
                         <TableCell>{material.material_uom}</TableCell>
-                        <TableCell>{material.material_wo_qty}</TableCell>
+                        <TableCell>{material.material_req_qty}</TableCell>
+                        <TableCell>{material.material_bal_qty}</TableCell>
+                        <TableCell>{material.locator_stock}</TableCell>
+                        {mmStatus === "Pending with material head" && (
+                          <TableCell>
+                            <TextField
+                              type="number"
+                              variant="outlined"
+                              size="small"
+                              sx={{ width: "100px" }}
+                              value={
+                                material.issued_qty !== null &&
+                                material.issued_qty !== undefined
+                                  ? material.issued_qty
+                                  : ""
+                              } // Allow 0 as valid input
+                              onChange={(e) =>
+                                handleProvidedQtyChange(e, index)
+                              }
+                              fullWidth
+                              error={
+                                material.issued_qty > material.material_bal_qty
+                              } // Show error if qty exceeds balance
+                              helperText={
+                                material.issued_qty > material.material_bal_qty
+                                  ? `Cannot exceed the balance quantity of ${material.material_bal_qty}`
+                                  : ""
+                              }
+                            />
+                          </TableCell>
+                        )}
+                        {mmStatus.includes("acknowledgement") && (
+                          <TableCell>
+                            {material.material_provided_qty}
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -254,7 +296,7 @@ const InventoryModal = ({
               <Typography>No materials available.</Typography>
             )}
             {/* Approvers Dropdown */}
-            {inventoryStatus.toLowerCase() === "pending for receipt" && (
+            {mmStatus.toLowerCase().includes("deployment head") && (
               <Box sx={{ marginTop: "16px" }}>
                 <Autocomplete
                   disablePortal
@@ -270,7 +312,31 @@ const InventoryModal = ({
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Approver Email"
+                      label="Material Incharge"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+            )}
+            {mmStatus.toLowerCase().includes("material incharge") && (
+              <Box sx={{ marginTop: "16px" }}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={approvers}
+                  getOptionLabel={(option) => option.approver2_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedApproverEmail(
+                      newValue ? newValue.approver2_email : null
+                    );
+                    setApproverName(newValue ? newValue.approver2_name : "");
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Material Head"
                       variant="outlined"
                       fullWidth
                     />
@@ -300,6 +366,35 @@ const InventoryModal = ({
           padding: "16px 24px",
         }}
       >
+        {mmStatus.toLowerCase().includes("acknowledgement") &&
+          rowData.requested_by === username && (
+            <Button
+              variant="contained"
+              color="warning"
+              onClick={handleApproveButton}
+              sx={{
+                fontWeight: "bold",
+                textTransform: "none",
+              }}
+            >
+              Recieved
+            </Button>
+          )}
+        {mmStatus.toLowerCase().includes("acknowledgement") &&
+          rowData.requested_by === username && (
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleRejectButton}
+              sx={{
+                fontWeight: "bold",
+                textTransform: "none",
+              }}
+            >
+              Not Recieved
+            </Button>
+          )}
+
         <Button
           variant="contained"
           color="success"
@@ -340,4 +435,4 @@ const InventoryModal = ({
   );
 };
 
-export default InventoryModal;
+export default MmModal;

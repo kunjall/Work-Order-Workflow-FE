@@ -8,7 +8,7 @@ import {
 } from "material-react-table";
 import { Box, lighten, Typography, Button } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import CwoModal from "./cwoModal";
+import MBModal from "./mbModal";
 import { mkConfig, generateCsv, download } from "export-to-csv";
 import { AuthContext } from "../../../context/authContext";
 
@@ -18,24 +18,24 @@ const Example = ({ refreshKey }) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const username = useMemo(() => user.username, []);
-  const [childMaterial, setChildMaterial] = useState([]);
-  const [childService, setChildService] = useState([]);
-  const [motherMaterial, setMotherMaterial] = useState([]);
-  const [motherService, setMotherService] = useState([]);
-  const [allChildMaterial, setAllChildMaterial] = useState([]);
-  const [allChildService, setAllChildService] = useState([]);
+  const [mbMaterial, setMbMaterial] = useState([]);
+  const [mbService, setMbService] = useState([]);
+  const [allMbMaterial, setAllMbMaterial] = useState([]);
+  const [allMbService, setAllMbService] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [open, setOpen] = useState(false);
-
+  const [selectedApproverEmail, setSelectedApproverEmail] = useState("");
+  const [approverName, setApproverName] = useState("");
   const [comment, setComment] = useState("");
+  const [approvers, setApprovers] = useState([]);
 
-  const [cwoStatusPass, setCwoStatusPass] = useState("");
+  const [mbStatusPass, setMbStatusPass] = useState("");
 
-  let cwoStatus;
+  let mbStatus;
 
   const handleOpenModal = (row) => {
     setSelectedRow(row); // Store the row's data
-    setCwoStatusPass(row ? row.cwo_status : "");
+    setMbStatusPass(row ? row.mb_status : "");
     setOpen(true); // Open the modal
   };
 
@@ -50,10 +50,10 @@ const Example = ({ refreshKey }) => {
   useEffect(() => {
     if (selectedRow != null) {
       console.log(selectedRow);
-      const fetchCwoMaterial = async () => {
+      const fetchMBMaterial = async () => {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/workorder/find-child-material?cwo_id=${selectedRow.cwo_id}`,
+            `${process.env.REACT_APP_API_URL}/mb/find-material-mb?mb_id=${selectedRow.mb_id}`,
             {
               headers: {
                 Authorization: user.authToken,
@@ -63,30 +63,30 @@ const Example = ({ refreshKey }) => {
 
           console.log(response.data);
 
-          const childMaterialArray = response.data.map((material) => ({
+          const mbMaterialArray = response.data.map((material) => ({
             record_id: material.record_id,
             cwo_id: material.cwo_id,
             cwo_number: material.cwo_number,
+            mb_id: material.mb_id,
             material_id: material.material_id,
             material_desc: material.material_desc,
             material_uom: material.material_uom,
-            material_wo_qty: material.material_wo_qty,
-            material_bal_qty: material.material_bal_qty,
-            material_rate: material.material_rate,
+            material_log_qty: material.material_log_qty,
+            material_unit_price: material.material_unit_price,
             material_price: material.material_price,
           }));
-          console.log(childMaterialArray);
-          setChildMaterial(childMaterialArray);
+          console.log(mbMaterialArray);
+          setMbMaterial(mbMaterialArray);
         } catch (err) {
           console.error("Error fetching child materials:", err);
           setError("Failed to load child materials");
         }
       };
 
-      const fetchCwoService = async () => {
+      const fetchMBService = async () => {
         try {
           const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/workorder/find-child-services?cwo_id=${selectedRow.cwo_id}`,
+            `${process.env.REACT_APP_API_URL}/mb/find-service-mb?mb_id=${selectedRow.mb_id}`,
             {
               headers: {
                 Authorization: user.authToken,
@@ -96,110 +96,75 @@ const Example = ({ refreshKey }) => {
 
           console.log(response.data);
 
-          const childServiceArray = response.data.map((service) => ({
+          const mbServiceArray = response.data.map((service) => ({
             record_id: service.record_id,
             cwo_id: service.cwo_id,
             cwo_number: service.cwo_number,
+            mb_id: service.mb_id,
             service_id: service.service_id,
             service_desc: service.service_desc,
             service_uom: service.service_uom,
-            service_wo_qty: service.service_wo_qty,
-            service_bal_qty: service.service_bal_qty,
-            service_rate: service.service_rate,
+            service_log_qty: service.service_log_qty,
+            service_unit_price: service.service_unit_price,
             service_price: service.service_price,
           }));
-          console.log(childServiceArray);
-          setChildService(childServiceArray);
+          console.log(mbServiceArray);
+          setMbService(mbServiceArray);
         } catch (err) {
           console.error("Error fetching child services:", err);
           setError("Failed to load child materials");
         }
       };
 
-      fetchCwoMaterial();
-      fetchCwoService();
+      fetchMBMaterial();
+      fetchMBService();
     }
   }, [selectedRow]);
-
   useEffect(() => {
-    if (selectedRow != null) {
+    if (selectedRow != null && selectedRow.execution_city != null) {
       console.log(selectedRow);
-      const fetchMwoMaterial = async () => {
+      const fetchApprovers = async () => {
         try {
+          console.log(selectedRow, "117");
+          // console.log(selectedRow.warehouse_city);
           const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/workorder/find-mother-material?mwo_id=${selectedRow.mwo_id}`,
+            `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=MB&city=${selectedRow.execution_city}`,
             {
               headers: {
                 Authorization: user.authToken,
               },
             }
           );
-
-          console.log(response.data);
-
-          const motherMaterialArray = response.data.map((material) => ({
-            record_id: material.record_id,
-            mwo_id: material.mwo_id,
-            mwo_number: material.mwo_number,
-            material_id: material.material_id,
-            material_desc: material.material_desc,
-            material_uom: material.material_uom,
-            material_wo_qty: material.material_wo_qty,
-            material_bal_qty: material.material_bal_qty,
-            material_rate: material.material_rate,
-            material_price: material.material_price,
+          const approverArray = response.data.map((reviewer) => ({
+            id: reviewer.record_id,
+            type: reviewer.type,
+            reviewer_email: reviewer.reviewer_email,
+            approver_email: reviewer.approver_email,
+            city: reviewer.city,
+            reviewer_name: reviewer.reviewer_name,
+            approver_name: reviewer.approver_name,
+            approver2_email: reviewer.approver2_email,
+            approver2_name: reviewer.approver2_name,
+            approver3_email: reviewer.approver3_email,
+            approver3_name: reviewer.approver3_name,
           }));
-          console.log(motherMaterialArray);
-          setMotherMaterial(motherMaterialArray);
+          console.log(approverArray, "138");
+          setApprovers(approverArray);
         } catch (err) {
-          console.error("Error fetching mother materials:", err);
-          setError("Failed to load mother materials");
+          console.error("Error fetching reviewer:", err);
+          setError("Failed to load reviewer");
         }
       };
 
-      const fetchMwoService = async () => {
-        try {
-          const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/workorder/find-mother-services?mwo_id=${selectedRow.mwo_id}`,
-            {
-              headers: {
-                Authorization: user.authToken,
-              },
-            }
-          );
-
-          console.log(response.data);
-
-          const motherServiceArray = response.data.map((service) => ({
-            record_id: service.record_id,
-            mwo_id: service.mwo_id,
-            mwo_number: service.mwo_number,
-            service_id: service.service_id,
-            service_desc: service.service_desc,
-            service_uom: service.service_uom,
-            service_wo_qty: service.service_wo_qty,
-            service_bal_qty: service.service_bal_qty,
-            service_rate: service.service_rate,
-            material_price: service.service_price,
-          }));
-          console.log(motherServiceArray);
-          setMotherService(motherServiceArray);
-        } catch (err) {
-          console.error("Error fetching mother services:", err);
-          setError("Failed to load mother materials");
-        }
-      };
-
-      fetchMwoMaterial();
-      fetchMwoService();
+      fetchApprovers();
     }
   }, [selectedRow]);
 
   useEffect(() => {
-    const fetchAllChildMaterial = async () => {
+    const fetchAllMbMaterial = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/workorder/find-all-child-material`,
+          `${process.env.REACT_APP_API_URL}/mb/find-material-mb`,
           {
             headers: {
               Authorization: user.authToken,
@@ -207,33 +172,33 @@ const Example = ({ refreshKey }) => {
           }
         );
 
-        const childMaterialArray = response.data.map((material) => ({
+        const mbMaterialArray = response.data.map((material) => ({
           record_id: material.record_id,
           cwo_id: material.cwo_id,
           cwo_number: material.cwo_number,
+          mb_id: material.mb_id,
           material_id: material.material_id,
           material_desc: material.material_desc,
           material_uom: material.material_uom,
-          material_wo_qty: material.material_wo_qty,
-          material_bal_qty: material.material_bal_qty,
-          material_rate: material.material_rate,
+          material_log_qty: material.material_log_qty,
+          material_unit_price: material.material_unit_price,
           material_price: material.material_price,
         }));
-        console.log(childMaterialArray);
-        setAllChildMaterial(childMaterialArray);
+        console.log(mbMaterialArray);
+        setAllMbMaterial(mbMaterialArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
         setError("Failed to load inventory materials");
       }
     };
-    fetchAllChildMaterial();
+    fetchAllMbMaterial();
   }, []);
 
   useEffect(() => {
-    const fetchAllChildService = async () => {
+    const fetchAllMbService = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/workorder/find-all-child-service`,
+          `${process.env.REACT_APP_API_URL}/mb/find-service-mb`,
           {
             headers: {
               Authorization: user.authToken,
@@ -241,44 +206,50 @@ const Example = ({ refreshKey }) => {
           }
         );
 
-        const childServiceArray = response.data.map((service) => ({
+        const mbServiceArray = response.data.map((service) => ({
           record_id: service.record_id,
           cwo_id: service.cwo_id,
           cwo_number: service.cwo_number,
+          mb_id: service.mb_id,
           service_id: service.service_id,
           service_desc: service.service_desc,
           service_uom: service.service_uom,
-          service_wo_qty: service.service_wo_qty,
-          service_bal_qty: service.service_bal_qty,
-          service_rate: service.service_rate,
-          material_price: service.service_price,
+          service_log_qty: service.service_log_qty,
+          service_unit_price: service.service_unit_price,
+          service_price: service.service_price,
         }));
-        console.log(childServiceArray);
-        setAllChildService(childServiceArray);
+        console.log(mbServiceArray);
+        setAllMbService(mbServiceArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
         setError("Failed to load inventory materials");
       }
     };
-    fetchAllChildService();
+    fetchAllMbService();
   }, []);
 
   // Fetch data from the API
   useEffect(() => {
     let isMounted = true;
 
-    const fetchCwoData = async () => {
+    const fetchMbData = async () => {
       setIsLoading(true);
       try {
         const statuses = [
-          "Pending for approval",
+          "Pending with TPM",
+          "Pending with deployment head",
+          "Pending with material head",
+          "Pending with billing spoc",
           "Approved",
-          "Rejected by approver",
+          "Rejected by TPM",
+          "Rejected by deployment head",
+          "Rejected by material head",
+          "Rejected by billing spoc",
         ];
 
         const promises = statuses.map((status) =>
           axios.get(
-            `${process.env.REACT_APP_API_URL}/workorder/find-child-workorder-actions?user=${username}&cwostatus=${status}`,
+            `${process.env.REACT_APP_API_URL}/mb/find-mb-actions?user=${username}&mbstatus=${status}`,
             {
               headers: { Authorization: user.authToken },
             }
@@ -305,7 +276,7 @@ const Example = ({ refreshKey }) => {
       }
     };
 
-    fetchCwoData();
+    fetchMbData();
 
     return () => {
       isMounted = false;
@@ -359,18 +330,27 @@ const Example = ({ refreshKey }) => {
       hour12: false, // AM/PM format
       timeZone: "IST", // Adjust to UTC
     });
-    console.log(selectedRow);
-    cwoStatus = "Rejected by approver";
+    if (mbStatusPass === "Pending with TPM") {
+      mbStatus = "Rejected by TPM";
+    } else if (mbStatusPass === "Pending with deployment head") {
+      mbStatus = "Rejected by deployment head";
+    } else if (mbStatusPass === "Pending with material head") {
+      mbStatus = "Rejected by material head";
+    } else if (mbStatusPass === "Pending with billing spoc") {
+      mbStatus = "Rejected";
+    }
+
     console.log("Approved", 278);
     try {
       const response = await axios.patch(
-        `${process.env.REACT_APP_API_URL}/workorder/reject-cwo`,
+        `${process.env.REACT_APP_API_URL}/mb/reject-mb`,
         {
-          mwo_id: String(selectedRow.mwo_id),
-          cwo_id: String(selectedRow.cwo_id),
-          cwo_status: cwoStatus,
-          approved_by: actionedBy,
-          approved_at: actionedAt,
+          mb_id: selectedRow.mb_id,
+          cwo_id: selectedRow.cwo_id, // Ensure this is passed to your modal
+          mb_status: mbStatus,
+          actioned_at: actionedAt,
+          actioned_by: actionedBy,
+          approver_comments: comment,
         },
         {
           headers: {
@@ -387,7 +367,15 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
-    console.log("Approved with comment:", comment);
+    if (mbStatusPass === "Pending with TPM") {
+      mbStatus = "Pending with deployment head";
+    } else if (mbStatusPass === "Pending with deployment head") {
+      mbStatus = "Pending with material head";
+    } else if (mbStatusPass === "Pending with material head") {
+      mbStatus = "Pending with billing spoc";
+    } else if (mbStatusPass === "Pending with billing spoc") {
+      mbStatus = "Approved";
+    }
     const actionedBy = user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
@@ -398,19 +386,64 @@ const Example = ({ refreshKey }) => {
       hour12: false, // AM/PM format
       timeZone: "IST", // Adjust to UTC
     });
-    console.log(selectedRow);
-    cwoStatus = "Approved";
-    console.log("Approved", 278);
+    console.log(mbStatusPass);
+
+    const requestData = {
+      mb_id: selectedRow.mb_id,
+      cwo_id: selectedRow.cwo_id, // Ensure this is passed to your modal
+      mb_status: mbStatus,
+
+      // Preserve existing approver details unless the status requires a change
+      mb_approver2_email:
+        selectedApproverEmail || selectedRow.mb_approver2_email || "",
+      mb_approver2_name: approverName || selectedRow.mb_approver2_name || "",
+
+      mb_approver3_email:
+        mbStatusPass === "Pending with deployment head"
+          ? selectedApproverEmail || selectedRow.mb_approver3_email || ""
+          : selectedRow.mb_approver3_email || "",
+      mb_approver3_name:
+        mbStatusPass === "Pending with deployment head"
+          ? approverName || selectedRow.mb_approver3_name || ""
+          : selectedRow.mb_approver3_name || "",
+
+      mb_approver4_email:
+        mbStatusPass === "Pending with material head"
+          ? selectedApproverEmail || selectedRow.mb_approver4_email || ""
+          : selectedRow.mb_approver4_email || "",
+      mb_approver4_name:
+        mbStatusPass === "Pending with material head"
+          ? approverName || selectedRow.mb_approver4_name || ""
+          : selectedRow.mb_approver4_name || "",
+
+      actioned_at: actionedAt,
+      actioned_by: actionedBy,
+      approver_comments: comment,
+
+      // Preserve other relevant data
+      locator_name: selectedRow.locator_name,
+
+      mbMaterial:
+        mbStatusPass === "Pending with billing spoc"
+          ? mbMaterial || []
+          : undefined,
+      mbService:
+        mbStatusPass === "Pending with billing spoc"
+          ? mbService || []
+          : undefined,
+    };
+
+    // Remove the key if it's undefined to avoid sending it unnecessarily
+    if (requestData.mbMaterial === undefined) {
+      delete requestData.mbMaterial;
+    }
+
+    // Include materialLineItems if mmStatusPass meets the criteria
+
     try {
       await axios.patch(
-        `${process.env.REACT_APP_API_URL}/workorder/update-cwo-approve-status`,
-        {
-          cwo_id: selectedRow.cwo_id, // Ensure this is passed to your modal
-          cwo_status: cwoStatus,
-          approved_at: actionedAt,
-          approved_by: actionedBy,
-          approver_comments: comment,
-        },
+        `${process.env.REACT_APP_API_URL}/mb/update-approve-mb`,
+        requestData,
         {
           headers: {
             Authorization: user.authToken,
@@ -426,8 +459,8 @@ const Example = ({ refreshKey }) => {
   // Define columns
   const columns = useMemo(() => [
     {
-      accessorKey: "cwo_id",
-      header: "CWO Id",
+      accessorKey: "mb_id",
+      header: "MB Id",
       width: "20px",
       size: 50,
       filterFn: "contains",
@@ -440,7 +473,7 @@ const Example = ({ refreshKey }) => {
           }}
           onClick={() => handleOpenModal(row.original)} // Pass the row's data
         >
-          {"CWO-" + row.original.cwo_id} {/* Prefix with "cwo_" */}{" "}
+          {"MB-" + row.original.mb_id} {/* Prefix with "cwo_" */}{" "}
         </span>
       ),
     },
@@ -452,8 +485,8 @@ const Example = ({ refreshKey }) => {
     },
 
     {
-      accessorKey: "cwo_status",
-      header: "CWO Status",
+      accessorKey: "mb_status",
+      header: "MB Status",
       size: 200,
       filterFn: "contains",
     },
@@ -471,12 +504,6 @@ const Example = ({ refreshKey }) => {
       filterFn: "contains",
     },
 
-    // {
-    //   accessorKey: "approved_by",
-    //   header: "Approved By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
     {
       accessorKey: "created_at",
       header: "Created Dt",
@@ -485,57 +512,6 @@ const Example = ({ refreshKey }) => {
       // filterFn: "contains",
     },
 
-    // {
-    //   accessorKey: "received_at",
-    //   header: "Received Dt",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "approved_at",
-    //   header: "Approved Dt",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "entry_date",
-    //   header: "Entry Date",
-    //   size: 150,
-    //   Cell: ({ cell }) => cell.getValue(), // Format date
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "inventory_receiver_name",
-    //   header: "Receiver Name",
-    //   size: 200,
-    //   // filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "inventory_approver_name",
-    //   header: "Approver Name",
-    //   size: 200,
-    //   // filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "customer_dc_number",
-    //   header: "Customer DC Number",
-    //   size: 200,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "dc_date",
-    //   header: "DC Date",
-    //   size: 150,
-    //   Cell: ({ cell }) => cell.getValue(), // Format date
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "customer_id",
-    //   header: "Customer ID",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
     {
       accessorKey: "customer_name",
       header: "Customer Name",
@@ -543,118 +519,26 @@ const Example = ({ refreshKey }) => {
       filterFn: "contains",
       size: 250,
     },
-    // {
-    //   accessorKey: "warehouse_id",
-    //   header: "Warehouse ID",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "eway_bill_number",
-    //   header: "Eway Bill Number",
-    //   size: 200,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "mrs_number",
-    //   header: "MRS Number",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "client_warehouse_id",
-    //   header: "Cust. Warehouse ID",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "client_warehouse_city",
-    //   header: "Cust. Warehouse City",
-    //   size: 200,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "created_by",
-    //   header: "Created By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "created_at",
-    //   header: "Created Dt",
-    //   size: 150,
-    //   Cell: ({ cell }) => cell.getValue(), // Format date
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "received_by",
-    //   header: "Received By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "received_at",
-    //   header: "Received Dt",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    {
-      accessorKey: "approved_by",
-      header: "Approved By",
-      size: 150,
-      filterFn: "contains",
-    },
-    {
-      accessorKey: "approved_at",
-      header: "Approved Dt",
-      size: 150,
-      filterFn: "contains",
-    },
-
-    // {
-    //   accessorKey: "material_id",
-    //   header: "Material Id",
-    //   size: 150,
-    // },
-    // {
-    //   accessorKey: "material_desc",
-    //   header: "Material Desc",
-    //   size: 150,
-    // },
-    // {
-    //   accessorKey: "material_uom",
-    //   header: "Material UOM",
-    //   size: 150,
-    // },
-    // {
-    //   accessorKey: "material_wo_qty",
-    //   header: "Material QTY",
-    //   size: 150,
-    // },
   ]);
 
   const handleExportRows = (rows) => {
     const flattened = [];
     console.log(rows);
 
-    rows.forEach((cwo) => {
-      console.log(cwo.cwo_id);
+    rows.forEach((mb) => {
+      console.log(mb.mb_id);
       // Merge materials
-      const materials = allChildMaterial.filter(
-        (mat) => mat.cwo_id === String(cwo.cwo_id)
+      const materials = allMbMaterial.filter(
+        (mat) => mat.mb_id === String(mb.mb_id)
       );
 
       // Merge services
-      const services = allChildService.filter(
-        (srv) => srv.cwo_id === String(cwo.cwo_id)
+      const services = allMbService.filter(
+        (srv) => srv.mb_id === String(mb.mb_id)
       );
 
-      console.log(allChildService);
-      console.log(allChildMaterial);
+      // console.log(allChildService);
+      // console.log(allChildMaterial);
       console.log(services);
       console.log(materials);
 
@@ -664,69 +548,64 @@ const Example = ({ refreshKey }) => {
         // Add each material as a separate row
         materials.forEach((mat) => {
           flattened.push({
-            ...cwo,
+            ...mb,
             material_id: mat.material_id,
             material_desc: mat.material_desc,
             material_uom: mat.material_uom,
-            material_wo_qty: mat.material_wo_qty,
-            material_bal_qty: mat.material_wo_qty,
+            material_log_qty: mat.material_log_qty,
+            material_unit_price: mat.material_unit_price,
             material_price: mat.material_price,
-            material_rate: mat.material_rate,
             service_id: "",
             service_desc: "",
             service_uom: "",
-            service_wo_qty: "",
-            service_bal_qty: "",
+            service_log_qty: "",
+            service_unit_price: "",
             service_price: "",
-            service_rate: "",
           });
         });
 
         // Add each service as a separate row
         services.forEach((srv) => {
           flattened.push({
-            ...cwo,
+            ...mb,
             material_id: "",
             material_desc: "",
             material_uom: "",
-            material_wo_qty: "",
-            material_bal_qty: "",
+            material_log_qty: "",
+            material_unit_price: "",
             material_price: "",
-            material_rate: "",
             service_id: srv.service_id,
             service_desc: srv.service_desc,
             service_uom: srv.service_uom,
-            service_wo_qty: srv.service_wo_qty,
-            service_bal_qty: srv.service_bal_qty,
+            service_log_qty: srv.service_log_qty,
+            service_unit_price: srv.service_unit_price,
             service_price: srv.service_price,
-            service_rate: srv.service_rate,
           });
         });
       } else {
         // Push a row without material if no materials exist
 
         flattened.push({
-          ...cwo,
+          ...mb,
+
           material_id: "",
           material_desc: "",
           material_uom: "",
-          material_wo_qty: "",
-          material_bal_qty: "",
+          material_log_qty: "",
+          material_unit_price: "",
           material_price: "",
-          material_rate: "",
           service_id: "",
           service_desc: "",
           service_uom: "",
-          service_wo_qty: "",
-          service_bal_qty: "",
+          service_log_qty: "",
+          service_unit_price: "",
           service_price: "",
-          service_rate: "",
         });
       }
     });
 
     const csvConfig = mkConfig({
-      filename: `MWO_${username}`,
+      filename: `MB_${username}`,
       useKeysAsHeaders: true, // Automatically use keys as column headers
     });
 
@@ -897,18 +776,21 @@ const Example = ({ refreshKey }) => {
           </Box>
         )}
       />
-      <CwoModal
+      <MBModal
         open={open}
         onClose={handleCloseModal}
         rowData={selectedRow}
-        childMaterial={childMaterial}
-        childService={childService}
+        childMaterial={mbMaterial}
+        childService={mbService}
         setComment={setComment}
         comment={comment}
+        setSelectedApproverEmail={setSelectedApproverEmail}
+        setApproverName={setApproverName}
         handleApprove={handleApprove}
-        cwoStatus={cwoStatusPass}
+        mbStatus={mbStatusPass}
         handleReject={handleReject}
         username={username}
+        approvers={approvers}
       />
     </Box>
   );

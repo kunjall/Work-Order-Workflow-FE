@@ -270,7 +270,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          Total Amount:
+          Budget Amount:
         </Typography>
         <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1976d2" }}>
           ₹{totalAmount}

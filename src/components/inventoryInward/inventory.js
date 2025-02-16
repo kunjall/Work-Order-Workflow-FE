@@ -77,7 +77,7 @@ const InventoryInward = () => {
           `${process.env.REACT_APP_API_URL}/master/findCustomer`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -108,7 +108,7 @@ const InventoryInward = () => {
           `${process.env.REACT_APP_API_URL}/master/find-material?company=${customerName}`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -134,7 +134,7 @@ const InventoryInward = () => {
           `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=Inventory&city=${warehouseState}`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -177,7 +177,7 @@ const InventoryInward = () => {
           `${process.env.REACT_APP_API_URL}/master/find-warehouse`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -232,7 +232,7 @@ const InventoryInward = () => {
           `${process.env.REACT_APP_API_URL}/master/find-client-warehouse?company=${customerName}`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -282,7 +282,7 @@ const InventoryInward = () => {
   };
 
   const handleSubmit = async () => {
-    const createdBy = localStorage.getItem("username") || "unknown";
+    const createdBy = user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short", // e.g., "Dec"
@@ -335,7 +335,7 @@ const InventoryInward = () => {
         payload,
         {
           headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+            Authorization: user.authToken,
           },
         }
       );
@@ -357,13 +357,7 @@ const InventoryInward = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <div
-        style={{
-          marginTop: "90px",
-          height: "calc(100vh - 60px)",
-          marginLeft: "20px",
-        }}
-      >
+      <div id="fiber-rollout">
         <Box sx={{ flexGrow: 1 }}>
           {error ? (
             <Typography color="error">{error}</Typography>

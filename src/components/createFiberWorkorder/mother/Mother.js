@@ -84,16 +84,16 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=MWO&city=${selectedCity}`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
         const reviewerArray = response.data.map((reviewer) => ({
           id: reviewer.record_id,
           type: reviewer.type,
-          approver_email: reviewer.approver_email,
+          approver_email: reviewer.reviewer_email,
           city: reviewer.city,
-          approver_name: reviewer.approver_name,
+          approver_name: reviewer.reviewer_name,
         }));
         setApprovers(reviewerArray);
       } catch (err) {
@@ -129,7 +129,7 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/master/findCity`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -185,7 +185,7 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/master/find-service?company=${customerName}`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -212,7 +212,7 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/master/find-material?company=${customerName}`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -239,7 +239,7 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/master/findCustomer`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -331,7 +331,7 @@ const DashboardWhinch = () => {
   console.log(serviceLineItems);
 
   // const handleSubmit = async () => {
-  //   const createdBy = localStorage.getItem("username") || "unknown";
+  //   const createdBy = user.username || "unknown";
   //   const createdAt = new Date().toISOString();
 
   //   setLoading(true);
@@ -363,7 +363,7 @@ const DashboardWhinch = () => {
   //       },
   //       {
   //         headers: {
-  //           Authorization: `${localStorage.getItem("token")}`,
+  //           Authorization: user.authToken,
   //         },
   //       }
   //     );
@@ -396,7 +396,7 @@ const DashboardWhinch = () => {
   //         },
   //         {
   //           headers: {
-  //             Authorization: `${localStorage.getItem("token")}`,
+  //             Authorization: user.authToken,
   //           },
   //         }
   //       );
@@ -426,7 +426,7 @@ const DashboardWhinch = () => {
   //         },
   //         {
   //           headers: {
-  //             Authorization: `${localStorage.getItem("token")}`,
+  //             Authorization: user.authToken,
   //           },
   //         }
   //       );
@@ -439,7 +439,7 @@ const DashboardWhinch = () => {
   // };
 
   const handleSubmit = async () => {
-    const createdBy = localStorage.getItem("username") || "unknown";
+    const createdBy = user.username || "unknown";
     const createdAt = new Date()
       .toLocaleString("en-US", {
         month: "short",
@@ -456,7 +456,7 @@ const DashboardWhinch = () => {
     const requestData = {
       mwo_number: workOrderNumber,
       workorder_type: "Fiber",
-      mwo_status: "Pending for approval",
+      mwo_status: "Pending with deployment head",
       gis_code: gisCode,
       route_name: routeName,
       route_length: routeLength,
@@ -486,7 +486,7 @@ const DashboardWhinch = () => {
         requestData,
         {
           headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+            Authorization: user.authToken,
           },
         }
       );

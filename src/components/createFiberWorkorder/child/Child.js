@@ -115,7 +115,7 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/master/findCity`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -173,7 +173,7 @@ const DashboardWhinch = () => {
             `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=CWO&city=${formData.execution_city}`,
             {
               headers: {
-                Authorization: `${localStorage.getItem("token")}`,
+                Authorization: user.authToken,
               },
             }
           );
@@ -215,7 +215,7 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/workorder/find-workorder`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -309,7 +309,7 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/master/find-vendors`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -375,7 +375,7 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/workorder/find-mother-services`,
           {
             params: { mwo_id: formData.mwo_id },
-            headers: { Authorization: `${localStorage.getItem("token")}` },
+            headers: { Authorization: user.authToken },
           }
         );
         setMotherServices(response.data);
@@ -393,7 +393,7 @@ const DashboardWhinch = () => {
             params: {
               mwo_id: formData.mwo_id, // Ensures cwo_id is a number
             },
-            headers: { Authorization: `${localStorage.getItem("token")}` },
+            headers: { Authorization: user.authToken },
           }
         );
         setMotherMaterials(response.data);
@@ -442,7 +442,7 @@ const DashboardWhinch = () => {
   }, [formData.execution_city, cityOptions]);
 
   const handleSubmit = async () => {
-    const createdBy = localStorage.getItem("username") || "unknown";
+    const createdBy = user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short", // e.g., "Dec"
@@ -465,7 +465,7 @@ const DashboardWhinch = () => {
       execution_city: formData.execution_city,
       state: formData.state,
       workorder_type: formData.workorder_type,
-      cwo_number: childWorkOrderNumber,
+      cwo_number: formData.mwo_number + "-" + childWorkOrderNumber,
       total_material_cost: totalMaterialAmount,
       materialItems: materialLineItems, // Array of material line items
       serviceItems: serviceLineItems, // Array of service line items
@@ -475,6 +475,9 @@ const DashboardWhinch = () => {
       created_at: createdAt,
       customer_name: customerName,
       vendor_name: vendorName,
+      gis_code: formData.gis_code,
+      homepass_count: formData.homepass_count,
+      activity: formData.activity,
       cwo_status: "Pending for approval",
     };
 
@@ -485,7 +488,7 @@ const DashboardWhinch = () => {
         requestData,
         {
           headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+            Authorization: user.authToken,
           },
         }
       );
@@ -678,16 +681,31 @@ const DashboardWhinch = () => {
                   fullWidth
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={6}>
+              <Grid item xs={12} sm={6} md={4}>
                 <TextField
                   id="child-work-order-number"
                   label="Child W/O Number"
                   variant="outlined"
                   fullWidth
                   value={childWorkOrderNumber}
-                  onChange={(e) => setChildWorkOrderNumber(e.target.value)}
+                  onChange={(e) => {
+                    const input = e.target.value
+                      .toUpperCase()
+                      .replace(/[^A-Z]/g, ""); // Only letters
+                    if (input.length <= 2) {
+                      setChildWorkOrderNumber(input); // Allow max 2 letters
+                    }
+                  }}
+                  InputProps={{
+                    startAdornment: (
+                      <span style={{ fontWeight: "bold", marginRight: "4px" }}>
+                        {formData.mwo_number}-{" "}
+                      </span>
+                    ),
+                  }}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6} md={2}>
                 <Autocomplete
                   disablePortal
@@ -966,7 +984,7 @@ const DashboardWhinch = () => {
                   }}
                 >
                   <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                    Total Amount:
+                    Budget Amount:
                   </Typography>
                   <Typography
                     variant="h6"
@@ -1050,8 +1068,8 @@ const DashboardWhinch = () => {
                             const value = e.target.value;
                             const cwoQty = Number(value);
                             const error =
-                              cwoQty > Number(material.material_wo_qty)
-                                ? "CWO Qty cannot exceed WO Qty"
+                              cwoQty > Number(material.material_bal_qty)
+                                ? "CWO Qty cannot exceed Bal Qty"
                                 : "";
 
                             setMaterialLineItems((prevItems) =>
@@ -1110,7 +1128,7 @@ const DashboardWhinch = () => {
                   }}
                 >
                   <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                    Total Amount:
+                    Budget Amount:
                   </Typography>
                   <Typography
                     variant="h6"

@@ -16,6 +16,8 @@ import CreateChild from "./pages/createChild";
 import Inventory from "./pages/inventoryInward";
 import Repository from "./pages/repository";
 import MRS from "./pages/createMRS";
+import MB from "./components/mbCreation/createMB";
+import Invoice from "./pages/createInvoice";
 import { Repeat } from "@mui/icons-material";
 
 // import Test from "./components/dashboard/test";
@@ -101,10 +103,26 @@ const App = () => {
                 }
               />
               <Route
+                path="/MB"
+                element={
+                  <WithAuth role="admin">
+                    <MB />
+                  </WithAuth>
+                }
+              />
+              {/* <Route
                 path="/repository"
                 element={
                   <WithAuth role="admin">
                     <Repository />
+                  </WithAuth>
+                }
+              /> */}
+              <Route
+                path="/budget"
+                element={
+                  <WithAuth role="admin">
+                    <Invoice />
                   </WithAuth>
                 }
               />

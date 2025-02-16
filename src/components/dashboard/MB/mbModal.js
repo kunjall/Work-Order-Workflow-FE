@@ -44,8 +44,11 @@ const MwoModal = ({
   comment,
   handleApprove,
   handleReject,
-  cwoStatus,
+  mbStatus,
   username,
+  setSelectedApproverEmail,
+  approvers,
+  setApproverName,
 }) => {
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
@@ -58,13 +61,20 @@ const MwoModal = ({
     return { backgroundColor: "gray", color: "white" };
   };
 
-  const statusStyles = getStatusStyles(cwoStatus);
+  const statusStyles = getStatusStyles(mbStatus);
+
   const isActionAllowed =
-    cwoStatus.toLowerCase().includes("pending") &&
+    mbStatus.toLowerCase().includes("pending") &&
     rowData &&
-    rowData.created_by !== username &&
-    (cwoStatus.toLowerCase() !== "pending for approval" ||
-      username === rowData.cwo_approver_email);
+    rowData.requested_by !== username &&
+    ((mbStatus.toLowerCase().includes("pending with tpm") &&
+      username === rowData?.mb_approver1_email) ||
+      (mbStatus.toLowerCase().includes("pending with deployment head") &&
+        username === rowData?.mb_approver2_email) ||
+      (mbStatus.toLowerCase().includes("pending with material head") &&
+        username === rowData?.mb_approver3_email) ||
+      (mbStatus.toLowerCase().includes("pending with billing spoc") &&
+        username === rowData?.mb_approver4_email));
 
   const handleApproveButton = () => {
     if (!isActionAllowed) return;
@@ -92,7 +102,7 @@ const MwoModal = ({
           }}
         >
           <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-            {cwoStatus}
+            {mbStatus}
           </Typography>
         </Box>
         <Grid container spacing={3}>
@@ -110,12 +120,29 @@ const MwoModal = ({
                     >
                       {key.replace(/_/g, " ")}:
                     </Typography>
-                    <Typography variant="body1">
-                      {key.toLowerCase().includes("date") ||
-                      key.toLowerCase().includes("time")
-                        ? formatDate(rowData[key])
-                        : rowData[key] || "N/A"}
-                    </Typography>
+                    {key.toLowerCase() === "attachment_url" && rowData[key] ? (
+                      <Typography variant="body1">
+                        <a
+                          href={rowData[key]}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            color: "#1976d2",
+                            textDecoration: "none",
+                            fontWeight: "bold",
+                          }}
+                        >
+                          View Attachment
+                        </a>
+                      </Typography>
+                    ) : (
+                      <Typography variant="body1">
+                        {key.toLowerCase().includes("date") ||
+                        key.toLowerCase().includes("time")
+                          ? formatDate(rowData[key])
+                          : rowData[key] || "N/A"}
+                      </Typography>
+                    )}
                   </Grid>
                 ))
               ) : (
@@ -136,7 +163,6 @@ const MwoModal = ({
                       <TableCell>Description</TableCell>
                       <TableCell>UOM</TableCell>
                       <TableCell>W/O QTY</TableCell>
-                      <TableCell>Bal QTY</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -145,8 +171,7 @@ const MwoModal = ({
                         <TableCell>{material.material_id}</TableCell>
                         <TableCell>{material.material_desc}</TableCell>
                         <TableCell>{material.material_uom}</TableCell>
-                        <TableCell>{material.material_wo_qty}</TableCell>
-                        <TableCell>{material.material_bal_qty}</TableCell>
+                        <TableCell>{material.material_log_qty}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -155,6 +180,7 @@ const MwoModal = ({
             ) : (
               <Typography>No materials available.</Typography>
             )}
+
             <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
               Services
             </Typography>
@@ -176,8 +202,7 @@ const MwoModal = ({
                         <TableCell>{service.service_id}</TableCell>
                         <TableCell>{service.service_desc}</TableCell>
                         <TableCell>{service.service_uom}</TableCell>
-                        <TableCell>{service.service_wo_qty}</TableCell>
-                        <TableCell>{service.service_bal_qty}</TableCell>
+                        <TableCell>{service.service_log_qty}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -186,7 +211,78 @@ const MwoModal = ({
             ) : (
               <Typography>No services available.</Typography>
             )}
-
+            {mbStatus.toLowerCase().includes("tpm") && (
+              <Box sx={{ marginTop: "16px" }}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={approvers}
+                  getOptionLabel={(option) => option.approver_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedApproverEmail(
+                      newValue ? newValue.approver_email : null
+                    );
+                    setApproverName(newValue ? newValue.approver_name : "");
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Deployment Head"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+            )}
+            {mbStatus.toLowerCase().includes("deployment head") && (
+              <Box sx={{ marginTop: "16px" }}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={approvers}
+                  getOptionLabel={(option) => option.approver2_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedApproverEmail(
+                      newValue ? newValue.approver2_email : null
+                    );
+                    setApproverName(newValue ? newValue.approver2_name : "");
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Material Head"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+            )}
+            {mbStatus.toLowerCase().includes("material head") && (
+              <Box sx={{ marginTop: "16px" }}>
+                <Autocomplete
+                  disablePortal
+                  id="combo-box-demo"
+                  options={approvers}
+                  getOptionLabel={(option) => option.approver3_email.toString()}
+                  onChange={(event, newValue) => {
+                    setSelectedApproverEmail(
+                      newValue ? newValue.approver3_email : null
+                    );
+                    setApproverName(newValue ? newValue.approver3_name : "");
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Billing Spoc"
+                      variant="outlined"
+                      fullWidth
+                    />
+                  )}
+                />
+              </Box>
+            )}
             <Box sx={{ mt: 3 }}>
               <TextField
                 label="Add Comment"

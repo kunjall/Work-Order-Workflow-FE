@@ -1,13 +1,17 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useContext } from "react";
 import { MRT_Table, useMaterialReactTable } from "material-react-table";
 import axios from "axios";
 import { Box, Button } from "@mui/material";
 import WorkorderDialog from "./dialogWorkorder";
+import { AuthContext } from "../../context/authContext";
 
 const DenseTable = () => {
   const [workorders, setWorkorders] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedWorkorder, setSelectedWorkorder] = useState(null);
+
+  const { user } = useContext(AuthContext);
+  console.log(user);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -16,7 +20,7 @@ const DenseTable = () => {
           `${process.env.REACT_APP_API_URL}/workorder/find-workorder`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );

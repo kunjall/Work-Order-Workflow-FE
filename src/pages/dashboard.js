@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import DashboardRequests from "../components/dashboard/Inventory/dashboardRequestsInventory";
 import DashboardRequestsMwo from "../components/dashboard/MWO/dashboardRequestsMwo";
 import DashboardRequestsCwo from "../components/dashboard/CWO/dashboardRequestsCwo";
+import DashboardRequestsMM from "../components/dashboard/MM/dashboardRequestsMM";
+import DashboardRequestMB from "../components/dashboard/MB/dashboardRequestsMB";
 import CachedIcon from "@mui/icons-material/Cached";
 import { Box, lighten, Typography, Button, IconButton } from "@mui/material";
 
@@ -29,6 +31,10 @@ const Requests = () => {
         return <DashboardRequestsMwo key={refreshKey} />;
       case "CWO":
         return <DashboardRequestsCwo key={refreshKey} />;
+      case "MM":
+        return <DashboardRequestsMM key={refreshKey} />;
+      case "MB":
+        return <DashboardRequestMB key={refreshKey} />;
       default:
         return null;
     }
@@ -106,7 +112,42 @@ const Requests = () => {
         >
           CWO
         </Button>
-
+        <Button
+          onClick={() => setActiveTab("MM")}
+          sx={{
+            color: activeTab === "MM" ? "#ec7c30" : "black", // Text color
+            backgroundColor: activeTab === "MM" ? "black" : "#ec7c30",
+            height: "40px", // Ensure height is fixed
+            padding: "10px 20px", // Add padding for better spacing
+            borderRadius: "5px",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: "black", // Keep the orange background on hover
+              color: "#ec7c30",
+              cursor: "pointer",
+            },
+          }}
+        >
+          MM
+        </Button>
+        <Button
+          onClick={() => setActiveTab("MB")}
+          sx={{
+            color: activeTab === "MB" ? "#ec7c30" : "black", // Text color
+            backgroundColor: activeTab === "MB" ? "black" : "#ec7c30",
+            height: "40px", // Ensure height is fixed
+            padding: "10px 20px", // Add padding for better spacing
+            borderRadius: "5px",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: "black", // Keep the orange background on hover
+              color: "#ec7c30",
+              cursor: "pointer",
+            },
+          }}
+        >
+          MB
+        </Button>
         {/* Refresh Button */}
         <IconButton
           onClick={handleRefresh}

@@ -51,7 +51,7 @@ const DashboardWhinch = () => {
             routeName: `%${routeName}%`,
           },
           headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+            Authorization: user.authToken,
           },
         }
       );

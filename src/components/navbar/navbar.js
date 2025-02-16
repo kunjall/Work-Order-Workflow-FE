@@ -12,6 +12,7 @@ import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import RouterIcon from "@mui/icons-material/Router";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
+import StraightenIcon from "@mui/icons-material/Straighten";
 
 const Navbar = () => {
   const { user } = useContext(AuthContext);
@@ -106,6 +107,21 @@ const Navbar = () => {
               </li>
               <li style={{ fontSize: "16x" }}>
                 <Link
+                  to="/MB"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    ...getActiveStyle("/MB"),
+                  }}
+                >
+                  <span style={{ marginRight: "8px" }}>
+                    <StraightenIcon />
+                  </span>
+                  <span>MB</span>
+                </Link>
+              </li>
+              <li style={{ fontSize: "16x" }}>
+                <Link
                   to="/locator"
                   style={{
                     display: "flex",
@@ -119,8 +135,7 @@ const Navbar = () => {
                   <span>Locator</span>
                 </Link>
               </li>
-
-              <li style={{ fontSize: "16px" }}>
+              {/* <li style={{ fontSize: "16px" }}>
                 <Link
                   to="/repository"
                   style={{
@@ -133,6 +148,21 @@ const Navbar = () => {
                     <MenuBookIcon />
                   </span>
                   <span>Repository</span>
+                </Link>
+              </li> */}
+              <li style={{ fontSize: "16px" }}>
+                <Link
+                  to="/budget"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    ...getActiveStyle("/budget"),
+                  }}
+                >
+                  <span style={{ marginRight: "8px" }}>
+                    <MenuBookIcon />
+                  </span>
+                  <span>Invoice</span>
                 </Link>
               </li>
             </>

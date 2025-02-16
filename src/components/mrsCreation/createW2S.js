@@ -80,7 +80,7 @@ const CreateMRS = () => {
   };
 
   const handleSubmit = async () => {
-    const createdBy = localStorage.getItem("username") || "unknown";
+    const createdBy = user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short", // e.g., "Dec"
@@ -124,7 +124,7 @@ const CreateMRS = () => {
         requestData,
         {
           headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+            Authorization: user.authToken,
           },
         }
       );
@@ -150,7 +150,7 @@ const CreateMRS = () => {
             `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=MM&city=${formData.execution_city}`,
             {
               headers: {
-                Authorization: `${localStorage.getItem("token")}`,
+                Authorization: user.authToken,
               },
             }
           );
@@ -194,7 +194,7 @@ const CreateMRS = () => {
             `${process.env.REACT_APP_API_URL}/master/find-warehouse`,
             {
               headers: {
-                Authorization: `${localStorage.getItem("token")}`,
+                Authorization: user.authToken,
               },
             }
           );
@@ -251,7 +251,7 @@ const CreateMRS = () => {
                 customer_name: formData.customer_name || "",
               },
               headers: {
-                Authorization: `${localStorage.getItem("token")}`,
+                Authorization: user.authToken,
               },
             }
           );
@@ -284,7 +284,7 @@ const CreateMRS = () => {
                   locator_name: selectedLocator,
                 },
                 headers: {
-                  Authorization: `${localStorage.getItem("token")}`,
+                  Authorization: user.authToken,
                 },
               }
             )
@@ -325,7 +325,7 @@ const CreateMRS = () => {
           `${process.env.REACT_APP_API_URL}/master/find-vendors`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -344,27 +344,6 @@ const CreateMRS = () => {
   }, []);
 
   useEffect(() => {
-    console.log(materialLineItems);
-    if (materialLineItems.length === 0) {
-      setMaterialLineItems(
-        materialLineItems.map((material) => ({
-          cwo_id: material.cwo_id || "",
-          cwo_number: material.cwo_number || "",
-          material_record_id: material.record_id || "",
-          material_id: material.material_id || "",
-          material_desc: material.material_desc || "",
-          material_uom: material.material_uom || "",
-          material_bal_qty: material.material_bal_qty || "",
-          material_cwo_qty: material.material_wo_qty || "",
-          material_rate: material.material_rate || "",
-          material_mm_qty: "",
-          material_mm_price: "",
-        }))
-      );
-    }
-  }, [childMaterials, materialLineItems]);
-
-  useEffect(() => {
     if (locatorStock.length > 0 && materialLineItems.length > 0) {
       const updatedMaterialLineItems = materialLineItems.map((item) => {
         const matchedLocator = locatorStock.find(
@@ -373,6 +352,15 @@ const CreateMRS = () => {
         return {
           ...item,
           locator_stock: matchedLocator ? matchedLocator.stock_qty : 0,
+          cwo_id: item.cwo_id || "",
+          cwo_number: item.cwo_number || "",
+          material_record_id: item.record_id || "",
+          material_id: item.material_id || "",
+          material_desc: item.material_desc || "",
+          material_uom: item.material_uom || "",
+          material_bal_qty: item.material_bal_qty || "",
+          material_cwo_qty: item.material_wo_qty || "",
+          material_rate: item.material_rate || "",
         };
       });
 
@@ -381,9 +369,8 @@ const CreateMRS = () => {
           JSON.stringify(prev) === JSON.stringify(updatedMaterialLineItems);
         return isSame ? prev : updatedMaterialLineItems;
       });
-      console.log(updatedMaterialLineItems);
     }
-  }, [locatorStock]);
+  }, [locatorStock, materialLineItems]);
 
   // useEffect(() => {
   //   const fetchWorkOrders = async () => {
@@ -391,7 +378,7 @@ const CreateMRS = () => {
   //       const response = await axios.get(
   //         `${process.env.REACT_APP_API_URL}/workorder/find-child-workorder`,
   //         {
-  //           headers: { Authorization: `${localStorage.getItem("token")}` },
+  //           headers: { Authorization: user.authToken },
   //         }
   //       );
 
@@ -410,18 +397,27 @@ const CreateMRS = () => {
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/workorder/find-child-workorder`,
           {
-            headers: { Authorization: `${localStorage.getItem("token")}` },
+            params: {
+              company: user.company,
+              internal_manager: user.name,
+            },
+            headers: { Authorization: user.authToken },
           }
         );
 
         const data = response.data;
 
-        const externalOrders = data.filter((item) => item.vendor_id !== null);
-        const internalOrders = data.filter((item) => item.vendor_id === null);
-        console.log(externalOrders);
-        console.log(internalOrders);
-        setExternalWorkOrders(externalOrders);
-        setInternalWorkOrders(internalOrders);
+        if (user.company === "TPS") {
+          // Only set internal orders for "TPS"
+          const internalOrders = data.filter((item) => item.vendor_id === null);
+          setInternalWorkOrders(internalOrders);
+          setExternalWorkOrders([]); // Clear external orders
+        } else {
+          // Only set external orders for other companies
+          const externalOrders = data.filter((item) => item.vendor_id !== null);
+          setExternalWorkOrders(externalOrders);
+          setInternalWorkOrders([]); // Clear internal orders
+        }
       } catch (err) {
         console.error("Failed to fetch work orders:", err);
         setError("Failed to load work orders");
@@ -429,7 +425,8 @@ const CreateMRS = () => {
     };
 
     fetchWorkOrders();
-  }, []);
+  }, [user]); // Add `user` as a dependency to trigger effect when it changes
+
   useEffect(() => {
     if (selectedWorkOrder) {
       const fetchChildServices = async () => {
@@ -441,7 +438,7 @@ const CreateMRS = () => {
                 cwo_number: selectedWorkOrder.cwo_number,
                 cwo_id: selectedWorkOrder.cwo_id,
               },
-              headers: { Authorization: `${localStorage.getItem("token")}` },
+              headers: { Authorization: user.authToken },
             }
           );
           setChildServices(response.data);
@@ -457,7 +454,7 @@ const CreateMRS = () => {
             `${process.env.REACT_APP_API_URL}/workorder/find-child-material`,
             {
               params: { cwo_id: selectedWorkOrder.cwo_id },
-              headers: { Authorization: `${localStorage.getItem("token")}` },
+              headers: { Authorization: user.authToken },
             }
           );
           setMaterialLineItems(response.data);
@@ -596,17 +593,17 @@ const CreateMRS = () => {
                     ? internalWorkOrders
                     : externalWorkOrders
                 }
-                getOptionLabel={(option) => option.cwo_number || ""}
+                getOptionLabel={(option) => option.cwo_id.toString() || ""}
                 onChange={(event, newValue) => {
                   handleWorkOrderSelect(event, newValue);
                 }}
                 isOptionEqualToValue={(option, value) =>
-                  option.cwo_number === value?.cwo_number
+                  option.cwo_id === value?.cwo_id
                 }
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="CWO Number"
+                    label="CWO id"
                     variant="outlined"
                     fullWidth
                   />
@@ -746,7 +743,7 @@ const CreateMRS = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Approver Email"
+                    label="Deployment Head"
                     variant="outlined"
                     fullWidth
                   />
@@ -757,7 +754,7 @@ const CreateMRS = () => {
             <Grid item xs={12} sm={6} md={4}>
               <TextField
                 id="approver-name"
-                label="Approver Name"
+                label="Deployment Head Name"
                 value={approverName}
                 variant="outlined"
                 InputProps={{
@@ -770,134 +767,136 @@ const CreateMRS = () => {
                 fullWidth
               />
             </Grid>
+            {selectedLocator && (
+              <Grid item xs={12}>
+                <Typography variant="h6">Materials</Typography>
+                <Grid container spacing={2} mt={1}>
+                  {materialLineItems.map((material, index) => (
+                    <React.Fragment key={material.record_id}>
+                      <Grid item xs={12} sm={6} md={2}>
+                        <TextField
+                          label="Material Code"
+                          value={material.material_id || ""}
+                          InputProps={{ readOnly: true }}
+                          variant="outlined"
+                          fullWidth
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={2}>
+                        <TextField
+                          label="Description"
+                          value={material.material_desc || ""}
+                          InputProps={{ readOnly: true }}
+                          variant="outlined"
+                          fullWidth
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={1}>
+                        <TextField
+                          label="CWO QTY"
+                          value={material.material_wo_qty || ""}
+                          InputProps={{ readOnly: true }}
+                          variant="outlined"
+                          fullWidth
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={1}>
+                        <TextField
+                          label="UOM"
+                          value={material.material_uom || ""}
+                          InputProps={{ readOnly: true }}
+                          variant="outlined"
+                          fullWidth
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={1}>
+                        <TextField
+                          disabled
+                          label="Rate"
+                          value={material.material_rate || ""}
+                          InputProps={{ readOnly: true }}
+                          variant="outlined"
+                          fullWidth
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={1}>
+                        <TextField
+                          disabled
+                          label="CWO Bal QTY"
+                          value={material.material_bal_qty || ""}
+                          InputProps={{ readOnly: true }}
+                          variant="outlined"
+                          fullWidth
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={1}>
+                        <TextField
+                          disabled
+                          label="Locator QTY"
+                          value={material.locator_stock || ""}
+                          InputProps={{ readOnly: true }}
+                          variant="outlined"
+                          fullWidth
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={1.5}>
+                        <TextField
+                          label="MM Qty"
+                          value={materialLineItems[index]?.mm_qty || ""}
+                          onChange={(e) => {
+                            console.log(material);
+                            const value = e.target.value;
+                            const mmQty = Number(value);
+                            const error =
+                              mmQty > Number(material.material_bal_qty)
+                                ? "MM Qty cannot exceed Bal Qty"
+                                : "";
 
-            <Grid item xs={12}>
-              <Typography variant="h6">Materials</Typography>
-              <Grid container spacing={2} mt={1}>
-                {materialLineItems.map((material, index) => (
-                  <React.Fragment key={material.record_id}>
-                    <Grid item xs={12} sm={6} md={2}>
-                      <TextField
-                        label="Material Code"
-                        value={material.material_id || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
-                      <TextField
-                        label="Description"
-                        value={material.material_desc || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
-                      <TextField
-                        label="CWO QTY"
-                        value={material.material_wo_qty || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
-                      <TextField
-                        label="UOM"
-                        value={material.material_uom || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
-                      <TextField
-                        disabled
-                        label="Rate"
-                        value={material.material_rate || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
-                      <TextField
-                        disabled
-                        label="CWO Bal QTY"
-                        value={material.material_bal_qty || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
-                      <TextField
-                        disabled
-                        label="Locator QTY"
-                        value={material.locator_stock || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={1.5}>
-                      <TextField
-                        label="MM Qty"
-                        value={materialLineItems[index]?.mm_qty || ""}
-                        onChange={(e) => {
-                          console.log(material);
-                          const value = e.target.value;
-                          const mmQty = Number(value);
-                          const error =
-                            mmQty > Number(material.material_wo_qty)
-                              ? "MM Qty cannot exceed CWO Qty"
-                              : "";
+                            setMaterialLineItems((prevItems) =>
+                              prevItems.map((item, idx) =>
+                                idx === index
+                                  ? {
+                                      ...item,
+                                      mm_qty: value,
+                                      error,
+                                      material_mm_price: error
+                                        ? "" // Clear CWO Price on error
+                                        : (
+                                            mmQty *
+                                            Number(material.material_rate)
+                                          ).toFixed(2), // Calculate price if valid
+                                    }
+                                  : item
+                              )
+                            );
+                          }}
+                          error={!!materialLineItems[index]?.error}
+                          helperText={materialLineItems[index]?.error || ""}
+                          variant="outlined"
+                          fullWidth
+                          type="number"
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6} md={1.5}>
+                        <TextField
+                          label="Amount"
+                          value={
+                            materialLineItems[index]?.material_mm_price || ""
+                          }
+                          InputProps={{ readOnly: true }}
+                          variant="outlined"
+                          fullWidth
+                        />
+                      </Grid>
 
-                          setMaterialLineItems((prevItems) =>
-                            prevItems.map((item, idx) =>
-                              idx === index
-                                ? {
-                                    ...item,
-                                    mm_qty: value,
-                                    error,
-                                    material_mm_price: error
-                                      ? "" // Clear CWO Price on error
-                                      : (
-                                          mmQty * Number(material.material_rate)
-                                        ).toFixed(2), // Calculate price if valid
-                                  }
-                                : item
-                            )
-                          );
-                        }}
-                        error={!!materialLineItems[index]?.error}
-                        helperText={materialLineItems[index]?.error || ""}
-                        variant="outlined"
-                        fullWidth
-                        type="number"
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={1.5}>
-                      <TextField
-                        label="Amount"
-                        value={
-                          materialLineItems[index]?.material_mm_price || ""
-                        }
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid>
-
-                    <Grid item xs={12}>
-                      <Divider />
-                    </Grid>
-                  </React.Fragment>
-                ))}
+                      <Grid item xs={12}>
+                        <Divider />
+                      </Grid>
+                    </React.Fragment>
+                  ))}
+                </Grid>
               </Grid>
-            </Grid>
+            )}
           </Grid>
         )}
         <Grid item xs={12} sx={{ display: "flex", justifyContent: "center" }}>

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useContext } from "react";
 import axios from "axios";
 import {
   MaterialReactTable,
@@ -9,20 +9,24 @@ import {
 import { Box, lighten, Typography, Button } from "@mui/material";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import MwoModal from "./mwoModal";
-import { mkConfig, generateCsv, download } from "export-to-csv"; //or use your library of choice here
+import { mkConfig, generateCsv, download } from "export-to-csv";
+import { AuthContext } from "../../../context/authContext";
 
 const Example = ({ refreshKey }) => {
+  const { user } = useContext(AuthContext);
   const [tableData, setTableData] = useState([]);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const username = useMemo(() => localStorage.getItem("username"), []);
+  const username = useMemo(() => user.username, []);
   const [motherMaterial, setMotherMaterial] = useState([]);
   const [motherService, setMotherService] = useState([]);
   const [allMotherMaterial, setAllMotherMaterial] = useState([]);
   const [allMotherService, setAllMotherService] = useState([]);
   const [selectedRow, setSelectedRow] = useState(null);
   const [open, setOpen] = useState(false);
-
+  const [approvers, setApprovers] = useState([]);
+  const [selectedApproverEmail, setSelectedApproverEmail] = useState("");
+  const [approverName, setApproverName] = useState("");
   const [comment, setComment] = useState("");
 
   const [mwoStatusPass, setMwoStatusPass] = useState("");
@@ -52,7 +56,7 @@ const Example = ({ refreshKey }) => {
             `${process.env.REACT_APP_API_URL}/workorder/find-mother-material?mwo_id=${selectedRow.mwo_id}`,
             {
               headers: {
-                Authorization: `${localStorage.getItem("token")}`,
+                Authorization: user.authToken,
               },
             }
           );
@@ -85,7 +89,7 @@ const Example = ({ refreshKey }) => {
             `${process.env.REACT_APP_API_URL}/workorder/find-mother-services?mwo_id=${selectedRow.mwo_id}`,
             {
               headers: {
-                Authorization: `${localStorage.getItem("token")}`,
+                Authorization: user.authToken,
               },
             }
           );
@@ -118,13 +122,53 @@ const Example = ({ refreshKey }) => {
   }, [selectedRow]);
 
   useEffect(() => {
+    if (selectedRow != null && selectedRow.execution_city != null) {
+      console.log(selectedRow);
+      const fetchApprovers = async () => {
+        try {
+          console.log(selectedRow, "117");
+          // console.log(selectedRow.warehouse_city);
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=MWO&city=${selectedRow.execution_city}`,
+            {
+              headers: {
+                Authorization: user.authToken,
+              },
+            }
+          );
+          const approverArray = response.data.map((reviewer) => ({
+            id: reviewer.record_id,
+            type: reviewer.type,
+            reviewer_email: reviewer.reviewer_email,
+            approver_email: reviewer.approver_email,
+            city: reviewer.city,
+            reviewer_name: reviewer.reviewer_name,
+            approver_name: reviewer.approver_name,
+            approver2_email: reviewer.approver2_email,
+            approver2_name: reviewer.approver2_name,
+            approver3_email: reviewer.approver3_email,
+            approver3_name: reviewer.approver3_name,
+          }));
+          console.log(approverArray, "138");
+          setApprovers(approverArray);
+        } catch (err) {
+          console.error("Error fetching reviewer:", err);
+          setError("Failed to load reviewer");
+        }
+      };
+
+      fetchApprovers();
+    }
+  }, [selectedRow]);
+
+  useEffect(() => {
     const fetchAllMotherMaterial = async () => {
       try {
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/workorder/find-all-mother-material`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -158,7 +202,7 @@ const Example = ({ refreshKey }) => {
           `${process.env.REACT_APP_API_URL}/workorder/find-all-mother-service`,
           {
             headers: {
-              Authorization: `${localStorage.getItem("token")}`,
+              Authorization: user.authToken,
             },
           }
         );
@@ -193,16 +237,20 @@ const Example = ({ refreshKey }) => {
       setIsLoading(true);
       try {
         const statuses = [
-          "Pending for approval",
+          "Pending with deployment head",
+          "Pending with head row",
+          "Pending with billing spoc",
           "Approved",
-          "Rejected by approver",
+          "Rejected by deployment head",
+          "Rejected by with head row",
+          "Rejected by with billing spoc",
         ];
 
         const promises = statuses.map((status) =>
           axios.get(
             `${process.env.REACT_APP_API_URL}/workorder/find-workorder-actions?user=${username}&mwostatus=${status}`,
             {
-              headers: { Authorization: `${localStorage.getItem("token")}` },
+              headers: { Authorization: user.authToken },
             }
           )
         );
@@ -245,7 +293,7 @@ const Example = ({ refreshKey }) => {
             `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=Inventory&city=${selectedRow.warehouse_city}`,
             {
               headers: {
-                Authorization: `${localStorage.getItem("token")}`,
+                Authorization: user.authToken,
               },
             }
           );
@@ -271,7 +319,7 @@ const Example = ({ refreshKey }) => {
 
   const handleReject = async () => {
     console.log("Approved with comment:", comment);
-    const actionedBy = localStorage.getItem("username") || "unknown";
+    const actionedBy = user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short", // e.g., "Dec"
@@ -281,34 +329,48 @@ const Example = ({ refreshKey }) => {
       hour12: false, // AM/PM format
       timeZone: "IST", // Adjust to UTC
     });
-    console.log(selectedRow);
-    mwoStatus = "Rejected by approver";
+    if (mwoStatusPass === "Pending with deployment head") {
+      mwoStatus = "Rejected by deployment head";
+    } else if (mwoStatusPass === "Pending with head row") {
+      mwoStatus = "Rejected by head row";
+    } else if (mwoStatusPass === "Pending with billing spoc") {
+      mwoStatus = "Rejected by billing spoc";
+    }
+
     console.log("Approved", 278);
     try {
-      await axios.patch(
+      const response = await axios.patch(
         `${process.env.REACT_APP_API_URL}/workorder/update-status`,
         {
           mwo_id: selectedRow.mwo_id, // Ensure this is passed to your modal
-          mwo_status: mwoStatus,
+          mwo_status: mwoStatus, // Ensure this is passed to your modal
           approved_at: actionedAt,
           approved_by: actionedBy,
           approver_comments: comment,
         },
         {
           headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+            Authorization: user.authToken,
           },
         }
       );
-    } catch (error) {
-      console.error("Error in approving: ", error);
-      setError("Failed to Approve");
+      console.log(response.data.message);
+      alert("Work order rejected successfully!");
+    } catch (err) {
+      console.error("Error rejecting work order:", err);
+      alert("Failed to reject work order. Please try again.");
     }
   };
 
   const handleApprove = async () => {
-    console.log("Approved with comment:", comment);
-    const actionedBy = localStorage.getItem("username") || "unknown";
+    if (mwoStatusPass === "Pending with deployment head") {
+      mwoStatus = "Pending with head row";
+    } else if (mwoStatusPass === "Pending with head row") {
+      mwoStatus = "Pending with billing spoc";
+    } else if (mwoStatusPass === "Pending with billing spoc") {
+      mwoStatus = "Approved";
+    }
+    const actionedBy = user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short", // e.g., "Dec"
@@ -318,22 +380,41 @@ const Example = ({ refreshKey }) => {
       hour12: false, // AM/PM format
       timeZone: "IST", // Adjust to UTC
     });
-    console.log(selectedRow);
-    mwoStatus = "Approved";
-    console.log("Approved", 278);
+
+    console.log(selectedApproverEmail);
+
+    const requestData = {
+      mwo_id: selectedRow.mwo_id, // Ensure this is passed to your modal
+      mwo_status: mwoStatus,
+      approved_at: actionedAt,
+      approved_by: actionedBy,
+      approver_comments: comment,
+      mwo_approver1_email:
+        mwoStatusPass === "Pending with deployment head"
+          ? selectedApproverEmail || selectedRow.mwo_approver1_email || ""
+          : selectedRow.mwo_approver1_email || "",
+      mwo_approver1_name:
+        mwoStatusPass === "Pending with deployment head"
+          ? approverName || selectedRow.mwo_approver1_name || ""
+          : selectedRow.mwo_approver1_name || "",
+
+      mwo_approver2_email:
+        mwoStatusPass === "Pending with head row"
+          ? selectedApproverEmail || selectedRow.mwo_approver2_email || ""
+          : selectedRow.mwo_approver2_email || "",
+      mwo_approver2_name:
+        mwoStatusPass === "Pending with head row"
+          ? approverName || selectedRow.mwo_approver2_name || ""
+          : selectedRow.mwo_approver3_name || "",
+    };
+    console.log(requestData);
     try {
       await axios.patch(
         `${process.env.REACT_APP_API_URL}/workorder/update-status`,
-        {
-          mwo_id: selectedRow.mwo_id, // Ensure this is passed to your modal
-          mwo_status: mwoStatus,
-          approved_at: actionedAt,
-          approved_by: actionedBy,
-          approver_comments: comment,
-        },
+        requestData,
         {
           headers: {
-            Authorization: `${localStorage.getItem("token")}`,
+            Authorization: user.authToken,
           },
         }
       );
@@ -385,8 +466,8 @@ const Example = ({ refreshKey }) => {
       // filterFn: "contains",
     },
     {
-      accessorKey: "created_by",
-      header: "Created By",
+      accessorKey: "route_name",
+      header: "Route Name",
       size: 150,
       filterFn: "contains",
     },
@@ -849,6 +930,9 @@ const Example = ({ refreshKey }) => {
         setComment={setComment}
         comment={comment}
         handleApprove={handleApprove}
+        setSelectedApproverEmail={setSelectedApproverEmail}
+        setApproverName={setApproverName}
+        approvers={approvers}
         mwoStatus={mwoStatusPass}
         handleReject={handleReject}
         username={username}

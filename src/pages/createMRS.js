@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-import CreateMRS from "../components/mrsCreation/createW2S";
+import CreateW2S from "../components/mrsCreation/createW2S";
+import CreateS2W from "../components/mrsCreation/createS2W";
 import { Box, lighten, Typography, Button, IconButton } from "@mui/material";
 
 const Requests = () => {
@@ -20,13 +21,11 @@ const Requests = () => {
   const renderComponent = () => {
     switch (activeTab) {
       case "W2S":
-        return <CreateMRS key={refreshKey} />; // Current inventory component
-      case "CWO-CWO":
-        return "PM1-PM1";
+        return <CreateW2S key={refreshKey} />; // Current inventory component
       case "D2S":
         return "D2S";
       case "S2W":
-        return "S2W";
+        return <CreateS2W key={refreshKey} />; // Current inventory component
       default:
         return null;
     }
@@ -66,24 +65,6 @@ const Requests = () => {
           }}
         >
           W2S
-        </Button>
-        <Button
-          onClick={() => setActiveTab("CWO-CWO")}
-          sx={{
-            color: activeTab === "CWO-CWO" ? "#ec7c30" : "black",
-            backgroundColor: activeTab === "CWO-CWO" ? "black" : "#ec7c30",
-            height: "40px",
-            padding: "10px 20px",
-            borderRadius: "5px",
-            fontWeight: "bold",
-            "&:hover": {
-              backgroundColor: "black",
-              color: "#ec7c30",
-              cursor: "pointer",
-            },
-          }}
-        >
-          CWO-CWO
         </Button>
 
         <Button
