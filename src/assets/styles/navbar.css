@@ -8,10 +8,10 @@
   display: flex;
   align-items: center;
   z-index: 1000;
-  justify-content: space-between; /* Ensure space between logo and nav */
+  justify-content: space-between;
   font-family: sans-serif;
   padding: 0 20px;
-  box-sizing: border-box; /* Ensure padding is included in width calculation */
+  box-sizing: border-box;
   font-size: 18px;
 }
 
@@ -39,18 +39,17 @@
 
 @media print {
   .header {
-    position: fixed; /* Ensure it stays at the top */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
   }
 
   .header + * {
-    /* Target the content below the navbar */
-    margin-top: 100px; /* Adjust this to avoid overlapping */
+    margin-top: 100px;
   }
 
   .header:not(:first-child) {
-    display: none !important; /* Hide navbar on subsequent pages */
+    display: none !important;
   }
 }

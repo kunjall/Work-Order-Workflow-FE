@@ -8,7 +8,7 @@ import { Box, lighten, Typography, Button, IconButton } from "@mui/material";
 const Requests = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("W2S"); // Default set to W2S
+  const [activeTab, setActiveTab] = useState("W2S");
   const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
@@ -17,33 +17,33 @@ const Requests = () => {
     }
   }, [user, navigate]);
 
-  // Function to render components based on the active tab
   const renderComponent = () => {
     switch (activeTab) {
       case "W2S":
-        return <CreateW2S key={refreshKey} />; // Current inventory component
+        return <CreateW2S key={refreshKey} />;
       case "D2S":
         return "D2S";
       case "S2W":
-        return <CreateS2W key={refreshKey} />; // Current inventory component
+        return <CreateS2W key={refreshKey} />;
       default:
         return null;
     }
   };
 
-  // Refresh function
   const handleRefresh = () => {
     setRefreshKey((prevKey) => prevKey + 1);
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      {/* Navigation Buttons */}
+      {}
       <div
         style={{
+          marginTop: "2rem",
+          marginRight: "2rem",
+          width: "95%",
           display: "flex",
           justifyContent: "flex-start",
-          marginTop: "90px",
           paddingLeft: "20px",
           gap: "5px",
         }}
@@ -94,7 +94,7 @@ const Requests = () => {
             padding: "10px 20px",
             borderRadius: "5px",
             fontWeight: "bold",
-            // marginLeft: "70px",
+
             "&:hover": {
               backgroundColor: "black",
               color: "white",
@@ -106,7 +106,7 @@ const Requests = () => {
         </Button>
       </div>
 
-      {/* Render the selected component */}
+      {}
       <div style={{ marginTop: "10px", flex: "1" }}>{renderComponent()}</div>
     </div>
   );

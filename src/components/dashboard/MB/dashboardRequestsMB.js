@@ -34,22 +34,20 @@ const Example = ({ refreshKey }) => {
   let mbStatus;
 
   const handleOpenModal = (row) => {
-    setSelectedRow(row); // Store the row's data
+    setSelectedRow(row);
     setMbStatusPass(row ? row.mb_status : "");
-    setOpen(true); // Open the modal
+    setOpen(true);
   };
 
   useEffect(() => {
-    // Reset the comment whenever a new request is selected
     setComment("");
   }, [selectedRow]);
 
   const handleCloseModal = () => {
-    setOpen(false); // Close the modal
+    setOpen(false);
   };
   useEffect(() => {
     if (selectedRow != null) {
-      console.log(selectedRow);
       const fetchMBMaterial = async () => {
         try {
           const response = await axios.get(
@@ -60,8 +58,6 @@ const Example = ({ refreshKey }) => {
               },
             }
           );
-
-          console.log(response.data);
 
           const mbMaterialArray = response.data.map((material) => ({
             record_id: material.record_id,
@@ -75,7 +71,6 @@ const Example = ({ refreshKey }) => {
             material_unit_price: material.material_unit_price,
             material_price: material.material_price,
           }));
-          console.log(mbMaterialArray);
           setMbMaterial(mbMaterialArray);
         } catch (err) {
           console.error("Error fetching child materials:", err);
@@ -94,8 +89,6 @@ const Example = ({ refreshKey }) => {
             }
           );
 
-          console.log(response.data);
-
           const mbServiceArray = response.data.map((service) => ({
             record_id: service.record_id,
             cwo_id: service.cwo_id,
@@ -108,7 +101,6 @@ const Example = ({ refreshKey }) => {
             service_unit_price: service.service_unit_price,
             service_price: service.service_price,
           }));
-          console.log(mbServiceArray);
           setMbService(mbServiceArray);
         } catch (err) {
           console.error("Error fetching child services:", err);
@@ -122,11 +114,8 @@ const Example = ({ refreshKey }) => {
   }, [selectedRow]);
   useEffect(() => {
     if (selectedRow != null && selectedRow.execution_city != null) {
-      console.log(selectedRow);
       const fetchApprovers = async () => {
         try {
-          console.log(selectedRow, "117");
-          // console.log(selectedRow.warehouse_city);
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=MB&city=${selectedRow.execution_city}`,
             {
@@ -148,7 +137,6 @@ const Example = ({ refreshKey }) => {
             approver3_email: reviewer.approver3_email,
             approver3_name: reviewer.approver3_name,
           }));
-          console.log(approverArray, "138");
           setApprovers(approverArray);
         } catch (err) {
           console.error("Error fetching reviewer:", err);
@@ -184,7 +172,6 @@ const Example = ({ refreshKey }) => {
           material_unit_price: material.material_unit_price,
           material_price: material.material_price,
         }));
-        console.log(mbMaterialArray);
         setAllMbMaterial(mbMaterialArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
@@ -218,7 +205,6 @@ const Example = ({ refreshKey }) => {
           service_unit_price: service.service_unit_price,
           service_price: service.service_price,
         }));
-        console.log(mbServiceArray);
         setAllMbService(mbServiceArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
@@ -228,7 +214,6 @@ const Example = ({ refreshKey }) => {
     fetchAllMbService();
   }, []);
 
-  // Fetch data from the API
   useEffect(() => {
     let isMounted = true;
 
@@ -265,7 +250,6 @@ const Example = ({ refreshKey }) => {
 
           setTableData(combinedData);
           setIsLoading(false);
-          console.log(combinedData); // Log combined data for debugging
         }
       } catch (err) {
         if (isMounted) {
@@ -283,52 +267,16 @@ const Example = ({ refreshKey }) => {
     };
   }, [username]);
 
-  useEffect(() => {
-    if (selectedRow != null && selectedRow.warehouse_city != null) {
-      console.log(selectedRow);
-      const fetchApprovers = async () => {
-        try {
-          console.log(selectedRow, "117");
-          console.log(selectedRow.warehouse_city);
-          const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=CWO&city=${selectedRow.warehouse_city}`,
-            {
-              headers: {
-                Authorization: user.authToken,
-              },
-            }
-          );
-          const approverArray = response.data.map((reviewer) => ({
-            id: reviewer.record_id,
-            type: reviewer.type,
-            reviewer_email: reviewer.reviewer_email,
-            approver_email: reviewer.approver_email,
-            city: reviewer.city,
-            reviewer_name: reviewer.reviewer_name,
-            approver_name: reviewer.approver_name,
-          }));
-          console.log(approverArray, "138");
-        } catch (err) {
-          console.error("Error fetching reviewer:", err);
-          setError("Failed to load reviewer");
-        }
-      };
-
-      fetchApprovers();
-    }
-  }, [selectedRow]);
-
   const handleReject = async () => {
-    console.log("Approved with comment:", comment);
     const actionedBy = user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
     if (mbStatusPass === "Pending with TPM") {
       mbStatus = "Rejected by TPM";
@@ -340,13 +288,12 @@ const Example = ({ refreshKey }) => {
       mbStatus = "Rejected";
     }
 
-    console.log("Approved", 278);
     try {
       const response = await axios.patch(
         `${process.env.REACT_APP_API_URL}/mb/reject-mb`,
         {
           mb_id: selectedRow.mb_id,
-          cwo_id: selectedRow.cwo_id, // Ensure this is passed to your modal
+          cwo_id: selectedRow.cwo_id,
           mb_status: mbStatus,
           actioned_at: actionedAt,
           actioned_by: actionedBy,
@@ -358,7 +305,6 @@ const Example = ({ refreshKey }) => {
           },
         }
       );
-      console.log(response.data.message);
       alert("Work order rejected successfully!");
     } catch (err) {
       console.error("Error rejecting work order:", err);
@@ -379,21 +325,19 @@ const Example = ({ refreshKey }) => {
     const actionedBy = user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
-    console.log(mbStatusPass);
 
     const requestData = {
       mb_id: selectedRow.mb_id,
-      cwo_id: selectedRow.cwo_id, // Ensure this is passed to your modal
+      cwo_id: selectedRow.cwo_id,
       mb_status: mbStatus,
 
-      // Preserve existing approver details unless the status requires a change
       mb_approver2_email:
         selectedApproverEmail || selectedRow.mb_approver2_email || "",
       mb_approver2_name: approverName || selectedRow.mb_approver2_name || "",
@@ -420,7 +364,6 @@ const Example = ({ refreshKey }) => {
       actioned_by: actionedBy,
       approver_comments: comment,
 
-      // Preserve other relevant data
       locator_name: selectedRow.locator_name,
 
       mbMaterial:
@@ -433,12 +376,9 @@ const Example = ({ refreshKey }) => {
           : undefined,
     };
 
-    // Remove the key if it's undefined to avoid sending it unnecessarily
     if (requestData.mbMaterial === undefined) {
       delete requestData.mbMaterial;
     }
-
-    // Include materialLineItems if mmStatusPass meets the criteria
 
     try {
       await axios.patch(
@@ -456,7 +396,6 @@ const Example = ({ refreshKey }) => {
     }
   };
 
-  // Define columns
   const columns = useMemo(() => [
     {
       accessorKey: "mb_id",
@@ -471,9 +410,9 @@ const Example = ({ refreshKey }) => {
             textDecoration: "underline",
             cursor: "pointer",
           }}
-          onClick={() => handleOpenModal(row.original)} // Pass the row's data
+          onClick={() => handleOpenModal(row.original)}
         >
-          {"MB-" + row.original.mb_id} {/* Prefix with "cwo_" */}{" "}
+          {"MB-" + row.original.mb_id} {}{" "}
         </span>
       ),
     },
@@ -494,8 +433,7 @@ const Example = ({ refreshKey }) => {
       accessorKey: "execution_city",
       header: "Execution City",
       size: 150,
-      Cell: ({ cell }) => cell.getValue(), // Format date
-      // filterFn: "contains",
+      Cell: ({ cell }) => cell.getValue(),
     },
     {
       accessorKey: "created_by",
@@ -508,8 +446,7 @@ const Example = ({ refreshKey }) => {
       accessorKey: "created_at",
       header: "Created Dt",
       size: 150,
-      Cell: ({ cell }) => cell.getValue(), // Format date
-      // filterFn: "contains",
+      Cell: ({ cell }) => cell.getValue(),
     },
 
     {
@@ -523,29 +460,17 @@ const Example = ({ refreshKey }) => {
 
   const handleExportRows = (rows) => {
     const flattened = [];
-    console.log(rows);
 
     rows.forEach((mb) => {
-      console.log(mb.mb_id);
-      // Merge materials
       const materials = allMbMaterial.filter(
         (mat) => mat.mb_id === String(mb.mb_id)
       );
 
-      // Merge services
       const services = allMbService.filter(
         (srv) => srv.mb_id === String(mb.mb_id)
       );
 
-      // console.log(allChildService);
-      // console.log(allChildMaterial);
-      console.log(services);
-      console.log(materials);
-
-      // Combine materials and services with the main data
       if (materials.length > 0 || services.length > 0) {
-        console.log("testettete");
-        // Add each material as a separate row
         materials.forEach((mat) => {
           flattened.push({
             ...mb,
@@ -564,7 +489,6 @@ const Example = ({ refreshKey }) => {
           });
         });
 
-        // Add each service as a separate row
         services.forEach((srv) => {
           flattened.push({
             ...mb,
@@ -583,8 +507,6 @@ const Example = ({ refreshKey }) => {
           });
         });
       } else {
-        // Push a row without material if no materials exist
-
         flattened.push({
           ...mb,
 
@@ -606,10 +528,9 @@ const Example = ({ refreshKey }) => {
 
     const csvConfig = mkConfig({
       filename: `MB_${username}`,
-      useKeysAsHeaders: true, // Automatically use keys as column headers
+      useKeysAsHeaders: true,
     });
 
-    // Generate and download CSV
     const csv = generateCsv(csvConfig)(flattened);
     download(csvConfig)(csv);
   };
@@ -620,8 +541,6 @@ const Example = ({ refreshKey }) => {
     enableColumnFilterModes: true,
     enableColumnOrdering: true,
     enableGrouping: false,
-    // getSubRows: (row) => row.materials,
-    // enableExpanding: true,
 
     enableColumnPinning: true,
     enableFacetedValues: true,
@@ -642,7 +561,7 @@ const Example = ({ refreshKey }) => {
     positionToolbarAlertBanner: "bottom",
     muiTableContainerProps: {
       sx: {
-        borderRadius: "16px", // Rounded edges
+        borderRadius: "16px",
         border: "1px solid #ec7c30",
         width: "98%",
         margin: "0 auto",
@@ -683,44 +602,41 @@ const Example = ({ refreshKey }) => {
       sx={{
         width: "98%",
         margin: "0 auto",
-        borderRadius: "16px", // Rounded edges
+        borderRadius: "16px",
       }}
     >
-      {/* Main Button outside Table */}
+      {}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "flex-end", // Align button to the right
-          marginBottom: "16px", // Add margin to separate from table
+          justifyContent: "flex-end",
+          marginBottom: "16px",
         }}
       >
         <Button
           disabled={table.getPrePaginationRowModel().rows.length === 0}
           onClick={() => {
-            const filteredRows = table.getFilteredRowModel().rows; // Get filtered rows
+            const filteredRows = table.getFilteredRowModel().rows;
 
-            // Extract original data and remove 'materials' field
             const allOriginalData = filteredRows.map((row) => {
-              const { materials, ...rest } = row.original; // Destructure and exclude 'materials'
-              return rest; // Return the remaining data without 'materials'
+              const { materials, ...rest } = row.original;
+              return rest;
             });
 
-            console.log(allOriginalData); // Log the modified data without 'materials'
-
-            handleExportRows(allOriginalData); // Export filtered rows without 'materials'
+            handleExportRows(allOriginalData);
           }}
           startIcon={<FileDownloadIcon />}
           variant="contained"
           sx={{
-            color: "black", // Text color
-            backgroundColor: "#ec7c30", // Orange background
-            height: "35px", // Ensure height is fixed
-            padding: "10px 20px", // Add padding for better spacing
+            color: "black",
+            backgroundColor: "#ec7c30",
+            height: "35px",
+            padding: "10px 20px",
             borderRadius: "8px",
-            marginTop: "-45px", // Optional: Round button edges
+            marginTop: "-45px",
             fontWeight: "bold",
             "&:hover": {
-              backgroundColor: "black", // Keep the orange background on hover
+              backgroundColor: "black",
               color: "#ec7c30",
               cursor: "pointer",
             },
@@ -729,7 +645,7 @@ const Example = ({ refreshKey }) => {
           Export
         </Button>
       </Box>
-      {/* Material React Table with Toolbar */}
+      {}
       <MaterialReactTable
         table={table}
         muiTableContainerProps={{
@@ -739,23 +655,6 @@ const Example = ({ refreshKey }) => {
             width: "100%",
           },
         }}
-        // renderRowSubComponent={({ row }) => (
-        //   <Box sx={{ padding: 2 }}>
-        //     <Typography variant="h6" sx={{ marginBottom: 1 }}>
-        //       Materials Details
-        //     </Typography>
-        //     <MaterialReactTable
-        //       columns={subRowColumns}
-        //       data={row.materials} // Subrow data
-        //       enableExpanding={false}
-        //       enablePagination={false}
-        //       enableSorting={false}
-        //       muiTableProps={{
-        //         sx: { backgroundColor: "#f9f9f9", border: "1px solid #ccc" },
-        //       }}
-        //     />
-        //   </Box>
-        // )}
         renderTopToolbar={({ table }) => (
           <Box
             sx={{
@@ -768,7 +667,7 @@ const Example = ({ refreshKey }) => {
               minHeight: "60px",
             }}
           >
-            {/* Filters Section */}
+            {}
             <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <MRT_GlobalFilterTextField table={table} />
               <MRT_ToggleFiltersButton table={table} />

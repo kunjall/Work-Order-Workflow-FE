@@ -22,7 +22,6 @@ import {
   InputLabel,
 } from "@mui/material";
 
-// Utility function to format dates
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
 
@@ -32,11 +31,11 @@ const formatDate = (isoDateString) => {
 
   return new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
-    month: "short", // "Dec"
+    month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false, // AM/PM format
+    hour12: false,
     timeZone: "IST",
   }).format(date);
 };
@@ -56,7 +55,6 @@ const InventoryModal = ({
   inventoryStatus,
   username,
 }) => {
-  // Function to determine styles based on the status
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
       return {
@@ -91,14 +89,12 @@ const InventoryModal = ({
 
   const handleApproveButton = () => {
     if (!isActionAllowed) return;
-    console.log(comment);
     handleApprove();
     onClose();
   };
 
   const handleRejectButton = () => {
     if (!isActionAllowed) return;
-    console.log("Rejected with comment:");
     handleReject();
     onClose();
   };
@@ -106,7 +102,7 @@ const InventoryModal = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="ld" fullWidth>
       <DialogContent sx={{ padding: "24px", position: "relative" }}>
-        {/* Status Box */}
+        {}
         <Box
           sx={{
             position: "absolute",
@@ -183,7 +179,7 @@ const InventoryModal = ({
                         "inventory_receiver_name",
                         "inventory_approver_email",
                       ].includes(key)
-                  ), // Include remaining keys not in the explicit order
+                  ),
                 ].map((key) => (
                   <Grid item xs={4} key={key}>
                     <Typography
@@ -253,7 +249,7 @@ const InventoryModal = ({
             ) : (
               <Typography>No materials available.</Typography>
             )}
-            {/* Approvers Dropdown */}
+            {}
             {inventoryStatus.toLowerCase() === "pending for receipt" && (
               <Box sx={{ marginTop: "16px" }}>
                 <Autocomplete
@@ -278,7 +274,7 @@ const InventoryModal = ({
                 />
               </Box>
             )}
-            {/* Comment Box */}
+            {}
             <Box sx={{ marginTop: "16px" }}>
               <TextField
                 label="Add Comment"

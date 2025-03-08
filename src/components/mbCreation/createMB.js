@@ -63,14 +63,13 @@ const CreateMRS = () => {
   );
 
   const handleRadioChange = (event) => {
-    console.log(internalExternal);
     setSelectedWorkOrder(null);
     setFormData({});
     setChildMaterials([]);
     setMaterialLineItems([]);
     setServiceLineItems([]);
-    setSelectedLocator(null); // Reset value for locator dropdown
-    setSelectedApproverEmail(null); // Reset value for approver email dropdown
+    setSelectedLocator(null);
+    setSelectedApproverEmail(null);
     setChildServices([]);
     setLocators([]);
 
@@ -85,15 +84,14 @@ const CreateMRS = () => {
     const createdBy = user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
 
-    // Construct the request body
     const requestData = {
       vendor_id: formData.vendor_id,
       tps_pm: formData.internal_manager,
@@ -118,11 +116,7 @@ const CreateMRS = () => {
       serviceItems: serviceLineItems,
     };
 
-    console.log(materialLineItems);
-    console.log(childMaterials);
-
     try {
-      // Send data to the backend in a single request
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/mb/create-mb`,
         requestData,
@@ -132,17 +126,9 @@ const CreateMRS = () => {
           },
         }
       );
-
-      // Handle success response
-      // if (response.status === 201) {
-      //   setSuccess(true);
-      //   // Additional success logic like closing the modal or redirecting
-      // }
     } catch (error) {
       console.error("Error submitting data:", error);
       setError("An error occurred while submitting the data.");
-      // setModalOpen(true);
-      // setSuccess(false);
     }
   };
 
@@ -166,7 +152,6 @@ const CreateMRS = () => {
           setSelectedWorkOrder(null);
           setFormData({});
         }
-        console.log("Response data:", response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -194,7 +179,6 @@ const CreateMRS = () => {
           reviewer_name: reviewer.reviewer_name,
         }));
         setApprovers(reviewerArray);
-        console.log(reviewerArray);
       } catch (err) {
         console.error("Error fetching reviewer:", err);
         setError("Failed to load reviewer");
@@ -282,7 +266,6 @@ const CreateMRS = () => {
 
           const responses = await Promise.all(promises);
           const locatorData = responses.map((response) => response.data);
-          console.log(responses);
 
           setLocatorStock(locatorData.flat());
         } catch (err) {
@@ -296,7 +279,6 @@ const CreateMRS = () => {
     }
   }, [selectedWorkOrder, selectedLocator, materialLineItems]);
 
-  // Fetch work orders on component mount
   useEffect(() => {
     const fetchVendors = async () => {
       try {
@@ -323,7 +305,6 @@ const CreateMRS = () => {
   }, []);
 
   useEffect(() => {
-    console.log(materialLineItems);
     if (materialLineItems.length === 0) {
       setMaterialLineItems(
         materialLineItems.map((material) => ({
@@ -344,7 +325,6 @@ const CreateMRS = () => {
   }, [childMaterials, materialLineItems]);
 
   useEffect(() => {
-    console.log(serviceLineItems);
     if (serviceLineItems.length === 0) {
       setServiceLineItems(
         serviceLineItems.map((service) => ({
@@ -381,28 +361,8 @@ const CreateMRS = () => {
           JSON.stringify(prev) === JSON.stringify(updatedMaterialLineItems);
         return isSame ? prev : updatedMaterialLineItems;
       });
-      console.log(updatedMaterialLineItems);
     }
   }, [locatorStock]);
-
-  // useEffect(() => {
-  //   const fetchWorkOrders = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/workorder/find-child-workorder`,
-  //         {
-  //           headers: { Authorization: user.authToken },
-  //         }
-  //       );
-
-  //       setWorkOrders(response.data);
-  //     } catch (err) {
-  //       console.error("Failed to fetch work orders:", err);
-  //       setError("Failed to load work orders");
-  //     }
-  //   };
-  //   fetchWorkOrders();
-  // }, []);
 
   useEffect(() => {
     const fetchWorkOrders = async () => {
@@ -421,15 +381,13 @@ const CreateMRS = () => {
         const data = response.data;
 
         if (user.company === "TPS") {
-          // Only set internal orders for "TPS"
           const internalOrders = data.filter((item) => item.vendor_id === null);
           setInternalWorkOrders(internalOrders);
-          setExternalWorkOrders([]); // Clear external orders
+          setExternalWorkOrders([]);
         } else {
-          // Only set external orders for other companies
           const externalOrders = data.filter((item) => item.vendor_id !== null);
           setExternalWorkOrders(externalOrders);
-          setInternalWorkOrders([]); // Clear internal orders
+          setInternalWorkOrders([]);
         }
       } catch (err) {
         console.error("Failed to fetch work orders:", err);
@@ -438,7 +396,7 @@ const CreateMRS = () => {
     };
 
     fetchWorkOrders();
-  }, [user]); // Add `user` as a dependency to trigger effect when it changes
+  }, [user]);
 
   useEffect(() => {
     if (selectedWorkOrder) {
@@ -470,7 +428,6 @@ const CreateMRS = () => {
               headers: { Authorization: user.authToken },
             }
           );
-          console.log(response.data);
           setMaterialLineItems(response.data);
         } catch (err) {
           console.error("Failed to fetch child materials:", err);
@@ -515,7 +472,6 @@ const CreateMRS = () => {
     }
   };
 
-  // Redirect to login if user is not authenticated
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -527,7 +483,7 @@ const CreateMRS = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ overflowX: "hidden", marginTop: "50px" }}>
+      <Box sx={{ overflowX: "hidden" }}>
         {exists ? (
           <Dialog open={exists}>
             <DialogTitle>
@@ -559,7 +515,7 @@ const CreateMRS = () => {
                   sx={{
                     marginLeft: 1,
                     marginTop: 1,
-                    maxWidth: "100%", // Prevent content from exceeding the viewport
+                    maxWidth: "100%",
                   }}
                 >
                   <Grid item xs={12} sm={12} md={6}>
@@ -625,10 +581,10 @@ const CreateMRS = () => {
                       </Grid>
                     </>
                   )}
-                  {/* Work Order Number Autocomplete */}
+                  {}
                   <Grid item xs={12} sm={6} md={7}>
                     <Autocomplete
-                      value={selectedWorkOrder} // Controlled value
+                      value={selectedWorkOrder}
                       options={
                         internalExternal === "internal"
                           ? internalWorkOrders
@@ -651,7 +607,7 @@ const CreateMRS = () => {
                       )}
                     />
                   </Grid>
-                  {/* Work Order Details */}
+                  {}
 
                   {/* <Grid item xs={12} sm={6} md={3}>
               <TextField
@@ -733,7 +689,7 @@ const CreateMRS = () => {
                       )}
                     />
                   </Grid>
-                  {/* <Grid item xs={12} sm={6} md={2}> */}
+                  {}
                   {/* <TextField
                         label="Description"
                         value={ || ""}
@@ -741,7 +697,7 @@ const CreateMRS = () => {
                         variant="outlined"
                         fullWidth
                       /> */}
-                  {/* </Grid> */}
+                  {}
                   <Grid item xs={12} sm={6} md={4}>
                     <Autocomplete
                       value={
@@ -792,10 +748,10 @@ const CreateMRS = () => {
                   <Grid item xs={12} sm={6} md={4}>
                     <TextField
                       label="Attachment Link"
-                      value={attachmentLink} // Controlled input
+                      value={attachmentLink}
                       onChange={(event) =>
                         setAttachmentLink(event.target.value)
-                      } // Update state
+                      }
                       variant="outlined"
                       fullWidth
                     />
@@ -877,7 +833,6 @@ const CreateMRS = () => {
                               label="MB Qty"
                               value={materialLineItems[index]?.mb_qty || ""}
                               onChange={(e) => {
-                                console.log(material);
                                 const value = e.target.value;
                                 const mbQty = Number(value);
                                 const error =
@@ -893,11 +848,11 @@ const CreateMRS = () => {
                                           mb_qty: value,
                                           error,
                                           material_mb_price: error
-                                            ? "" // Clear CWO Price on error
+                                            ? ""
                                             : (
                                                 mbQty *
                                                 Number(material.material_rate)
-                                              ).toFixed(2), // Calculate price if valid
+                                              ).toFixed(2),
                                         }
                                       : item
                                   )
@@ -982,32 +937,11 @@ const CreateMRS = () => {
                               fullWidth
                             />
                           </Grid>
-                          {/* <Grid item xs={12} sm={6} md={1}>
-                      <TextField
-                        disabled
-                        label="CWO Bal QTY"
-                        value={material.material_bal_qty || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid> */}
-                          {/* <Grid item xs={12} sm={6} md={1}>
-                      <TextField
-                        disabled
-                        label="Locator QTY"
-                        value={material.locator_stock || ""}
-                        InputProps={{ readOnly: true }}
-                        variant="outlined"
-                        fullWidth
-                      />
-                    </Grid> */}
                           <Grid item xs={12} sm={6} md={1.5}>
                             <TextField
                               label="MB Qty"
                               value={serviceLineItems[index]?.mb_qty || ""}
                               onChange={(e) => {
-                                console.log(serviceLineItems);
                                 const value = e.target.value;
                                 const mmQty = Number(value);
                                 const error =
@@ -1023,11 +957,11 @@ const CreateMRS = () => {
                                           mb_qty: value,
                                           error,
                                           service_mb_price: error
-                                            ? "" // Clear CWO Price on error
+                                            ? ""
                                             : (
                                                 mmQty *
                                                 Number(service.service_rate)
-                                              ).toFixed(2), // Calculate price if valid
+                                              ).toFixed(2),
                                         }
                                       : item
                                   )

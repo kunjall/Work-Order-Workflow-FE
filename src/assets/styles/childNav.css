@@ -1,15 +1,3 @@
-/* @media print {
-  body,
-  html,
-  #page-container,
-  .scrollable-page,
-  .ps,
-  .panel {
-    height: 100% !important;
-    width: 100% !important;
-  }
-} */
-
 @media print {
   body {
     overflow: visible !important;

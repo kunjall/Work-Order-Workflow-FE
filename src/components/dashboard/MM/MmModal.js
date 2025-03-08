@@ -22,7 +22,6 @@ import {
   InputLabel,
 } from "@mui/material";
 
-// Utility function to format dates
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
 
@@ -32,11 +31,11 @@ const formatDate = (isoDateString) => {
 
   return new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
-    month: "short", // "Dec"
+    month: "short",
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
-    hour12: false, // AM/PM format
+    hour12: false,
     timeZone: "IST",
   }).format(date);
 };
@@ -57,8 +56,6 @@ const MmModal = ({
   username,
   handleProvidedQtyChange,
 }) => {
-  console.log(mmMaterial);
-  // Function to determine styles based on the status
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
       return {
@@ -79,7 +76,7 @@ const MmModal = ({
     return {
       backgroundColor: "gray",
       color: "white",
-    }; // Default style
+    };
   };
 
   const statusStyles = getStatusStyles(mmStatus);
@@ -96,31 +93,20 @@ const MmModal = ({
         username === rowData?.mm_approver3_email));
 
   const handleApproveButton = () => {
-    //   const lowerCaseStatus = mmStatus.toLowerCase();
-
-    // // Check if username should match specific approver emails based on status
-    // const isApproverAllowed =
-    //   (lowerCaseStatus.includes("pending with deployment head") &&
-    //     username === rowData?.mm_approver1_email) ||
-    //   (lowerCaseStatus.includes("pending with material incharge") &&
-    //     username === rowData?.mm_approver2_email) ||
-    //   (lowerCaseStatus.includes("pending with material head") &&
-    //     username === rowData?.mm_approver3_email);
     if (
       (mmStatus.includes("acknowledgement") &&
         username === rowData.requested_by) ||
       isActionAllowed
     ) {
-      handleApprove(); // Call the approve function
-      onClose(); // Close the modal or form
+      handleApprove();
+      onClose();
     } else {
-      return; // Do nothing if action is not allowed
+      return;
     }
   };
 
   const handleRejectButton = () => {
     if (!isActionAllowed) return;
-    console.log("Rejected with comment:");
     handleReject();
     onClose();
   };
@@ -128,7 +114,7 @@ const MmModal = ({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="ld" fullWidth>
       <DialogContent sx={{ padding: "24px", position: "relative" }}>
-        {/* Status Box */}
+        {}
         <Box
           sx={{
             position: "absolute",
@@ -182,7 +168,7 @@ const MmModal = ({
                         "approved_at",
                         "approver_comments",
                       ].includes(key)
-                  ), // Include remaining keys not in the explicit order
+                  ),
                 ].map((key) => (
                   <Grid item xs={6} key={key}>
                     <Typography
@@ -266,14 +252,14 @@ const MmModal = ({
                                 material.issued_qty !== undefined
                                   ? material.issued_qty
                                   : ""
-                              } // Allow 0 as valid input
+                              }
                               onChange={(e) =>
                                 handleProvidedQtyChange(e, index)
                               }
                               fullWidth
                               error={
                                 material.issued_qty > material.material_bal_qty
-                              } // Show error if qty exceeds balance
+                              }
                               helperText={
                                 material.issued_qty > material.material_bal_qty
                                   ? `Cannot exceed the balance quantity of ${material.material_bal_qty}`
@@ -295,7 +281,7 @@ const MmModal = ({
             ) : (
               <Typography>No materials available.</Typography>
             )}
-            {/* Approvers Dropdown */}
+            {}
             {mmStatus.toLowerCase().includes("deployment head") && (
               <Box sx={{ marginTop: "16px" }}>
                 <Autocomplete
@@ -344,7 +330,7 @@ const MmModal = ({
                 />
               </Box>
             )}
-            {/* Comment Box */}
+            {}
             <Box sx={{ marginTop: "16px" }}>
               <TextField
                 label="Add Comment"

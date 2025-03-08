@@ -32,7 +32,6 @@ const DashboardWhinch = () => {
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
 
-  // Fetch work orders on component mount
   useEffect(() => {
     const fetchWorkOrders = async () => {
       try {
@@ -51,7 +50,6 @@ const DashboardWhinch = () => {
     fetchWorkOrders();
   }, []);
 
-  // Handle work order selection
   const handleWorkOrderSelect = (event, newValue) => {
     if (newValue) {
       setSelectedWorkOrder(newValue);
@@ -76,7 +74,6 @@ const DashboardWhinch = () => {
     }
   };
 
-  // Redirect to login if user is not authenticated
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -93,7 +90,7 @@ const DashboardWhinch = () => {
           <Typography color="error">{error}</Typography>
         ) : (
           <Grid container spacing={2}>
-            {/* Work Order Number Autocomplete */}
+            {}
             <Grid item xs={12} sm={6}>
               <Autocomplete
                 options={workOrders}
@@ -113,7 +110,7 @@ const DashboardWhinch = () => {
               />
             </Grid>
 
-            {/* Work Order Details */}
+            {}
             <Grid item xs={12} sm={6} md={3}>
               <TextField
                 label="Type"

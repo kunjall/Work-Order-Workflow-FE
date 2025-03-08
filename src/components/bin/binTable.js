@@ -1,155 +1,182 @@
-import React, { useEffect, useMemo, useState, useContext } from "react";
-import { MRT_Table, useMaterialReactTable } from "material-react-table";
+import React, { useEffect, useState, useContext } from "react";
 import axios from "axios";
-import { Box, Button } from "@mui/material";
-import WorkorderDialog from "./dialogWorkorder";
 import { AuthContext } from "../../context/authContext";
+import {
+  Autocomplete,
+  TextField,
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+  Button,
+} from "@mui/material";
+import { CSVLink } from "react-csv";
 
-const DenseTable = () => {
-  const [workorders, setWorkorders] = useState([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedWorkorder, setSelectedWorkorder] = useState(null);
-
+const LocatorStock = () => {
   const { user } = useContext(AuthContext);
-  console.log(user);
+  const [locators, setLocators] = useState([]);
+  const [selectedLocator, setSelectedLocator] = useState(null);
+  const [stockData, setStockData] = useState([]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchLocators = async () => {
       try {
+        const internalExternal =
+          user.company === "TPS" ? "internal" : "external";
+
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/workorder/find-workorder`,
+          `${process.env.REACT_APP_API_URL}/master/find-locators`,
           {
+            params: {
+              vendor_name: user.name,
+              internal_external: internalExternal,
+            },
             headers: {
               Authorization: user.authToken,
             },
           }
         );
-        console.log(response.data); // Log data to check for mwo_status
-        setWorkorders(response.data);
-      } catch (error) {
-        console.log(error);
+
+        setLocators(response.data);
+      } catch (err) {
+        console.error("Error fetching locators:", err);
       }
     };
 
-    fetchData();
-  }, []);
+    fetchLocators();
+  }, [user]);
 
-  const handleOpenDialog = (workorder) => {
-    setSelectedWorkorder(workorder);
-    setDialogOpen(true);
+  const handleLocatorChange = async (_, newValue) => {
+    setSelectedLocator(newValue);
+
+    if (!newValue) {
+      setStockData([]);
+      return;
+    }
+
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/master/find-locator-stock`,
+        {
+          params: { locator_name: newValue.locator_name },
+          headers: { Authorization: user.authToken },
+        }
+      );
+
+      setStockData(response.data);
+    } catch (err) {
+      console.error("Error fetching stock:", err);
+    }
   };
 
-  const handleCloseDialog = () => {
-    setDialogOpen(false);
-    setSelectedWorkorder(null);
-  };
-
-  const columns = [
-    {
-      accessorKey: "workorder_number",
-      header: "Workorder Number",
-      Cell: ({ cell }) => (
-        <Button
-          variant="text"
-          onClick={() => handleOpenDialog(cell.row.original)}
-        >
-          {cell.getValue()}
-        </Button>
-      ),
-    },
-    { accessorKey: "workorder_type", header: "Workorder Type" },
-    { accessorKey: "mwo_status", header: "Workorder Status" },
-    { accessorKey: "customer_id", header: "Customer ID" },
-    { accessorKey: "gis_code", header: "GIS Code" },
-    { accessorKey: "route_name", header: "Route Name" },
-    { accessorKey: "homepass_count", header: "Homepass Count" },
-    { accessorKey: "activity", header: "Activity" },
-    { accessorKey: "type", header: "Type" },
-    { accessorKey: "plan_received", header: "Plan Received" },
-    { accessorKey: "survey_customer", header: "Survey Customer" },
-    { accessorKey: "feasible", header: "Feasible" },
-    {
-      accessorKey: "informed_customer_email_date",
-      header: "Informed Customer Email Date",
-    },
-    { accessorKey: "plan_received_date", header: "Plan Received Date" },
-    { accessorKey: "date_of_surver", header: "Date of Survey" },
-    { accessorKey: "reason_if_not_feasible", header: "Reason if Not Feasible" },
-    { accessorKey: "remarks", header: "Remarks" },
-    { accessorKey: "created_by", header: "Created By" },
-    { accessorKey: "created_at", header: "Created At" },
-  ];
-
-  const table = useMaterialReactTable({
-    columns: useMemo(() => columns, []),
-    data: useMemo(() => workorders, [workorders]),
-    enableColumnActions: false,
-    enableColumnFilters: false,
-    enablePagination: true,
-    enableSorting: true,
-    initialState: {
-      pagination: {
-        pageSize: 10,
-      },
-    },
-    mrtTheme: (theme) => ({
-      baseBackgroundColor: theme.palette.background.default,
-    }),
-    muiTableContainerProps: {
-      sx: {
-        maxHeight: 500,
-        maxWidth: "100%",
-        overflow: "auto",
-        borderRadius: "8px",
-      },
-    },
-    muiTableHeadProps: {
-      sx: {
-        backgroundColor: "rgba(0, 0, 0, 0.1)", // Different header color
-      },
-    },
-    muiTableBodyRowProps: {
-      sx: {
-        "&:nth-of-type(odd)": {
-          backgroundColor: (theme) => theme.palette.action.hover,
-        },
-        height: "10px", // Denser rows
-      },
-    },
-    muiTableProps: {
-      sx: {
-        border: "1px solid rgba(81, 81, 81, .5)",
-        "& .MuiTableCell-root": {
-          padding: "1px", // Denser cells
-        },
-      },
-    },
-    muiTableHeadCellProps: {
-      sx: {
-        border: "1px solid rgba(81, 81, 81, .5)",
-        fontStyle: "italic",
-        fontWeight: "normal",
-        padding: "1px", // Denser header cells
-      },
-    },
-    muiTableBodyCellProps: {
-      sx: {
-        border: "1px solid rgba(81, 81, 81, .5)",
-        padding: "1px", // Denser body cells
-      },
-    },
-  });
+  const exportData = stockData.map((item) => ({
+    "Locator Name": selectedLocator?.locator_name || "N/A",
+    "Material ID": item.material_id,
+    "Stock Quantity": item.stock_qty,
+  }));
 
   return (
-    <Box sx={{ overflow: "auto", maxWidth: "100%" }}>
-      <MRT_Table table={table} />
-      <WorkorderDialog
-        open={dialogOpen}
-        onClose={handleCloseDialog}
-        workorder={selectedWorkorder}
+    <Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          width: "100vw",
+          mb: 2,
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: "bold",
+            color: "#2c3e50",
+            textTransform: "uppercase",
+            letterSpacing: "1px",
+            textAlign: "center",
+          }}
+        >
+          Locator Stock
+        </Typography>
+      </Box>
+
+      {}
+      <Autocomplete
+        options={locators}
+        getOptionLabel={(option) => option.locator_name || ""}
+        value={selectedLocator}
+        onChange={handleLocatorChange}
+        renderInput={(params) => (
+          <TextField {...params} label="Select Locator" fullWidth />
+        )}
+        isOptionEqualToValue={(option, value) =>
+          option.locator_name === value?.locator_name
+        }
       />
+
+      {}
+      {stockData.length > 0 && (
+        <Box mt={2} display="flex" justifyContent="flex-end">
+          <CSVLink
+            data={exportData}
+            filename="locator_stock.csv"
+            style={{ textDecoration: "none" }}
+          >
+            <Button variant="contained" color="primary">
+              Export CSV
+            </Button>
+          </CSVLink>
+        </Box>
+      )}
+
+      {}
+      <Box mt={1}>
+        {stockData.length > 0 ? (
+          <TableContainer
+            component={Paper}
+            sx={{ border: "1px solid #ccc", borderRadius: "8px" }}
+          >
+            <Table>
+              <TableHead sx={{ backgroundColor: "#f5f5f5" }}>
+                <TableRow>
+                  <TableCell
+                    sx={{ fontWeight: "bold", borderRight: "1px solid #ddd" }}
+                  >
+                    Material ID
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "bold" }}>Quantity</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {stockData.map((item, index) => (
+                  <TableRow
+                    key={index}
+                    sx={{
+                      "&:nth-of-type(even)": { backgroundColor: "#fafafa" },
+                    }}
+                  >
+                    <TableCell sx={{ borderRight: "1px solid #ddd" }}>
+                      {item.material_id}
+                    </TableCell>
+                    <TableCell>{item.stock_qty}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Typography variant="body1" mt={2} color="textSecondary">
+            No stock data available
+          </Typography>
+        )}
+      </Box>
     </Box>
   );
 };
 
-export default DenseTable;
+export default LocatorStock;

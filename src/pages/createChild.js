@@ -1,9 +1,8 @@
 import React, { useContext, useEffect } from "react";
 import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-// import ChildNav from "../components/createFiberWorkorder/child/childNav";
+
 import ChildNav from "../components/createFiberWorkorder/child/Child";
-// import "../assets/styles/childNav.css";
 
 const Find = () => {
   const { user } = useContext(AuthContext);
@@ -17,8 +16,15 @@ const Find = () => {
 
   return (
     <div style={{ display: "fixed", flexDirection: "column", height: "100%" }}>
-      {/* <div style={{ flexDirection: "column", height: "100%" }}> */}
-      <div style={{ marginTop: "5rem", width: "100%" }}>
+      {}
+      <div
+        style={{
+          marginTop: "2rem",
+          marginLeft: "2rem",
+          marginRight: "2rem",
+          width: "95%",
+        }}
+      >
         <ChildNav />
       </div>
     </div>

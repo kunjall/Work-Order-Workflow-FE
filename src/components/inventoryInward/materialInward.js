@@ -21,8 +21,8 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
   ]);
 
   useEffect(() => {
-    onUpdate(lineItems); // Send the initial items to the parent on load
-  }, [lineItems, onUpdate]); // Ensure it sends updated items every time lineItems change
+    onUpdate(lineItems);
+  }, [lineItems, onUpdate]);
 
   const handleAddLineItem = () => {
     const newLineItems = [
@@ -35,13 +35,13 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
       },
     ];
     setLineItems(newLineItems);
-    onUpdate(newLineItems); // Send updated items to parent
+    onUpdate(newLineItems);
   };
 
   const handleRemoveLineItem = (index) => {
     const updatedLineItems = lineItems.filter((_, i) => i !== index);
     setLineItems(updatedLineItems);
-    onUpdate(updatedLineItems); // Send updated items to parent
+    onUpdate(updatedLineItems);
   };
 
   const handleChange = (index, field, value) => {
@@ -49,7 +49,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
       i === index ? { ...item, [field]: value } : item
     );
     setLineItems(updatedLineItems);
-    onUpdate(updatedLineItems); // Send updated items to parent
+    onUpdate(updatedLineItems);
   };
 
   const handleMaterialChange = (index, material) => {
@@ -61,15 +61,14 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
       i === index ? { ...item, materialCode, itemName, itemUom } : item
     );
     setLineItems(updatedLineItems);
-    onUpdate(updatedLineItems); // Send updated items to parent
+    onUpdate(updatedLineItems);
   };
 
   return (
     <Box sx={{ flex: 1, padding: 2 }}>
       {lineItems.map((item, index) => (
         <Box key={index}>
-          {index !== 0 && <Divider sx={{ my: 2 }} />}{" "}
-          {/* Divider between line items */}
+          {index !== 0 && <Divider sx={{ my: 2 }} />} {}
           <Grid container spacing={2} sx={{ marginBottom: 2 }}>
             <Grid
               item
@@ -111,7 +110,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
                   handleChange(index, "itemName", e.target.value)
                 }
                 fullWidth
-                disabled // Automatically populated based on materialCode selection
+                disabled
               />
             </Grid>
 
@@ -121,7 +120,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
                 value={item.itemUom}
                 onChange={(e) => handleChange(index, "itemUom", e.target.value)}
                 fullWidth
-                disabled // Automatically populated based on materialCode selection
+                disabled
               />
             </Grid>
 
@@ -132,7 +131,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
                 onChange={(e) => handleChange(index, "itemQTY", e.target.value)}
                 fullWidth
                 type="number"
-                inputProps={{ step: "0.01", min: "0" }} // Allows decimals
+                inputProps={{ step: "0.01", min: "0" }}
               />
             </Grid>
 

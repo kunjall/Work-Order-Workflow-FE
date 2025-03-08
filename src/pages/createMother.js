@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from "react";
 import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-import MotherNav from "../components/createFiberWorkorder/mother/motherNav";
+import MotherNav from "../components/createFiberWorkorder/mother/Mother";
 
 const Test = () => {
   const { user } = useContext(AuthContext);
@@ -14,8 +14,16 @@ const Test = () => {
   }, [user, navigate]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh" }}>
-      <div style={{ position: "fixed", top: 0, width: "100%" }}>
+    <div style={{ display: "fixed", flexDirection: "column", height: "100%" }}>
+      {}
+      <div
+        style={{
+          marginTop: "2rem",
+          marginLeft: "2rem",
+          marginRight: "2rem",
+          width: "95%",
+        }}
+      >
         <MotherNav />
       </div>
     </div>

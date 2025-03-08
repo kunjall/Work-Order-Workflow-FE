@@ -23,11 +23,11 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
     },
   ]);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [error, setError] = useState(null); // To track if there's an error
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    onLineItemUpdate(lineItems); // Send the initial items to the parent on load
-    calculateTotal(); // Calculate total initially
+    onLineItemUpdate(lineItems);
+    calculateTotal();
   }, [lineItems, onLineItemUpdate]);
 
   const handleAddLineItem = () => {
@@ -56,7 +56,6 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
     );
     setLineItems(updatedLineItems);
 
-    // Calculate individual service price
     if (field === "serviceQTY" || field === "serviceRate") {
       const qty = parseFloat(updatedLineItems[index].serviceQTY || 0);
       const rate = parseFloat(updatedLineItems[index].serviceRate || 0);
@@ -75,7 +74,6 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
         rate: serviceRate,
       } = service;
 
-      // Check for duplicate serviceId
       const isDuplicate = lineItems.some(
         (item, i) => i !== index && item.serviceId === serviceId
       );
@@ -84,7 +82,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
         setError("This service has already been added.");
         return;
       } else {
-        setError(null); // Clear error if no duplicate
+        setError(null);
       }
 
       const updatedLineItems = lineItems.map((item, i) =>
@@ -115,13 +113,13 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
     const total = lineItems.reduce((sum, item) => {
       return sum + parseFloat(item.servicePrice || 0);
     }, 0);
-    setTotalAmount(total.toFixed(2)); // Format to 2 decimal places
-    onAmountUpdate(total.toFixed(2)); // Update parent component with the total amount
+    setTotalAmount(total.toFixed(2));
+    onAmountUpdate(total.toFixed(2));
   };
 
   useEffect(() => {
     calculateTotal();
-  }, [lineItems]); // Recalculate total every time line items change
+  }, [lineItems]);
 
   const isAddDisabled = lineItems.some(
     (item) =>
@@ -142,8 +140,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
       )}
       {lineItems.map((item, index) => (
         <Box key={index}>
-          {index !== 0 && <Divider sx={{ my: 2 }} />}{" "}
-          {/* Divider between line items */}
+          {index !== 0 && <Divider sx={{ my: 2 }} />} {}
           <Grid container spacing={2} sx={{ marginBottom: 2 }}>
             <Grid
               item
@@ -212,7 +209,6 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
                   handleChange(index, "serviceRate", e.target.value)
                 }
                 fullWidth
-                disabled
               />
             </Grid>
 
@@ -256,7 +252,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
           <Typography>Add Line Item</Typography>
         </IconButton>
       </Box>
-      {/* Total Amount Box */}
+      {}
       <Box
         mt={2}
         sx={{

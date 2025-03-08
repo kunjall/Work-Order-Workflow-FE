@@ -24,6 +24,7 @@
     "material-react-table": "^2.13.3",
     "mui-one-time-password-input": "^2.0.2",
     "react": "^18.3.1",
+    "react-csv": "^2.2.2",
     "react-datepicker": "^7.3.0",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.23.1",
@@ -31,7 +32,8 @@
     "react-to-print": "^3.0.2",
     "react-toastify": "^10.0.5",
     "sequelize": "^6.37.3",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "yup": "^1.6.1"
   },
   "scripts": {
     "start": "react-scripts start",

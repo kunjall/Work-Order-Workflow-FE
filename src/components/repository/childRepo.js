@@ -28,7 +28,6 @@ const ChildRepo = () => {
   const [vendorOptions, setVendorOptions] = useState([]);
   const [error, setError] = useState(null);
 
-  // Fetch work orders on component mount
   useEffect(() => {
     const fetchVendors = async () => {
       try {
@@ -91,18 +90,16 @@ const ChildRepo = () => {
 
       const fetchChildMaterials = async () => {
         try {
-          console.log(formData);
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/workorder/find-child-material`,
             {
               params: {
-                cwo_id: selectedWorkOrder.cwo_id, // Ensures cwo_id is a number
+                cwo_id: selectedWorkOrder.cwo_id,
               },
               headers: { Authorization: user.authToken },
             }
           );
           setChildMaterials(response.data);
-          console.log(childMaterials);
         } catch (err) {
           console.error("Failed to fetch child materials:", err);
           setError("Failed to load child materials");
@@ -114,7 +111,6 @@ const ChildRepo = () => {
     }
   }, [selectedWorkOrder]);
 
-  // Handle work order selection
   const handleWorkOrderSelect = (event, newValue) => {
     if (newValue) {
       setSelectedWorkOrder(newValue);
@@ -133,7 +129,6 @@ const ChildRepo = () => {
     }
   };
 
-  // Redirect to login if user is not authenticated
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -150,7 +145,7 @@ const ChildRepo = () => {
           <Typography color="error">{error}</Typography>
         ) : (
           <Grid container spacing={2}>
-            {/* Work Order Number Autocomplete */}
+            {}
             <Grid item xs={12} sm={6}>
               <Autocomplete
                 options={workOrders}
@@ -170,7 +165,7 @@ const ChildRepo = () => {
               />
             </Grid>
 
-            {/* Work Order Details */}
+            {}
             <Grid item xs={12} sm={6} md={2}>
               <TextField
                 label="MWO number"

@@ -1,5 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { CSVLink } from "react-csv";
+import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import {
   createTheme,
   responsiveFontSizes,
@@ -33,6 +35,8 @@ const InvoiceForm = () => {
   const [formData, setFormData] = useState({});
   const [isSaved, setIsSaved] = useState(false);
   const [totalExpense, setTotalExpense] = useState(null);
+  const [allExpenseData, setAllExpenseData] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [error, setError] = useState(null);
   const addOverheadRow = (cwoIndex) => {
@@ -67,7 +71,6 @@ const InvoiceForm = () => {
           { headers: { Authorization: user.authToken } }
         );
 
-        console.log("Total Expense Response:", response);
         setTotalExpense(response.data || 0);
       } catch (error) {
         console.error("Error fetching total expense:", error);
@@ -103,9 +106,6 @@ const InvoiceForm = () => {
   }, [user, navigate]);
   const handleSubmit = async (cwoId) => {
     try {
-      console.log(childWorkorders);
-
-      // Ensure childWorkorders exists and at least one entry has overhead data
       if (
         !childWorkorders ||
         !childWorkorders.length ||
@@ -115,12 +115,11 @@ const InvoiceForm = () => {
         return;
       }
 
-      // Prepare data for submission
       const expenseData = childWorkorders
-        .filter((cwo) => cwo.overhead?.length) // Only include CWOs with overhead data
+        .filter((cwo) => cwo.overhead?.length)
         .flatMap((cwo) =>
           cwo.overhead.map((entry) => ({
-            cwo_id: cwo.cwo_id, // Use correct cwo_id from each childWorkorder
+            cwo_id: cwo.cwo_id,
             mwo_id: selectedWorkOrder.mwo_id,
             service: entry.A,
             vendor_name: entry.B,
@@ -129,8 +128,6 @@ const InvoiceForm = () => {
             expense_amount: entry.E,
           }))
         );
-
-      console.log(expenseData);
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/invoice/add-overhead-expense`,
@@ -148,13 +145,11 @@ const InvoiceForm = () => {
       alert("An error occurred while saving expenses.");
     }
   };
-  // FIX: Now it tracks the entire `selectedWorkOrder` object
 
   useEffect(() => {
     if (selectedWorkOrder) {
       const fetchCWO = async () => {
         try {
-          // Fetch Child Work Orders
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/workorder/find-invoice-cwo?mwo_id=${selectedWorkOrder.mwo_id}`,
             { headers: { Authorization: user.authToken } }
@@ -162,7 +157,6 @@ const InvoiceForm = () => {
 
           let childWorkordersData = response.data;
 
-          // Fetch Material and Service Budgets concurrently
           const [materialResponse, serviceResponse] = await Promise.all([
             axios.get(
               `${process.env.REACT_APP_API_URL}/invoice/find-material-budget`,
@@ -178,13 +172,9 @@ const InvoiceForm = () => {
             ),
           ]);
 
-          console.log(materialResponse.data);
-          console.log(serviceResponse.data);
+          const materialBudgetData = materialResponse.data;
+          const serviceBudgetData = serviceResponse.data;
 
-          const materialBudgetData = materialResponse.data; // [{ cwo_id, material_budget }]
-          const serviceBudgetData = serviceResponse.data; // [{ cwo_id, service_budget }]
-
-          // Merge budgets with work orders
           const updatedChildWorkorders = childWorkordersData.map((cwo) => {
             const materialBudget =
               materialBudgetData.find(
@@ -203,7 +193,6 @@ const InvoiceForm = () => {
           });
 
           setChildWorkorders(updatedChildWorkorders);
-          console.log(childWorkorders);
         } catch (err) {
           setError("Failed to load work orders");
           console.error("Error fetching work orders and budgets:", err);
@@ -213,6 +202,44 @@ const InvoiceForm = () => {
       fetchCWO();
     }
   }, [selectedWorkOrder]);
+
+  const handleExport = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/invoice/find-all-expense`,
+        { headers: { Authorization: user.authToken } }
+      );
+
+      const data = response.data || [];
+
+      if (data.length === 0) {
+        console.warn("No data available for export.");
+        return;
+      }
+
+      const csvContent =
+        "data:text/csv;charset=utf-8," +
+        [
+          Object.keys(data[0]).join(","),
+          ...data.map((row) => Object.values(row).join(",")),
+        ].join("\n");
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "expenses_report.csv");
+      document.body.appendChild(link);
+
+      link.click();
+
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Error fetching expenses:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const totalMaterialPayment = childWorkorders.reduce(
     (sum, item) => sum + (parseFloat(item.material_budget) || 0),
@@ -230,7 +257,7 @@ const InvoiceForm = () => {
         `${process.env.REACT_APP_API_URL}/invoice/update-overhead-budget`,
         {
           overhead_budget: overheadBudget,
-          mwo_id: formData.mwo_id, // Ensure you pass the correct MWO ID
+          mwo_id: formData.mwo_id,
         },
         {
           headers: { Authorization: user.authToken },
@@ -255,22 +282,19 @@ const InvoiceForm = () => {
         ? dayjs(newValue.customer_approval_date)
         : null,
     });
-
-    // Ensure overhead budget is either the new work order’s value or empty
   };
 
   useEffect(() => {
     if (!formData?.mwo_id) {
-      setOverheadBudget(""); // Clear budget when no MWO is selected
+      setOverheadBudget("");
       setIsSaved(false);
     } else if (formData?.mwo_id && formData?.overhead_budget) {
-      // Ensure we are setting the budget for the currently selected work order
       const numericValue = formData.overhead_budget.replace(/[^0-9.]/g, "");
       setOverheadBudget(numericValue);
     } else {
-      setOverheadBudget(""); // Ensure it's empty if no budget exists
+      setOverheadBudget("");
     }
-  }, [formData?.mwo_id]); // Depend only on MWO ID to reset correctly
+  }, [formData?.mwo_id]);
 
   let theme = createTheme();
   theme = responsiveFontSizes(theme);
@@ -278,12 +302,31 @@ const InvoiceForm = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ p: 3 }}>
-        <Typography variant="h5" gutterBottom>
-          Payment Budget
-        </Typography>
+        <Grid item xs={12} sm={2} display="flex" gap={2} mb={2}>
+          <Typography variant="h5" gutterBottom>
+            Payment Budget
+          </Typography>
+
+          <Button
+            justifyContent="flex-end"
+            variant="contained"
+            onClick={handleExport}
+            sx={{
+              backgroundColor: "#007bff",
+              color: "white",
+
+              "&:hover": { backgroundColor: "#0056b3" },
+            }}
+            startIcon={<FileDownloadIcon />}
+            disabled={loading}
+          >
+            {loading ? "Fetching..." : "Export CSV"}
+          </Button>
+        </Grid>
+
         <Paper elevation={3} sx={{ p: 3 }}>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={3}>
+            <Grid item xs={12} sm={2.5}>
               <Autocomplete
                 options={workOrders}
                 getOptionLabel={(option) => option.mwo_id?.toString() || ""}
@@ -293,7 +336,7 @@ const InvoiceForm = () => {
                 )}
               />
             </Grid>
-            <Grid item xs={12} sm={2.5}>
+            <Grid item xs={12} sm={2}>
               <TextField
                 label="Balance Material Cost"
                 value={formData.bal_material_cost?.replace("$", "₹") || "₹0"}
@@ -303,7 +346,7 @@ const InvoiceForm = () => {
                 sx={{ "& .MuiInputBase-input": { color: "red" } }}
               />
             </Grid>
-            <Grid item xs={12} sm={2.5}>
+            <Grid item xs={12} sm={2}>
               <TextField
                 label="Balance Service Cost"
                 value={formData.bal_service_cost?.replace("$", "₹") || "₹0"}
@@ -311,6 +354,16 @@ const InvoiceForm = () => {
                 fullWidth
                 variant="outlined"
                 sx={{ "& .MuiInputBase-input": { color: "red" } }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={2}>
+              <TextField
+                label="Route Name"
+                value={formData.route_name || ""}
+                InputProps={{ readOnly: true }}
+                fullWidth
+                variant="outlined"
+                InputLabelProps={{ shrink: true }}
               />
             </Grid>
             <Grid item xs={12} sm={2.5}>
@@ -322,7 +375,7 @@ const InvoiceForm = () => {
                 fullWidth
                 variant="outlined"
                 sx={{ "& .MuiInputBase-input": { color: "red" } }}
-                disabled={isSaved || Boolean(formData.overhead_budget)} // Disable if saved or already exists
+                disabled={isSaved || Boolean(formData.overhead_budget)}
                 InputProps={{
                   startAdornment:
                     isSaved || formData.overhead_budget ? (
@@ -344,13 +397,12 @@ const InvoiceForm = () => {
                   isSaved ||
                   !formData.mwo_id ||
                   formData.overhead_budget
-                } // Disable button after saving
-                onClick={handleSave} // Handle save
+                }
+                onClick={handleSave}
               >
                 Save
               </Button>
             </Grid>
-            ;
           </Grid>
           {selectedWorkOrder && (
             <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
@@ -422,12 +474,11 @@ const InvoiceForm = () => {
                                       onChange={(event) => {
                                         let newValue = event.target.value;
 
-                                        // Allow only numbers in "D"
                                         if (letter === "E") {
                                           newValue = newValue.replace(
                                             /[^0-9]/g,
                                             ""
-                                          ); // Remove non-numeric characters
+                                          );
                                         }
 
                                         const updatedRows = [...cwo.overhead];
@@ -443,7 +494,7 @@ const InvoiceForm = () => {
                                       }}
                                       fullWidth
                                       variant="outlined"
-                                      type={letter === "E" ? "number" : "text"} // Set type to number for D
+                                      type={letter === "E" ? "number" : "text"}
                                     />
                                   </Grid>
                                 ))}
@@ -499,7 +550,7 @@ const InvoiceForm = () => {
                 </Grid>
                 <Grid item xs={6} sm={2} md={4} mt={2}>
                   <TextField
-                    label="Total Service Payment"
+                    label="Total Overhead Payment"
                     value={
                       totalExpense !== null
                         ? `₹${totalExpense.toLocaleString()}`

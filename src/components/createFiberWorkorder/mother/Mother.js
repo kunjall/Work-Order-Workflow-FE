@@ -105,20 +105,15 @@ const DashboardWhinch = () => {
     if (selectedCity) fetchApprovers();
   }, [selectedCity]);
 
-  console.log(approvers);
-
   useEffect(() => {
     if (selectedApproverEmail) {
-      console.log(selectedApproverEmail);
       const selectedReviewer = approvers.find(
         (reviewer) => reviewer.approver_email === selectedApproverEmail
       );
       setApproverName(selectedReviewer ? selectedReviewer.approver_name : "");
-      console.log(approverName);
     } else {
       setSelectedApproverEmail("");
       setApproverName("");
-      console.log("test");
     }
   }, [selectedApproverEmail, approvers]);
 
@@ -134,27 +129,23 @@ const DashboardWhinch = () => {
           }
         );
 
-        console.log(response.data); // Debugging to check data structure
-
-        // Group cities by their name and merge manager lists
         const cityMap = response.data.reduce((acc, city) => {
           const cityName = city.city_name;
           const managers = Array.isArray(city.manager_name)
             ? city.manager_name.map((name) => name.trim())
             : typeof city.manager_name === "string"
-            ? [city.manager_name.trim()] // Convert string to array
-            : []; // Fallback if null/undefined
+            ? [city.manager_name.trim()]
+            : [];
 
           if (!acc[cityName]) {
             acc[cityName] = {
-              cityManagerId: city.city_manager_id, // Optional: keep only the first city's ID
+              cityManagerId: city.city_manager_id,
               cityName: cityName,
-              managerNames: new Set(managers), // Use a Set to ensure uniqueness
+              managerNames: new Set(managers),
               type: city.type,
               state: city.state,
             };
           } else {
-            // Merge managers into the existing Set
             managers.forEach((manager) =>
               acc[cityName].managerNames.add(manager)
             );
@@ -163,13 +154,11 @@ const DashboardWhinch = () => {
           return acc;
         }, {});
 
-        // Convert the city map back to an array, with unique managers for each city
         const citiesArray = Object.values(cityMap).map((city) => ({
           ...city,
-          managerNames: Array.from(city.managerNames), // Convert Set back to array
+          managerNames: Array.from(city.managerNames),
         }));
 
-        console.log(citiesArray); // Check the processed city data
         setCityOptions(citiesArray);
       } catch (error) {
         console.error(error);
@@ -313,12 +302,11 @@ const DashboardWhinch = () => {
     const cityName = event.target.value;
     setSelectedCity(cityName);
 
-    // Find the state corresponding to the selected city
     const city = cityOptions.find((c) => c.cityName === cityName);
     if (city) {
       setSelectedState(city.state);
     } else {
-      setSelectedState(""); // Clear state if no city matches
+      setSelectedState("");
     }
   };
 
@@ -327,116 +315,6 @@ const DashboardWhinch = () => {
       navigate("/login");
     }
   }, [user, navigate]);
-
-  console.log(serviceLineItems);
-
-  // const handleSubmit = async () => {
-  //   const createdBy = user.username || "unknown";
-  //   const createdAt = new Date().toISOString();
-
-  //   setLoading(true);
-
-  //   try {
-  //     const response = await axios.post(
-  //       `${process.env.REACT_APP_API_URL}/workorder/create`,
-  //       {
-  //         mwo_number: workOrderNumber,
-  //         workorder_type: "Fiber",
-  //         workorder_number: workOrderNumber,
-  //         mwo_status: "Pending Approval",
-  //         gis_code: gisCode,
-  //         route_name: routeName,
-  //         route_length: routeLength,
-  //         homepass_count: homepassCount,
-  //         activity: activity,
-  //         type: type,
-  //         customer_id: selectedCustomerId,
-  //         execution_city: selectedCity,
-  //         total_service_cost: totalAmount,
-  //         total_material_cost: totalMaterialAmount,
-  //         customer_project_manager: customerProjectManager,
-  //         customer_name: customerName,
-  //         customer_state: customerState,
-  //         customer_approval_date: selectedDate,
-  //         created_by: createdBy,
-  //         created_at: createdAt,
-  //       },
-  //       {
-  //         headers: {
-  //           Authorization: user.authToken,
-  //         },
-  //       }
-  //     );
-  //     mwoId = response.data;
-  //     setSuccessPopupOpen(true);
-  //   } catch (error) {
-  //     console.error("Error submitting form:", error);
-  //     setError("Failed to submit form");
-  //   } finally {
-  //     setLoading(false); // Set loading to false after API call is finished
-  //   }
-
-  //   try {
-  //     const response = serviceLineItems.map(async (item) => {
-  //       console.log(serviceLineItems);
-  //       console.log(item);
-  //       return await axios.post(
-  //         `${process.env.REACT_APP_API_URL}/workorder/motherEnterServices`,
-  //         {
-  //           record_id: `${workOrderNumber}_${item.serviceId}`,
-  //           mwo_number: workOrderNumber,
-  //           service_id: item.serviceId,
-  //           service_desc: item.serviceDescription,
-  //           service_uom: item.serviceUOM,
-  //           service_rate: item.serviceRate,
-  //           service_wo_qty: item.serviceQTY,
-  //           service_bal_qty: item.serviceQTY,
-  //           service_price: item.servicePrice,
-  //           mwo_id: mwoId,
-  //         },
-  //         {
-  //           headers: {
-  //             Authorization: user.authToken,
-  //           },
-  //         }
-  //       );
-  //     });
-  //     const responses = await Promise.all(response);
-  //   } catch (error) {
-  //     console.error("Error submitting services:", error);
-  //     setError("Failed to submit services");
-  //   }
-
-  //   try {
-  //     console.log(lineItems);
-  //     const response = lineItems.map(async (item) => {
-  //       return await axios.post(
-  //         `${process.env.REACT_APP_API_URL}/workorder/motherEnterMaterial`,
-  //         {
-  //           record_id: `${workOrderNumber}_${item.materialCode}`,
-  //           mwo_number: workOrderNumber,
-  //           material_id: item.materialCode,
-  //           material_desc: item.itemName,
-  //           material_uom: item.itemUom,
-  //           material_wo_qty: item.itemQTY,
-  //           material_bal_qty: item.itemQTY,
-  //           mwo_id: mwoId,
-  //           material_price: item.itemPrice,
-  //           material_rate: item.itemRate,
-  //         },
-  //         {
-  //           headers: {
-  //             Authorization: user.authToken,
-  //           },
-  //         }
-  //       );
-  //     });
-  //     const responses = await Promise.all(response);
-  //   } catch (error) {
-  //     console.error("Error submitting materials:", error);
-  //     setError("Failed to submit materials");
-  //   }
-  // };
 
   const handleSubmit = async () => {
     const createdBy = user.username || "unknown";
@@ -452,7 +330,6 @@ const DashboardWhinch = () => {
       .replace(",", "");
     setLoading(true);
 
-    // Construct the request body
     const requestData = {
       mwo_number: workOrderNumber,
       workorder_type: "Fiber",
@@ -476,8 +353,8 @@ const DashboardWhinch = () => {
       created_by: createdBy,
       created_at: createdAt,
       state: selectedState,
-      materialRecords: lineItems, // Directly use the material line items
-      serviceRecords: serviceLineItems, // Directly use the service line items
+      materialRecords: lineItems,
+      serviceRecords: serviceLineItems,
     };
 
     try {
@@ -491,7 +368,6 @@ const DashboardWhinch = () => {
         }
       );
 
-      // Handle success response
       if (response.status === 201) {
         setSuccessPopupOpen(true);
       }
@@ -505,7 +381,7 @@ const DashboardWhinch = () => {
 
   const handlePopupClose = () => {
     setSuccessPopupOpen(false);
-    resetForm(); // Reset form after popup is closed
+    resetForm();
   };
 
   let theme = createTheme();
@@ -519,7 +395,28 @@ const DashboardWhinch = () => {
             <Typography color="error">{error}</Typography>
           ) : (
             <Grid container spacing={2}>
-              {/* Sticky container for fields from customer to approver_name */}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100vw",
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#2c3e50",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                    textAlign: "center",
+                  }}
+                >
+                  Mother Workorder
+                </Typography>
+              </Box>
+              {}
               <Grid
                 item
                 xs={12}
@@ -549,10 +446,6 @@ const DashboardWhinch = () => {
                             fullWidth
                             InputProps={{
                               ...params.InputProps,
-                              sx: { height: 40 }, // Adjust height for input box
-                            }}
-                            InputLabelProps={{
-                              sx: { fontSize: "14px", top: "-5px" }, // Adjust label position and font size
                             }}
                           />
                         )}
@@ -566,10 +459,6 @@ const DashboardWhinch = () => {
                         variant="outlined"
                         InputProps={{
                           readOnly: true,
-                          sx: { height: 40 },
-                        }}
-                        InputLabelProps={{
-                          sx: { fontSize: "14px", top: "-5px" }, // Adjust label position and font size
                         }}
                         fullWidth
                       />
@@ -582,10 +471,6 @@ const DashboardWhinch = () => {
                         variant="outlined"
                         InputProps={{
                           readOnly: true,
-                          sx: { height: 40 },
-                        }}
-                        InputLabelProps={{
-                          sx: { fontSize: "14px", top: "-5px" }, // Adjust label position and font size
                         }}
                         fullWidth
                       />
@@ -607,12 +492,6 @@ const DashboardWhinch = () => {
                         variant="outlined"
                         fullWidth
                         value={gisCode}
-                        InputProps={{
-                          sx: { height: 40 },
-                        }}
-                        InputLabelProps={{
-                          sx: { fontSize: "14px", top: "-5px" }, // Adjust label position and font size
-                        }}
                         onChange={(e) => setGisCode(e.target.value)}
                       />
                     </Grid>
@@ -809,39 +688,27 @@ const DashboardWhinch = () => {
                 </Box>
               </Grid>
 
-              {/* Scrollable content below */}
-              <Grid
-                item
-                xs={12}
-                sx={{ overflowY: "auto", maxHeight: "calc(100vh - 200px)" }}
-              >
-                <Divider />
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", md: "column" },
-                  }}
-                >
-                  <Box sx={{ flex: 1, padding: 2 }}>
-                    <Typography variant="h6">Services</Typography>
-                    <AddServices
-                      services={services}
-                      onLineItemUpdate={handleServiceLineItemsUpdate}
-                      onAmountUpdate={handleTotalAmountChange}
-                    />
-                  </Box>
-                  <Divider
-                    flexItem
-                    sx={{ display: { xs: "none", md: "flex" } }}
+              {}
+              <Grid item xs={12}>
+                <Box sx={{ flex: 1, padding: 2 }}>
+                  <Typography variant="h6">Services</Typography>
+                  <AddServices
+                    services={services}
+                    onLineItemUpdate={handleServiceLineItemsUpdate}
+                    onAmountUpdate={handleTotalAmountChange}
                   />
-                  <Box sx={{ flex: 1, padding: 2 }}>
-                    <Typography variant="h6">Materials</Typography>
-                    <AddMaterials
-                      materialCodes={materialCodes}
-                      onUpdate={handleLineItemsUpdate}
-                      onAmountUpdate={handleTotalMaterialAmountChange}
-                    />
-                  </Box>
+                </Box>
+                <Divider
+                  flexItem
+                  sx={{ display: { xs: "none", md: "flex" } }}
+                />
+                <Box sx={{ flex: 1, padding: 2 }}>
+                  <Typography variant="h6">Materials</Typography>
+                  <AddMaterials
+                    materialCodes={materialCodes}
+                    onUpdate={handleLineItemsUpdate}
+                    onAmountUpdate={handleTotalMaterialAmountChange}
+                  />
                 </Box>
               </Grid>
 
@@ -873,13 +740,12 @@ const DashboardWhinch = () => {
           )}
         </Box>
 
-        {/* Success Dialog */}
+        {}
         <Dialog open={successPopupOpen} onClose={handlePopupClose}>
           <DialogTitle>Success</DialogTitle>
           <DialogContent>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <CheckCircleIcon style={{ color: "green" }} />{" "}
-              {/* Green checkmark icon */}
+              <CheckCircleIcon style={{ color: "green" }} /> {}
               <DialogContentText>
                 The work order has been successfully submitted.
               </DialogContentText>

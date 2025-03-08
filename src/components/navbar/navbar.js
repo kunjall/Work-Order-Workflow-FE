@@ -1,9 +1,23 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
 import WOW from "../../assets/images/wow.png";
 import "../../assets/styles/navbar.css";
+import {
+  AppBar,
+  Toolbar,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Box,
+  Typography,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import InventoryIcon from "@mui/icons-material/Inventory";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
@@ -13,175 +27,122 @@ import PendingActionsIcon from "@mui/icons-material/PendingActions";
 import RouterIcon from "@mui/icons-material/Router";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import StraightenIcon from "@mui/icons-material/Straighten";
+import VpnKeyIcon from "@mui/icons-material/VpnKey";
 
 const Navbar = () => {
   const { user } = useContext(AuthContext);
-  const location = useLocation(); // Get the current route
+  const location = useLocation();
+  const [openDrawer, setOpenDrawer] = useState(false);
+
+  const toggleDrawer = (open) => (event) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
+    }
+    setOpenDrawer(open);
+  };
 
   const getActiveStyle = (path) => ({
-    color: location.pathname === path ? "#40E0D0" : "white", // Highlight active link
-    textDecoration: location.pathname === path ? "underline" : "none", // Underline for active link
+    color: location.pathname === path ? "#40E0D0" : "white",
+    textDecoration: location.pathname === path ? "underline" : "none",
   });
 
+  const adminMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/dashboard-admin" },
+
+    { text: "Create MWO", icon: <EngineeringIcon />, path: "/create" },
+    { text: "Create CWO", icon: <RouterIcon />, path: "/find" },
+    {
+      text: "Inventory Inward",
+      icon: <WarehouseIcon />,
+      path: "/inventory-inward",
+    },
+    { text: "Mat Mov", icon: <LocalShippingIcon />, path: "/MRS" },
+    { text: "MB", icon: <StraightenIcon />, path: "/MB" },
+    { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
+    { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+    { text: "Budget", icon: <MenuBookIcon />, path: "/budget" },
+    { text: "Access", icon: <VpnKeyIcon />, path: "/user-access" },
+  ];
+
+  const whinchMenuItems = [
+    {
+      text: "Inventory Inward",
+      icon: <WarehouseIcon />,
+      path: "/inventory-inward",
+    },
+    { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
+    { text: "MM", icon: <LocalShippingIcon />, path: "/MRS" },
+  ];
+
+  let menuItems = [];
+  if (user?.role === "admin") {
+    menuItems = adminMenuItems;
+  } else if (user?.role === "whinch") {
+    menuItems = whinchMenuItems;
+  }
+
   return user ? (
-    <div className="header">
-      <img src={WOW} alt="logo"></img>
-      <nav>
-        <ul>
-          {user && user.role === "admin" && (
-            <>
-              <li style={{ fontSize: "16px" }}>
-                <Link
-                  to="/dashboard-admin"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/dashboard-admin"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <PendingActionsIcon />
-                  </span>
-                  <span>Actions</span>
-                </Link>
-              </li>
-              <li style={{ fontSize: "16px" }}>
-                <Link
-                  to="/inventory-inward"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/inventory-inward"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <WarehouseIcon />
-                  </span>
-                  <span>Inventory Inward</span>
-                </Link>
-              </li>
-              <li style={{ fontSize: "16px" }}>
-                <Link
-                  to="/create"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/create"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <EngineeringIcon />
-                  </span>
-                  <span>Create MWO</span>
-                </Link>
-              </li>
-              <li style={{ fontSize: "16px" }}>
-                <Link
-                  to="/find"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/find"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <RouterIcon />
-                  </span>
-                  <span>Create CWO</span>
-                </Link>
-              </li>
-              <li style={{ fontSize: "16x" }}>
-                <Link
-                  to="/MRS"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/MRS"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <LocalShippingIcon />
-                  </span>
-                  <span>MM</span>
-                </Link>
-              </li>
-              <li style={{ fontSize: "16x" }}>
-                <Link
-                  to="/MB"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/MB"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <StraightenIcon />
-                  </span>
-                  <span>MB</span>
-                </Link>
-              </li>
-              <li style={{ fontSize: "16x" }}>
-                <Link
-                  to="/locator"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/locator"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <FolderOpenIcon />
-                  </span>
-                  <span>Locator</span>
-                </Link>
-              </li>
-              {/* <li style={{ fontSize: "16px" }}>
-                <Link
-                  to="/repository"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/repository"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <MenuBookIcon />
-                  </span>
-                  <span>Repository</span>
-                </Link>
-              </li> */}
-              <li style={{ fontSize: "16px" }}>
-                <Link
-                  to="/budget"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    ...getActiveStyle("/budget"),
-                  }}
-                >
-                  <span style={{ marginRight: "8px" }}>
-                    <MenuBookIcon />
-                  </span>
-                  <span>Invoice</span>
-                </Link>
-              </li>
-            </>
+    <>
+      {}
+      <AppBar position="static" sx={{ backgroundColor: "black" }}>
+        <Toolbar>
+          {}
+          {menuItems.length > 0 && (
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={toggleDrawer(true)}
+            >
+              <MenuIcon />
+            </IconButton>
           )}
-        </ul>
-      </nav>
-      <div className="nav-end">
-        <span className="nav-item">
-          <Link to="/test2">
-            <AccountCircleIcon
-              sx={{ color: "white", marginRight: "10px", fontSize: "35px" }}
-            />
-          </Link>
-        </span>
-      </div>
-    </div>
-  ) : (
-    <></>
-  );
+
+          {}
+          <Box sx={{ flexGrow: 1 }}>
+            <img src={WOW} alt="logo" style={{ height: "30px" }} />
+          </Box>
+
+          {}
+          <IconButton color="inherit" component={Link} to="/profile">
+            <AccountCircleIcon sx={{ fontSize: "35px" }} />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
+
+      {}
+      <Drawer anchor="left" open={openDrawer} onClose={toggleDrawer(false)}>
+        <Box sx={{ width: 250, backgroundColor: "#222", height: "100%" }}>
+          <Typography
+            variant="h6"
+            sx={{ color: "#fff", p: 2, textAlign: "center" }}
+          >
+            Menu
+          </Typography>
+          <List>
+            {menuItems.map((item) => (
+              <ListItem
+                key={item.text}
+                component={Link}
+                to={item.path}
+                onClick={toggleDrawer(false)}
+                sx={{
+                  color: "white",
+                  "&:hover": { backgroundColor: "#444" },
+                  ...getActiveStyle(item.path),
+                }}
+              >
+                <ListItemIcon sx={{ color: "white" }}>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </Drawer>
+    </>
+  ) : null;
 };
 
 export default Navbar;

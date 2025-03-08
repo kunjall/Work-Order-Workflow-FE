@@ -34,22 +34,20 @@ const Example = ({ refreshKey }) => {
   let cwoStatus;
 
   const handleOpenModal = (row) => {
-    setSelectedRow(row); // Store the row's data
+    setSelectedRow(row);
     setCwoStatusPass(row ? row.cwo_status : "");
-    setOpen(true); // Open the modal
+    setOpen(true);
   };
 
   useEffect(() => {
-    // Reset the comment whenever a new request is selected
     setComment("");
   }, [selectedRow]);
 
   const handleCloseModal = () => {
-    setOpen(false); // Close the modal
+    setOpen(false);
   };
   useEffect(() => {
     if (selectedRow != null) {
-      console.log(selectedRow);
       const fetchCwoMaterial = async () => {
         try {
           const response = await axios.get(
@@ -60,8 +58,6 @@ const Example = ({ refreshKey }) => {
               },
             }
           );
-
-          console.log(response.data);
 
           const childMaterialArray = response.data.map((material) => ({
             record_id: material.record_id,
@@ -75,7 +71,6 @@ const Example = ({ refreshKey }) => {
             material_rate: material.material_rate,
             material_price: material.material_price,
           }));
-          console.log(childMaterialArray);
           setChildMaterial(childMaterialArray);
         } catch (err) {
           console.error("Error fetching child materials:", err);
@@ -94,8 +89,6 @@ const Example = ({ refreshKey }) => {
             }
           );
 
-          console.log(response.data);
-
           const childServiceArray = response.data.map((service) => ({
             record_id: service.record_id,
             cwo_id: service.cwo_id,
@@ -108,7 +101,6 @@ const Example = ({ refreshKey }) => {
             service_rate: service.service_rate,
             service_price: service.service_price,
           }));
-          console.log(childServiceArray);
           setChildService(childServiceArray);
         } catch (err) {
           console.error("Error fetching child services:", err);
@@ -123,7 +115,6 @@ const Example = ({ refreshKey }) => {
 
   useEffect(() => {
     if (selectedRow != null) {
-      console.log(selectedRow);
       const fetchMwoMaterial = async () => {
         try {
           const response = await axios.get(
@@ -134,8 +125,6 @@ const Example = ({ refreshKey }) => {
               },
             }
           );
-
-          console.log(response.data);
 
           const motherMaterialArray = response.data.map((material) => ({
             record_id: material.record_id,
@@ -149,7 +138,6 @@ const Example = ({ refreshKey }) => {
             material_rate: material.material_rate,
             material_price: material.material_price,
           }));
-          console.log(motherMaterialArray);
           setMotherMaterial(motherMaterialArray);
         } catch (err) {
           console.error("Error fetching mother materials:", err);
@@ -168,8 +156,6 @@ const Example = ({ refreshKey }) => {
             }
           );
 
-          console.log(response.data);
-
           const motherServiceArray = response.data.map((service) => ({
             record_id: service.record_id,
             mwo_id: service.mwo_id,
@@ -182,7 +168,6 @@ const Example = ({ refreshKey }) => {
             service_rate: service.service_rate,
             material_price: service.service_price,
           }));
-          console.log(motherServiceArray);
           setMotherService(motherServiceArray);
         } catch (err) {
           console.error("Error fetching mother services:", err);
@@ -219,7 +204,6 @@ const Example = ({ refreshKey }) => {
           material_rate: material.material_rate,
           material_price: material.material_price,
         }));
-        console.log(childMaterialArray);
         setAllChildMaterial(childMaterialArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
@@ -253,7 +237,6 @@ const Example = ({ refreshKey }) => {
           service_rate: service.service_rate,
           material_price: service.service_price,
         }));
-        console.log(childServiceArray);
         setAllChildService(childServiceArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
@@ -263,7 +246,6 @@ const Example = ({ refreshKey }) => {
     fetchAllChildService();
   }, []);
 
-  // Fetch data from the API
   useEffect(() => {
     let isMounted = true;
 
@@ -294,7 +276,6 @@ const Example = ({ refreshKey }) => {
 
           setTableData(combinedData);
           setIsLoading(false);
-          console.log(combinedData); // Log combined data for debugging
         }
       } catch (err) {
         if (isMounted) {
@@ -314,11 +295,8 @@ const Example = ({ refreshKey }) => {
 
   useEffect(() => {
     if (selectedRow != null && selectedRow.warehouse_city != null) {
-      console.log(selectedRow);
       const fetchApprovers = async () => {
         try {
-          console.log(selectedRow, "117");
-          console.log(selectedRow.warehouse_city);
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=CWO&city=${selectedRow.warehouse_city}`,
             {
@@ -336,7 +314,6 @@ const Example = ({ refreshKey }) => {
             reviewer_name: reviewer.reviewer_name,
             approver_name: reviewer.approver_name,
           }));
-          console.log(approverArray, "138");
         } catch (err) {
           console.error("Error fetching reviewer:", err);
           setError("Failed to load reviewer");
@@ -348,20 +325,17 @@ const Example = ({ refreshKey }) => {
   }, [selectedRow]);
 
   const handleReject = async () => {
-    console.log("Approved with comment:", comment);
     const actionedBy = user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
-    console.log(selectedRow);
     cwoStatus = "Rejected by approver";
-    console.log("Approved", 278);
     try {
       const response = await axios.patch(
         `${process.env.REACT_APP_API_URL}/workorder/reject-cwo`,
@@ -378,7 +352,6 @@ const Example = ({ refreshKey }) => {
           },
         }
       );
-      console.log(response.data.message);
       alert("Work order rejected successfully!");
     } catch (err) {
       console.error("Error rejecting work order:", err);
@@ -387,25 +360,22 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
-    console.log("Approved with comment:", comment);
     const actionedBy = user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
-    console.log(selectedRow);
     cwoStatus = "Approved";
-    console.log("Approved", 278);
     try {
       await axios.patch(
         `${process.env.REACT_APP_API_URL}/workorder/update-cwo-approve-status`,
         {
-          cwo_id: selectedRow.cwo_id, // Ensure this is passed to your modal
+          cwo_id: selectedRow.cwo_id,
           cwo_status: cwoStatus,
           approved_at: actionedAt,
           approved_by: actionedBy,
@@ -423,7 +393,6 @@ const Example = ({ refreshKey }) => {
     }
   };
 
-  // Define columns
   const columns = useMemo(() => [
     {
       accessorKey: "cwo_id",
@@ -438,9 +407,9 @@ const Example = ({ refreshKey }) => {
             textDecoration: "underline",
             cursor: "pointer",
           }}
-          onClick={() => handleOpenModal(row.original)} // Pass the row's data
+          onClick={() => handleOpenModal(row.original)}
         >
-          {"CWO-" + row.original.cwo_id} {/* Prefix with "cwo_" */}{" "}
+          {"CWO-" + row.original.cwo_id} {}{" "}
         </span>
       ),
     },
@@ -461,8 +430,7 @@ const Example = ({ refreshKey }) => {
       accessorKey: "execution_city",
       header: "Execution City",
       size: 150,
-      Cell: ({ cell }) => cell.getValue(), // Format date
-      // filterFn: "contains",
+      Cell: ({ cell }) => cell.getValue(),
     },
     {
       accessorKey: "created_by",
@@ -471,71 +439,13 @@ const Example = ({ refreshKey }) => {
       filterFn: "contains",
     },
 
-    // {
-    //   accessorKey: "approved_by",
-    //   header: "Approved By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
     {
       accessorKey: "created_at",
       header: "Created Dt",
       size: 150,
-      Cell: ({ cell }) => cell.getValue(), // Format date
-      // filterFn: "contains",
+      Cell: ({ cell }) => cell.getValue(),
     },
 
-    // {
-    //   accessorKey: "received_at",
-    //   header: "Received Dt",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "approved_at",
-    //   header: "Approved Dt",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "entry_date",
-    //   header: "Entry Date",
-    //   size: 150,
-    //   Cell: ({ cell }) => cell.getValue(), // Format date
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "inventory_receiver_name",
-    //   header: "Receiver Name",
-    //   size: 200,
-    //   // filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "inventory_approver_name",
-    //   header: "Approver Name",
-    //   size: 200,
-    //   // filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "customer_dc_number",
-    //   header: "Customer DC Number",
-    //   size: 200,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "dc_date",
-    //   header: "DC Date",
-    //   size: 150,
-    //   Cell: ({ cell }) => cell.getValue(), // Format date
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "customer_id",
-    //   header: "Customer ID",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
     {
       accessorKey: "customer_name",
       header: "Customer Name",
@@ -543,65 +453,7 @@ const Example = ({ refreshKey }) => {
       filterFn: "contains",
       size: 250,
     },
-    // {
-    //   accessorKey: "warehouse_id",
-    //   header: "Warehouse ID",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
 
-    // {
-    //   accessorKey: "eway_bill_number",
-    //   header: "Eway Bill Number",
-    //   size: 200,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "mrs_number",
-    //   header: "MRS Number",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "client_warehouse_id",
-    //   header: "Cust. Warehouse ID",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "client_warehouse_city",
-    //   header: "Cust. Warehouse City",
-    //   size: 200,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "created_by",
-    //   header: "Created By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "created_at",
-    //   header: "Created Dt",
-    //   size: 150,
-    //   Cell: ({ cell }) => cell.getValue(), // Format date
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "received_by",
-    //   header: "Received By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "received_at",
-    //   header: "Received Dt",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
     {
       accessorKey: "approved_by",
       header: "Approved By",
@@ -614,54 +466,21 @@ const Example = ({ refreshKey }) => {
       size: 150,
       filterFn: "contains",
     },
-
-    // {
-    //   accessorKey: "material_id",
-    //   header: "Material Id",
-    //   size: 150,
-    // },
-    // {
-    //   accessorKey: "material_desc",
-    //   header: "Material Desc",
-    //   size: 150,
-    // },
-    // {
-    //   accessorKey: "material_uom",
-    //   header: "Material UOM",
-    //   size: 150,
-    // },
-    // {
-    //   accessorKey: "material_wo_qty",
-    //   header: "Material QTY",
-    //   size: 150,
-    // },
   ]);
 
   const handleExportRows = (rows) => {
     const flattened = [];
-    console.log(rows);
 
     rows.forEach((cwo) => {
-      console.log(cwo.cwo_id);
-      // Merge materials
       const materials = allChildMaterial.filter(
         (mat) => mat.cwo_id === String(cwo.cwo_id)
       );
 
-      // Merge services
       const services = allChildService.filter(
         (srv) => srv.cwo_id === String(cwo.cwo_id)
       );
 
-      console.log(allChildService);
-      console.log(allChildMaterial);
-      console.log(services);
-      console.log(materials);
-
-      // Combine materials and services with the main data
       if (materials.length > 0 || services.length > 0) {
-        console.log("testettete");
-        // Add each material as a separate row
         materials.forEach((mat) => {
           flattened.push({
             ...cwo,
@@ -682,7 +501,6 @@ const Example = ({ refreshKey }) => {
           });
         });
 
-        // Add each service as a separate row
         services.forEach((srv) => {
           flattened.push({
             ...cwo,
@@ -703,8 +521,6 @@ const Example = ({ refreshKey }) => {
           });
         });
       } else {
-        // Push a row without material if no materials exist
-
         flattened.push({
           ...cwo,
           material_id: "",
@@ -727,10 +543,9 @@ const Example = ({ refreshKey }) => {
 
     const csvConfig = mkConfig({
       filename: `MWO_${username}`,
-      useKeysAsHeaders: true, // Automatically use keys as column headers
+      useKeysAsHeaders: true,
     });
 
-    // Generate and download CSV
     const csv = generateCsv(csvConfig)(flattened);
     download(csvConfig)(csv);
   };
@@ -741,8 +556,6 @@ const Example = ({ refreshKey }) => {
     enableColumnFilterModes: true,
     enableColumnOrdering: true,
     enableGrouping: false,
-    // getSubRows: (row) => row.materials,
-    // enableExpanding: true,
 
     enableColumnPinning: true,
     enableFacetedValues: true,
@@ -763,7 +576,7 @@ const Example = ({ refreshKey }) => {
     positionToolbarAlertBanner: "bottom",
     muiTableContainerProps: {
       sx: {
-        borderRadius: "16px", // Rounded edges
+        borderRadius: "16px",
         border: "1px solid #ec7c30",
         width: "98%",
         margin: "0 auto",
@@ -804,44 +617,41 @@ const Example = ({ refreshKey }) => {
       sx={{
         width: "98%",
         margin: "0 auto",
-        borderRadius: "16px", // Rounded edges
+        borderRadius: "16px",
       }}
     >
-      {/* Main Button outside Table */}
+      {}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "flex-end", // Align button to the right
-          marginBottom: "16px", // Add margin to separate from table
+          justifyContent: "flex-end",
+          marginBottom: "16px",
         }}
       >
         <Button
           disabled={table.getPrePaginationRowModel().rows.length === 0}
           onClick={() => {
-            const filteredRows = table.getFilteredRowModel().rows; // Get filtered rows
+            const filteredRows = table.getFilteredRowModel().rows;
 
-            // Extract original data and remove 'materials' field
             const allOriginalData = filteredRows.map((row) => {
-              const { materials, ...rest } = row.original; // Destructure and exclude 'materials'
-              return rest; // Return the remaining data without 'materials'
+              const { materials, ...rest } = row.original;
+              return rest;
             });
 
-            console.log(allOriginalData); // Log the modified data without 'materials'
-
-            handleExportRows(allOriginalData); // Export filtered rows without 'materials'
+            handleExportRows(allOriginalData);
           }}
           startIcon={<FileDownloadIcon />}
           variant="contained"
           sx={{
-            color: "black", // Text color
-            backgroundColor: "#ec7c30", // Orange background
-            height: "35px", // Ensure height is fixed
-            padding: "10px 20px", // Add padding for better spacing
+            color: "black",
+            backgroundColor: "#ec7c30",
+            height: "35px",
+            padding: "10px 20px",
             borderRadius: "8px",
-            marginTop: "-45px", // Optional: Round button edges
+            marginTop: "-45px",
             fontWeight: "bold",
             "&:hover": {
-              backgroundColor: "black", // Keep the orange background on hover
+              backgroundColor: "black",
               color: "#ec7c30",
               cursor: "pointer",
             },
@@ -850,7 +660,7 @@ const Example = ({ refreshKey }) => {
           Export
         </Button>
       </Box>
-      {/* Material React Table with Toolbar */}
+      {}
       <MaterialReactTable
         table={table}
         muiTableContainerProps={{
@@ -860,23 +670,6 @@ const Example = ({ refreshKey }) => {
             width: "100%",
           },
         }}
-        // renderRowSubComponent={({ row }) => (
-        //   <Box sx={{ padding: 2 }}>
-        //     <Typography variant="h6" sx={{ marginBottom: 1 }}>
-        //       Materials Details
-        //     </Typography>
-        //     <MaterialReactTable
-        //       columns={subRowColumns}
-        //       data={row.materials} // Subrow data
-        //       enableExpanding={false}
-        //       enablePagination={false}
-        //       enableSorting={false}
-        //       muiTableProps={{
-        //         sx: { backgroundColor: "#f9f9f9", border: "1px solid #ccc" },
-        //       }}
-        //     />
-        //   </Box>
-        // )}
         renderTopToolbar={({ table }) => (
           <Box
             sx={{
@@ -889,7 +682,7 @@ const Example = ({ refreshKey }) => {
               minHeight: "60px",
             }}
           >
-            {/* Filters Section */}
+            {}
             <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <MRT_GlobalFilterTextField table={table} />
               <MRT_ToggleFiltersButton table={table} />

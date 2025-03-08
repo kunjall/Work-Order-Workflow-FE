@@ -11,16 +11,16 @@ import Background from "./assets/images/background.jpeg";
 import { AuthProvider } from "./context/authContext";
 import WithAuth from "./context/withAuth";
 import Navbar from "./components/navbar/navbar";
-import Bin from "./components/dashboard/bin";
+import Bin from "./pages/bin";
+import WarehouseStock from "./pages/warehouseStock";
+import Profile from "./components/profile/profile";
 import CreateChild from "./pages/createChild";
 import Inventory from "./pages/inventoryInward";
-import Repository from "./pages/repository";
 import MRS from "./pages/createMRS";
 import MB from "./components/mbCreation/createMB";
+import UserAccess from "./components/profile/userAccess";
 import Invoice from "./pages/createInvoice";
 import { Repeat } from "@mui/icons-material";
-
-// import Test from "./components/dashboard/test";
 
 const App = () => {
   return (
@@ -28,7 +28,6 @@ const App = () => {
       <GlobalStyles
         styles={{
           body: {
-            // backgroundImage: `url(${Background})`,
             backgroundRepeat: "repeat",
             backgroundPosition: "center center",
             backgroundSize: "cover",
@@ -71,7 +70,7 @@ const App = () => {
                 path="/create"
                 element={
                   <WithAuth role="admin">
-                    {/* <DashboardAdmin /> */}
+                    {}
                     <Enter />
                   </WithAuth>
                 }
@@ -80,7 +79,7 @@ const App = () => {
                 path="/find"
                 element={
                   <WithAuth role="admin">
-                    {/* <DashboardAdmin /> */}
+                    {}
                     <CreateChild />
                   </WithAuth>
                 }
@@ -91,6 +90,30 @@ const App = () => {
                 element={
                   <WithAuth role="admin">
                     <Bin />
+                  </WithAuth>
+                }
+              />
+              <Route
+                path="/warehouse-stock"
+                element={
+                  <WithAuth role="admin">
+                    <WarehouseStock />
+                  </WithAuth>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <WithAuth>
+                    <Profile />
+                  </WithAuth>
+                }
+              />
+              <Route
+                path="/user-access"
+                element={
+                  <WithAuth role="admin">
+                    <UserAccess />
                   </WithAuth>
                 }
               />

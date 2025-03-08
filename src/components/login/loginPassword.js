@@ -1,46 +1,46 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
-import { IconButton } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import CssBaseline from "@mui/material/CssBaseline";
-import Box from "@mui/material/Box";
-import TextField from "@mui/material/TextField";
-import ButtonComponent from "../buttons/button";
-import WOW from "../../assets/images/wow.png";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../context/authContext";
+import axios from "axios";
+import {
+  Box,
+  TextField,
+  Button,
+  IconButton,
+  Typography,
+  Container,
+  CssBaseline,
+  Paper,
+} from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import WOW from "../../assets/images/wow.png";
 
 export default function Password({ onBackClick, username }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const URL = process.env.REACT_APP_API_URL;
   const { login } = useContext(AuthContext);
+  const URL = process.env.REACT_APP_API_URL;
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError("");
+
     try {
       const response = await axios.post(
         `${URL}/user/loginUser`,
         { username, password },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { headers: { "Content-Type": "application/json" } }
       );
 
       if (response.data.error) {
         setError(response.data.error);
       } else {
-        const token = response.data.token;
-        login(token);
-        const role = response.data.role;
-        const redirectTo = `/dashboard-${role}`;
-        navigate(redirectTo);
+        login(response.data.token);
+        navigate(`/dashboard-${response.data.role}`);
       }
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
+      console.error("Login error:", err);
       setError("An error occurred during login.");
     }
   };
@@ -48,49 +48,53 @@ export default function Password({ onBackClick, username }) {
   return (
     <React.Fragment>
       <CssBaseline />
-      <Box
-        sx={{
-          bgcolor: "#E3E3E3",
-          height: "50vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: "20px",
-          borderRadius: "8px",
-        }}
+      <IconButton
+        onClick={onBackClick}
+        sx={{ position: "absolute", left: 16, top: 1 }}
       >
-        <IconButton
-          onClick={onBackClick}
-          style={{ position: "absolute", left: "10px", top: "10px" }}
-        >
-          <ArrowBackIcon />
-        </IconButton>
-        <div className="form">
-          <img src={WOW} alt="wow" />
+        <ArrowBackIcon />
+      </IconButton>
 
-          <div className="password">
-            <TextField
-              id="outlined-basic"
-              label="Password"
-              variant="outlined"
-              style={{ width: "460px", minWidth: "250px" }}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              error={!!error}
-              helperText={error}
-            />
-          </div>
-          <span>
-            <ButtonComponent
-              variant="contained"
-              text={"Login"}
-              onClick={handleLogin}
-            />
-          </span>
-          <p>Contact admin if you're unable to login</p>
-        </div>
+      <Box sx={{ textAlign: "center", mb: 2 }}>
+        <img
+          src={WOW}
+          alt="WOW Logo"
+          style={{
+            width: "110px",
+            height: "auto",
+            objectFit: "contain",
+            marginBottom: "10px",
+          }}
+        />
       </Box>
+
+      <form onSubmit={handleLogin} style={{ width: "100%" }}>
+        <TextField
+          label="Password"
+          type="password"
+          variant="outlined"
+          fullWidth
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={!!error}
+          helperText={error}
+          sx={{ mb: 2 }}
+        />
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          fullWidth
+          sx={{ mt: 1, padding: "12px", fontSize: "16px" }}
+        >
+          Login
+        </Button>
+      </form>
+
+      <Typography variant="body2" color="textSecondary" mt={2}>
+        Contact admin if you're unable to login.
+      </Typography>
     </React.Fragment>
   );
 }

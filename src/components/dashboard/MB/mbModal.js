@@ -18,7 +18,6 @@ import {
   Autocomplete,
 } from "@mui/material";
 
-// Utility function to format dates
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
   const date = new Date(isoDateString);

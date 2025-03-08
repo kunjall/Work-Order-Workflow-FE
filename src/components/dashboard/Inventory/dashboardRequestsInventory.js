@@ -33,18 +33,17 @@ const Example = ({ refreshKey }) => {
   const username = useMemo(() => user.username, [user]);
 
   const handleOpenModal = (row) => {
-    setSelectedRow(row); // Store the row's data
+    setSelectedRow(row);
     setInventoryStatusPass(row ? row.inventory_inward_status : "");
-    setOpen(true); // Open the modal
+    setOpen(true);
   };
 
   useEffect(() => {
-    // Reset the comment whenever a new request is selected
     setComment("");
   }, [selectedRow]);
 
   const handleCloseModal = () => {
-    setOpen(false); // Close the modal
+    setOpen(false);
   };
   useEffect(() => {
     if (selectedRow != null) {
@@ -109,7 +108,6 @@ const Example = ({ refreshKey }) => {
     fetchAllInventoryMaterial();
   }, []);
 
-  // Fetch data from the API
   useEffect(() => {
     let isMounted = true;
 
@@ -195,12 +193,12 @@ const Example = ({ refreshKey }) => {
     const actionedBy = user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
 
     if (inventoryStatusPass === "Pending for receipt") {
@@ -234,7 +232,7 @@ const Example = ({ refreshKey }) => {
         const response = await axios.patch(
           `${process.env.REACT_APP_API_URL}/inventory/updateApproved`,
           {
-            inventory_id: selectedRow.inventory_id, // Ensure this is passed to your modal
+            inventory_id: selectedRow.inventory_id,
             inventory_inward_status: inventoryStatus,
             approved_at: actionedAt,
             approved_by: actionedBy,
@@ -257,12 +255,12 @@ const Example = ({ refreshKey }) => {
     const actionedBy = user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
 
     if (inventoryStatusPass === "Pending for receipt") {
@@ -271,7 +269,7 @@ const Example = ({ refreshKey }) => {
         const response = await axios.patch(
           `${process.env.REACT_APP_API_URL}/inventory/updateReceived`,
           {
-            inventory_id: selectedRow.inventory_id, // Ensure this is passed to your modal
+            inventory_id: selectedRow.inventory_id,
             inventory_inward_status: inventoryStatus,
             received_at: actionedAt,
             received_by: actionedBy,
@@ -296,7 +294,7 @@ const Example = ({ refreshKey }) => {
         const response = await axios.patch(
           `${process.env.REACT_APP_API_URL}/inventory/updateApproved`,
           {
-            inventory_id: selectedRow.inventory_id, // Ensure this is passed to your modal
+            inventory_id: selectedRow.inventory_id,
             inventory_inward_status: inventoryStatus,
             approved_at: actionedAt,
             approved_by: actionedBy,
@@ -317,7 +315,6 @@ const Example = ({ refreshKey }) => {
     }
   };
 
-  // Define columns
   const columns = useMemo(() => [
     {
       accessorKey: "inventory_id",
@@ -332,9 +329,9 @@ const Example = ({ refreshKey }) => {
             textDecoration: "underline",
             cursor: "pointer",
           }}
-          onClick={() => handleOpenModal(row.original)} // Pass the row's data
+          onClick={() => handleOpenModal(row.original)}
         >
-          {"INV-" + row.original.inventory_id} {/* Prefix with "mwo_" */}{" "}
+          {"INV-" + row.original.inventory_id} {}{" "}
         </span>
       ),
     },
@@ -358,77 +355,31 @@ const Example = ({ refreshKey }) => {
       filterFn: "contains",
     },
 
-    // {
-    //   accessorKey: "received_by",
-    //   header: "Received By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "approved_by",
-    //   header: "Approved By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
     {
       accessorKey: "created_at",
       header: "Created Dt",
       size: 150,
-      Cell: ({ cell }) => cell.getValue(), // Format date
-      // filterFn: "contains",
+      Cell: ({ cell }) => cell.getValue(),
     },
-    // {
-    //   accessorKey: "received_at",
-    //   header: "Received Dt",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
+
     {
       accessorKey: "inventory_approver_email",
       header: "Approver Email",
       size: 150,
       filterFn: "contains",
     },
-    // {
-    //   accessorKey: "entry_date",
-    //   header: "Entry Date",
-    //   size: 150,
-    //   Cell: ({ cell }) => cell.getValue(), // Format date
-    //   filterFn: "contains",
-    // },
+
     {
       accessorKey: "inventory_receiver_name",
       header: "Receiver Name",
       size: 200,
-      // filterFn: "contains",
     },
     {
       accessorKey: "inventory_approver_name",
       header: "Approver Name",
       size: 200,
-      // filterFn: "contains",
     },
-    // {
-    //   accessorKey: "customer_dc_number",
-    //   header: "Customer DC Number",
-    //   size: 200,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "dc_date",
-    //   header: "DC Date",
-    //   size: 150,
-    //   Cell: ({ cell }) => cell.getValue(), // Format date
-    //   filterFn: "contains",
-    // },
 
-    // {
-    //   accessorKey: "customer_id",
-    //   header: "Customer ID",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
     {
       accessorKey: "customer_name",
       header: "Customer Name",
@@ -436,103 +387,11 @@ const Example = ({ refreshKey }) => {
       filterFn: "contains",
       size: 250,
     },
-    // {
-    //   accessorKey: "warehouse_id",
-    //   header: "Warehouse ID",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "eway_bill_number",
-    //   header: "Eway Bill Number",
-    //   size: 200,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "mrs_number",
-    //   header: "MRS Number",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "client_warehouse_id",
-    //   header: "Cust. Warehouse ID",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "client_warehouse_city",
-    //   header: "Cust. Warehouse City",
-    //   size: 200,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "created_by",
-    //   header: "Created By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "created_at",
-    //   header: "Created Dt",
-    //   size: 150,
-    //   Cell: ({ cell }) => cell.getValue(), // Format date
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "received_by",
-    //   header: "Received By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "received_at",
-    //   header: "Received Dt",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "approved_by",
-    //   header: "Approved By",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-    // {
-    //   accessorKey: "approved_at",
-    //   header: "Approved Dt",
-    //   size: 150,
-    //   filterFn: "contains",
-    // },
-
-    // {
-    //   accessorKey: "material_id",
-    //   header: "Material Id",
-    //   size: 150,
-    // },
-    // {
-    //   accessorKey: "material_desc",
-    //   header: "Material Desc",
-    //   size: 150,
-    // },
-    // {
-    //   accessorKey: "material_uom",
-    //   header: "Material UOM",
-    //   size: 150,
-    // },
-    // {
-    //   accessorKey: "material_wo_qty",
-    //   header: "Material QTY",
-    //   size: 150,
-    // },
   ]);
 
   const handleExportRows = (rows) => {
     const flattened = [];
-    // Merge `tableData` with the material details
+
     rows.forEach((inventory) => {
       const materials = allInventoryMaterial.filter(
         (mat) => mat.inventory_id === inventory.inventory_id
@@ -548,7 +407,6 @@ const Example = ({ refreshKey }) => {
           });
         });
       } else {
-        // Push a row without material if no materials exist
         flattened.push({
           ...inventory,
           material_id: "",
@@ -560,10 +418,9 @@ const Example = ({ refreshKey }) => {
 
     const csvConfig = mkConfig({
       filename: "inventory_with_materials",
-      useKeysAsHeaders: true, // Automatically use keys as column headers
+      useKeysAsHeaders: true,
     });
 
-    // Generate and download CSV
     const csv = generateCsv(csvConfig)(flattened);
     download(csvConfig)(csv);
   };
@@ -574,8 +431,6 @@ const Example = ({ refreshKey }) => {
     enableColumnFilterModes: true,
     enableColumnOrdering: true,
     enableGrouping: false,
-    // getSubRows: (row) => row.materials,
-    // enableExpanding: true,
 
     enableColumnPinning: true,
     enableFacetedValues: true,
@@ -596,7 +451,7 @@ const Example = ({ refreshKey }) => {
     positionToolbarAlertBanner: "bottom",
     muiTableContainerProps: {
       sx: {
-        borderRadius: "16px", // Rounded edges
+        borderRadius: "16px",
         border: "1px solid #ec7c30",
         width: "98%",
         margin: "0 auto",
@@ -637,42 +492,41 @@ const Example = ({ refreshKey }) => {
       sx={{
         width: "98%",
         margin: "0 auto",
-        borderRadius: "16px", // Rounded edges
+        borderRadius: "16px",
       }}
     >
-      {/* Main Button outside Table */}
+      {}
       <Box
         sx={{
           display: "flex",
-          justifyContent: "flex-end", // Align button to the right
-          marginBottom: "16px", // Add margin to separate from table
+          justifyContent: "flex-end",
+          marginBottom: "16px",
         }}
       >
         <Button
           disabled={table.getPrePaginationRowModel().rows.length === 0}
           onClick={() => {
-            const filteredRows = table.getFilteredRowModel().rows; // Get filtered rows
+            const filteredRows = table.getFilteredRowModel().rows;
 
-            // Extract original data and remove 'materials' field
             const allOriginalData = filteredRows.map((row) => {
-              const { materials, ...rest } = row.original; // Destructure and exclude 'materials'
-              return rest; // Return the remaining data without 'materials'
+              const { materials, ...rest } = row.original;
+              return rest;
             });
 
-            handleExportRows(allOriginalData); // Export filtered rows without 'materials'
+            handleExportRows(allOriginalData);
           }}
           startIcon={<FileDownloadIcon />}
           variant="contained"
           sx={{
-            color: "black", // Text color
-            backgroundColor: "#ec7c30", // Orange background
-            height: "35px", // Ensure height is fixed
-            padding: "10px 20px", // Add padding for better spacing
+            color: "black",
+            backgroundColor: "#ec7c30",
+            height: "35px",
+            padding: "10px 20px",
             borderRadius: "8px",
-            marginTop: "-45px", // Optional: Round button edges
+            marginTop: "-45px",
             fontWeight: "bold",
             "&:hover": {
-              backgroundColor: "black", // Keep the orange background on hover
+              backgroundColor: "black",
               color: "#ec7c30",
               cursor: "pointer",
             },
@@ -682,7 +536,7 @@ const Example = ({ refreshKey }) => {
         </Button>
       </Box>
 
-      {/* Material React Table with Toolbar */}
+      {}
       <MaterialReactTable
         table={table}
         muiTableContainerProps={{
@@ -692,23 +546,6 @@ const Example = ({ refreshKey }) => {
             width: "100%",
           },
         }}
-        // renderRowSubComponent={({ row }) => (
-        //   <Box sx={{ padding: 2 }}>
-        //     <Typography variant="h6" sx={{ marginBottom: 1 }}>
-        //       Materials Details
-        //     </Typography>
-        //     <MaterialReactTable
-        //       columns={subRowColumns}
-        //       data={row.materials} // Subrow data
-        //       enableExpanding={false}
-        //       enablePagination={false}
-        //       enableSorting={false}
-        //       muiTableProps={{
-        //         sx: { backgroundColor: "#f9f9f9", border: "1px solid #ccc" },
-        //       }}
-        //     />
-        //   </Box>
-        // )}
         renderTopToolbar={({ table }) => (
           <Box
             sx={{
@@ -721,7 +558,7 @@ const Example = ({ refreshKey }) => {
               minHeight: "60px",
             }}
           >
-            {/* Filters Section */}
+            {}
             <Box sx={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <MRT_GlobalFilterTextField table={table} />
               <MRT_ToggleFiltersButton table={table} />
@@ -730,7 +567,7 @@ const Example = ({ refreshKey }) => {
         )}
       />
 
-      {/* Inventory Modal */}
+      {}
       <InventoryModal
         open={open}
         onClose={handleCloseModal}

@@ -61,7 +61,7 @@ const InventoryInward = () => {
   const [clientWarehouses, setClientWarehouses] = useState([]);
   let inventoryId = null;
 
-  dayjs.extend(utc); // Add UTC plugin
+  dayjs.extend(utc);
   dayjs.extend(timezone);
 
   useEffect(() => {
@@ -213,15 +213,12 @@ const InventoryInward = () => {
 
   useEffect(() => {
     if (selectedReviewerEmail) {
-      console.log(selectedReviewerEmail);
       const selectedReviewer = reviewers.find(
         (reviewer) => reviewer.reviewer_email === selectedReviewerEmail
       );
       setReviewerName(selectedReviewer ? selectedReviewer.reviewer_name : "");
-      console.log(reviewerName);
     } else {
       setReviewerName("");
-      console.log("test");
     }
   }, [selectedReviewerEmail, reviewers]);
 
@@ -236,13 +233,11 @@ const InventoryInward = () => {
             },
           }
         );
-        console.log(response);
         const clientWarehouseArray = response.data.map((warehouse) => ({
           id: warehouse.warehouse_id,
           city: warehouse.warehouse_city,
         }));
         setClientWarehouses(clientWarehouseArray);
-        console.log(clientWarehouseArray);
       } catch (err) {
         console.error("Error fetching warehouse:", err);
         setError("Failed to load warehouses");
@@ -273,9 +268,8 @@ const InventoryInward = () => {
     setSelectedWarehouseId("");
     setWarehouseState("");
 
-    // Reset date fields to current date, formatted in your desired format
-    setDCDate(dayjs().format("MMM DD, YYYY, hh:mm:ss A")); // Adjusted for your date format
-    setEntryDate(dayjs().format("MMM DD, YYYY, hh:mm:ss A")); // Adjusted for your date format
+    setDCDate(dayjs().format("MMM DD, YYYY, hh:mm:ss A"));
+    setEntryDate(dayjs().format("MMM DD, YYYY, hh:mm:ss A"));
 
     setEWayBillNumber("");
     setdeliveryChallanNumber("");
@@ -285,7 +279,7 @@ const InventoryInward = () => {
     const createdBy = user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
@@ -301,7 +295,6 @@ const InventoryInward = () => {
     const mrsDateFormatted = formatDate(mrsDate);
 
     try {
-      // Prepare materials array for the new backend structure
       const materials = lineItems.map((item) => ({
         material_id: item.materialCode,
         material_desc: item.itemName,
@@ -327,11 +320,11 @@ const InventoryInward = () => {
         created_at: createdAt,
         inventory_receiver_email: selectedReviewerEmail,
         inventory_receiver_name: reviewerName,
-        materials, // Pass materials array
+        materials,
       };
 
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/inventory/create`, // Updated endpoint
+        `${process.env.REACT_APP_API_URL}/inventory/create`,
         payload,
         {
           headers: {
@@ -339,8 +332,6 @@ const InventoryInward = () => {
           },
         }
       );
-
-      console.log("Transaction Response:", response.data);
     } catch (error) {
       console.error("Error submitting inventory transaction:", error);
       setError("Failed to submit inventory transaction");
@@ -349,7 +340,7 @@ const InventoryInward = () => {
 
   const handlePopupClose = () => {
     setSuccessPopupOpen(false);
-    resetForm(); // Reset form after popup is closed
+    resetForm();
   };
 
   let theme = createTheme();
@@ -363,6 +354,27 @@ const InventoryInward = () => {
             <Typography color="error">{error}</Typography>
           ) : (
             <Grid container spacing={2}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100vw",
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#2c3e50",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                    textAlign: "center",
+                  }}
+                >
+                  Inventory Inward
+                </Typography>
+              </Box>
               <Grid item xs={12} sm={6} md={2}>
                 <Autocomplete
                   disablePortal
@@ -619,7 +631,7 @@ const InventoryInward = () => {
                     borderWidth: "1px",
                   }}
                 />{" "}
-                {/* Horizontal Divider */}
+                {}
               </Grid>
               <Box sx={{ flex: 1, padding: 2 }}>
                 <Typography variant="h6">Materials</Typography>
@@ -654,8 +666,7 @@ const InventoryInward = () => {
           <DialogTitle>Success</DialogTitle>
           <DialogContent>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <CheckCircleIcon style={{ color: "green" }} />{" "}
-              {/* Green checkmark icon */}
+              <CheckCircleIcon style={{ color: "green" }} /> {}
               <DialogContentText>
                 The work order has been successfully submitted.
               </DialogContentText>

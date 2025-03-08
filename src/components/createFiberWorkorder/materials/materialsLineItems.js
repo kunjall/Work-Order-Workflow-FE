@@ -18,20 +18,20 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
       itemName: "",
       itemUom: "",
       itemQTY: "",
-      itemRate: "", // Added item rate
-      itemPrice: "", // Added item price (calculated)
-      totalAmount: "", // Added total amount (calculated)
+      itemRate: "",
+      itemPrice: "",
+      totalAmount: "",
     },
   ]);
   const [totalAmount, setTotalAmount] = useState(0);
-  const [error, setError] = useState(null); // To track if there's an error
+  const [error, setError] = useState(null);
 
   const calculateTotal = () => {
     const total = lineItems.reduce((sum, item) => {
       return sum + parseFloat(item.itemPrice || 0);
     }, 0);
-    setTotalAmount(total.toFixed(2)); // Format to 2 decimal places
-    onAmountUpdate(total.toFixed(2)); // Update parent component with the total amount
+    setTotalAmount(total.toFixed(2));
+    onAmountUpdate(total.toFixed(2));
   };
 
   useEffect(() => {
@@ -39,8 +39,8 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
   }, [lineItems]);
 
   useEffect(() => {
-    onUpdate(lineItems); // Send the initial items to the parent on load
-  }, [lineItems, onUpdate]); // Ensure it sends updated items every time lineItems change
+    onUpdate(lineItems);
+  }, [lineItems, onUpdate]);
 
   const handleAddLineItem = () => {
     const newLineItems = [
@@ -50,19 +50,19 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
         itemName: "",
         itemUom: "",
         itemQTY: "",
-        itemRate: "", // Added item rate
-        itemPrice: "", // Added item price (calculated)
-        totalAmount: "", // Added total amount (calculated)
+        itemRate: "",
+        itemPrice: "",
+        totalAmount: "",
       },
     ];
     setLineItems(newLineItems);
-    onUpdate(newLineItems); // Send updated items to parent
+    onUpdate(newLineItems);
   };
 
   const handleRemoveLineItem = (index) => {
     const updatedLineItems = lineItems.filter((_, i) => i !== index);
     setLineItems(updatedLineItems);
-    onUpdate(updatedLineItems); // Send updated items to parent
+    onUpdate(updatedLineItems);
   };
 
   const handleChange = (index, field, value) => {
@@ -70,26 +70,26 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
       i === index ? { ...item, [field]: value } : item
     );
     setLineItems(updatedLineItems);
-    onUpdate(updatedLineItems); // Send updated items to parent
+    onUpdate(updatedLineItems);
   };
 
   const handleMaterialChange = (index, material) => {
     const materialCode = material ? material.id : "";
-    // Check if the materialCode is already selected in other rows
+
     const isMaterialCodeDuplicate = lineItems.some(
       (item, i) => i !== index && item.materialCode === materialCode
     );
 
     if (isMaterialCodeDuplicate) {
       setError("This material has already been added.");
-      return; // Prevent selecting the same material
+      return;
     } else {
-      setError(null); // Reset error if it's a valid selection
+      setError(null);
     }
 
     const itemName = material ? material.description : "";
     const itemUom = material ? material.uom : "";
-    const itemRate = material ? material.rate : ""; // Assuming material object has a rate field
+    const itemRate = material ? material.rate : "";
 
     const updatedLineItems = lineItems.map((item, i) =>
       i === index
@@ -97,14 +97,13 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
         : item
     );
     setLineItems(updatedLineItems);
-    onUpdate(updatedLineItems); // Send updated items to parent
+    onUpdate(updatedLineItems);
   };
 
   const handleQuantityChange = (index, value) => {
     const updatedLineItems = [...lineItems];
     updatedLineItems[index].itemQTY = value;
 
-    // Calculate price and total amount
     const itemRate = updatedLineItems[index].itemRate;
     const itemPrice = value * itemRate;
     const totalAmount = itemPrice;
@@ -113,14 +112,13 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
     updatedLineItems[index].totalAmount = totalAmount;
 
     setLineItems(updatedLineItems);
-    onUpdate(updatedLineItems); // Send updated items to parent
+    onUpdate(updatedLineItems);
   };
 
   const handleRateChange = (index, value) => {
     const updatedLineItems = [...lineItems];
     updatedLineItems[index].itemRate = value;
 
-    // Recalculate price and total amount
     const itemQTY = updatedLineItems[index].itemQTY;
     const itemPrice = itemQTY * value;
     const totalAmount = itemPrice;
@@ -129,10 +127,9 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
     updatedLineItems[index].totalAmount = totalAmount;
 
     setLineItems(updatedLineItems);
-    onUpdate(updatedLineItems); // Send updated items to parent
+    onUpdate(updatedLineItems);
   };
 
-  // Disable "Add Line Item" button if the last line item is incomplete
   const isAddDisabled = lineItems.some(
     (item) =>
       !item.itemRate ||
@@ -251,7 +248,7 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
         <IconButton
           color="primary"
           onClick={handleAddLineItem}
-          disabled={isAddDisabled} // Disable if any required field is missing
+          disabled={isAddDisabled}
         >
           <AddCircleOutline />
           <Typography>Add Line Item</Typography>

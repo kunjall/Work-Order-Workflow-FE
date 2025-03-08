@@ -18,7 +18,6 @@ import {
   Autocomplete,
 } from "@mui/material";
 
-// Utility function to format dates
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
   const date = new Date(isoDateString);
@@ -134,8 +133,8 @@ const MwoModal = ({
               <TableContainer
                 component={Paper}
                 sx={{
-                  maxHeight: 300, // Set the maximum height for the container
-                  overflowY: "auto", // Enable vertical scrolling
+                  maxHeight: 300,
+                  overflowY: "auto",
                 }}
               >
                 <Table>
@@ -179,8 +178,8 @@ const MwoModal = ({
               <TableContainer
                 component={Paper}
                 sx={{
-                  maxHeight: 300, // Set the maximum height for the container
-                  overflowY: "auto", // Enable vertical scrolling
+                  maxHeight: 300,
+                  overflowY: "auto",
                 }}
               >
                 <Table>

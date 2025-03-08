@@ -60,16 +60,15 @@ const CreateMRS = () => {
   );
 
   const handleRadioChange = (event) => {
-    console.log(internalExternal);
     setSelectedWorkOrder(null);
     setFormData({});
     setChildMaterials([]);
     setMaterialLineItems([]);
-    setSelectedLocator(null); // Reset value for locator dropdown
-    setSelectedWarehouseId(null); // Reset value for warehouse dropdown
-    setSelectedApproverEmail(null); // Reset value for approver email dropdown
+    setSelectedLocator(null);
+    setSelectedWarehouseId(null);
+    setSelectedApproverEmail(null);
     setChildServices([]);
-    setWarehouses([]); // Clear warehouse options
+    setWarehouses([]);
     setLocators([]);
 
     if (event.target.value === "internal") {
@@ -83,15 +82,14 @@ const CreateMRS = () => {
     const createdBy = user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
 
-    // Construct the request body
     const requestData = {
       warehouse_id: selectedWarehouseId,
       vendor_id: formData.vendor_id,
@@ -114,11 +112,7 @@ const CreateMRS = () => {
       materialItems: materialLineItems,
     };
 
-    console.log(materialLineItems);
-    console.log(childMaterials);
-
     try {
-      // Send data to the backend in a single request
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/mm/create-mm`,
         requestData,
@@ -128,17 +122,9 @@ const CreateMRS = () => {
           },
         }
       );
-
-      // Handle success response
-      // if (response.status === 201) {
-      //   setSuccess(true);
-      //   // Additional success logic like closing the modal or redirecting
-      // }
     } catch (error) {
       console.error("Error submitting data:", error);
       setError("An error occurred while submitting the data.");
-      // setModalOpen(true);
-      // setSuccess(false);
     }
   };
 
@@ -188,7 +174,6 @@ const CreateMRS = () => {
   useEffect(() => {
     const fetchWarehouses = async () => {
       if (Object.keys(formData).length > 0) {
-        // Check if formData has any properties
         try {
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/master/find-warehouse`,
@@ -292,7 +277,6 @@ const CreateMRS = () => {
 
           const responses = await Promise.all(promises);
           const locatorData = responses.map((response) => response.data);
-          console.log(responses);
 
           setLocatorStock(locatorData.flat());
         } catch (err) {
@@ -317,7 +301,6 @@ const CreateMRS = () => {
     }
   }, [selectedWarehouseId, warehouses]);
 
-  // Fetch work orders on component mount
   useEffect(() => {
     const fetchVendors = async () => {
       try {
@@ -372,25 +355,6 @@ const CreateMRS = () => {
     }
   }, [locatorStock, materialLineItems]);
 
-  // useEffect(() => {
-  //   const fetchWorkOrders = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/workorder/find-child-workorder`,
-  //         {
-  //           headers: { Authorization: user.authToken },
-  //         }
-  //       );
-
-  //       setWorkOrders(response.data);
-  //     } catch (err) {
-  //       console.error("Failed to fetch work orders:", err);
-  //       setError("Failed to load work orders");
-  //     }
-  //   };
-  //   fetchWorkOrders();
-  // }, []);
-
   useEffect(() => {
     const fetchWorkOrders = async () => {
       try {
@@ -408,15 +372,13 @@ const CreateMRS = () => {
         const data = response.data;
 
         if (user.company === "TPS") {
-          // Only set internal orders for "TPS"
           const internalOrders = data.filter((item) => item.vendor_id === null);
           setInternalWorkOrders(internalOrders);
-          setExternalWorkOrders([]); // Clear external orders
+          setExternalWorkOrders([]);
         } else {
-          // Only set external orders for other companies
           const externalOrders = data.filter((item) => item.vendor_id !== null);
           setExternalWorkOrders(externalOrders);
-          setInternalWorkOrders([]); // Clear internal orders
+          setInternalWorkOrders([]);
         }
       } catch (err) {
         console.error("Failed to fetch work orders:", err);
@@ -425,7 +387,7 @@ const CreateMRS = () => {
     };
 
     fetchWorkOrders();
-  }, [user]); // Add `user` as a dependency to trigger effect when it changes
+  }, [user]);
 
   useEffect(() => {
     if (selectedWorkOrder) {
@@ -497,7 +459,6 @@ const CreateMRS = () => {
     }
   };
 
-  // Redirect to login if user is not authenticated
   useEffect(() => {
     if (!user) {
       navigate("/login");
@@ -519,7 +480,7 @@ const CreateMRS = () => {
             sx={{
               marginLeft: 1,
               marginTop: 1,
-              maxWidth: "100%", // Prevent content from exceeding the viewport
+              maxWidth: "100%",
             }}
           >
             <Grid item xs={12} sm={12} md={6}>
@@ -584,10 +545,10 @@ const CreateMRS = () => {
                 </Grid>
               </>
             )}
-            {/* Work Order Number Autocomplete */}
+            {}
             <Grid item xs={12} sm={6} md={7}>
               <Autocomplete
-                value={selectedWorkOrder} // Controlled value
+                value={selectedWorkOrder}
                 options={
                   internalExternal === "internal"
                     ? internalWorkOrders
@@ -610,7 +571,7 @@ const CreateMRS = () => {
                 )}
               />
             </Grid>
-            {/* Work Order Details */}
+            {}
 
             {/* <Grid item xs={12} sm={6} md={3}>
               <TextField
@@ -712,7 +673,7 @@ const CreateMRS = () => {
                 )}
               />
             </Grid>
-            {/* <Grid item xs={12} sm={6} md={2}> */}
+            {}
             {/* <TextField
                         label="Description"
                         value={ || ""}
@@ -720,7 +681,7 @@ const CreateMRS = () => {
                         variant="outlined"
                         fullWidth
                       /> */}
-            {/* </Grid> */}
+            {}
             <Grid item xs={12} sm={6} md={4}>
               <Autocomplete
                 value={
@@ -844,7 +805,6 @@ const CreateMRS = () => {
                           label="MM Qty"
                           value={materialLineItems[index]?.mm_qty || ""}
                           onChange={(e) => {
-                            console.log(material);
                             const value = e.target.value;
                             const mmQty = Number(value);
                             const error =
@@ -860,11 +820,11 @@ const CreateMRS = () => {
                                       mm_qty: value,
                                       error,
                                       material_mm_price: error
-                                        ? "" // Clear CWO Price on error
+                                        ? ""
                                         : (
                                             mmQty *
                                             Number(material.material_rate)
-                                          ).toFixed(2), // Calculate price if valid
+                                          ).toFixed(2),
                                     }
                                   : item
                               )

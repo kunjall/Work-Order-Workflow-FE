@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
@@ -11,6 +11,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const URL = process.env.REACT_APP_API_URL;
+  const INACTIVITY_LIMIT = 30 * 60 * 1000;
+
+  let inactivityTimer;
+
+  const resetInactivityTimer = useCallback(() => {
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(() => {
+      logout();
+    }, INACTIVITY_LIMIT);
+  }, []);
 
   useEffect(() => {
     const initializeAuth = async () => {
@@ -24,6 +34,7 @@ export const AuthProvider = ({ children }) => {
             const decoded = jwtDecode(token);
             setUser({ ...decoded, authToken: token });
             setAuthToken(token);
+            resetInactivityTimer();
           } else {
             handleLogout();
           }
@@ -36,13 +47,24 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-  }, [URL]);
+
+    window.addEventListener("mousemove", resetInactivityTimer);
+    window.addEventListener("keydown", resetInactivityTimer);
+    window.addEventListener("click", resetInactivityTimer);
+
+    return () => {
+      window.removeEventListener("mousemove", resetInactivityTimer);
+      window.removeEventListener("keydown", resetInactivityTimer);
+      window.removeEventListener("click", resetInactivityTimer);
+    };
+  }, [URL, resetInactivityTimer]);
 
   const login = (token) => {
     localStorage.setItem("token", token);
     const decoded = jwtDecode(token);
     setUser({ ...decoded, authToken: token });
     setAuthToken(token);
+    resetInactivityTimer();
   };
 
   const handleLogout = () => {

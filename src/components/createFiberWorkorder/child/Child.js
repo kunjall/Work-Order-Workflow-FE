@@ -39,9 +39,7 @@ const DashboardWhinch = () => {
   const [error, setError] = useState(null);
   const [cityOptions, setCityOptions] = useState([]);
   const [selectedManager, setSelectedManager] = useState("");
-  // const [materialCodes, setMaterialCodes] = useState([]);
-  // const [services, setServices] = useState([]);
-  // const [lineItems, setLineItems] = useState([]);
+
   const [totalAmount, setTotalAmount] = useState("");
   const [vendorOptions, setVendorOptions] = useState([]);
   const [selectedVendorId, setSelectedVendorId] = useState(null);
@@ -75,18 +73,16 @@ const DashboardWhinch = () => {
   const [vendorRouteAllocationError, setVendorRouteAllocationError] =
     useState("");
 
-  // Update the handle for vendorRouteAllocation input change
   const handleVendorRouteAllocationChange = (event) => {
     const value = event.target.value;
     setvendorRouteAllocation(value);
 
-    // Validate allocation against route length
     if (parseFloat(value) > parseFloat(formData.route_length)) {
       setVendorRouteAllocationError(
         "Vendor Route Allocation cannot exceed Route Length."
       );
     } else {
-      setVendorRouteAllocationError(""); // Clear error if valid
+      setVendorRouteAllocationError("");
     }
   };
 
@@ -107,7 +103,6 @@ const DashboardWhinch = () => {
     customer_project_manager: "",
   });
 
-  // Fetch work orders on mount
   useEffect(() => {
     const fetchCities = async () => {
       try {
@@ -124,24 +119,22 @@ const DashboardWhinch = () => {
           (city) => city.company === "The Pinnacle Search"
         );
 
-        // Group cities by their name and merge manager lists
         const cityMap = filteredCities.reduce((acc, city) => {
           const cityName = city.city_name;
           const managers = Array.isArray(city.manager_name)
             ? city.manager_name.map((name) => name.trim())
             : typeof city.manager_name === "string"
-            ? [city.manager_name.trim()] // Convert string to array
-            : []; // Fallback if null/undefined
+            ? [city.manager_name.trim()]
+            : [];
 
           if (!acc[cityName]) {
             acc[cityName] = {
-              cityManagerId: city.city_manager_id, // Optional: keep only the first city's ID
+              cityManagerId: city.city_manager_id,
               cityName: cityName,
-              managerNames: new Set(managers), // Use a Set to ensure uniqueness
+              managerNames: new Set(managers),
               type: city.type,
             };
           } else {
-            // Merge managers into the existing Set
             managers.forEach((manager) =>
               acc[cityName].managerNames.add(manager)
             );
@@ -150,10 +143,9 @@ const DashboardWhinch = () => {
           return acc;
         }, {});
 
-        // Convert the city map back to an array, with unique managers for each city
         const citiesArray = Object.values(cityMap).map((city) => ({
           ...city,
-          managerNames: Array.from(city.managerNames), // Convert Set back to array
+          managerNames: Array.from(city.managerNames),
         }));
 
         setCityOptions(citiesArray);
@@ -227,7 +219,6 @@ const DashboardWhinch = () => {
     fetchWorkOrders();
   }, []);
 
-  // Handle work order selection
   const handleWorkOrderSelect = (event, newValue) => {
     if (newValue) {
       setSelectedWorkOrder(newValue);
@@ -292,14 +283,11 @@ const DashboardWhinch = () => {
     }
   }, [user, navigate]);
   useEffect(() => {
-    // Calculate total sum of service_cwo_price from serviceLineItems
     const total = serviceLineItems.reduce((sum, item) => {
-      // Only add valid prices (non-empty and non-NaN)
       const price = parseFloat(item.service_cwo_price);
       return !isNaN(price) ? sum + price : sum;
     }, 0);
 
-    // Set the total amount with two decimal points
     setTotalAmount(total.toFixed(2));
   }, [serviceLineItems]);
   useEffect(() => {
@@ -342,7 +330,7 @@ const DashboardWhinch = () => {
           service_uom: service.service_uom || "",
           service_wo_qty: service.service_wo_qty || "",
           service_cwo_qty: "",
-          service_cwo_price: "", // Initially set to empty string or 0
+          service_cwo_price: "",
         }))
       );
     }
@@ -391,7 +379,7 @@ const DashboardWhinch = () => {
           `${process.env.REACT_APP_API_URL}/workorder/find-mother-material`,
           {
             params: {
-              mwo_id: formData.mwo_id, // Ensures cwo_id is a number
+              mwo_id: formData.mwo_id,
             },
             headers: { Authorization: user.authToken },
           }
@@ -428,15 +416,12 @@ const DashboardWhinch = () => {
 
   useEffect(() => {
     if (formData.execution_city) {
-      // Find the selected city's data based on the name
       const selectedCityData = cityOptions.find(
         (city) => city.cityName === formData.execution_city
       );
 
-      // Set manager options based on the selected city's managers
       setManagerOptions(selectedCityData ? selectedCityData.managerNames : []);
     } else {
-      // Clear manager options if no city is selected
       setManagerOptions([]);
     }
   }, [formData.execution_city, cityOptions]);
@@ -445,15 +430,14 @@ const DashboardWhinch = () => {
     const createdBy = user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
-      month: "short", // e.g., "Dec"
+      month: "short",
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false, // AM/PM format
-      timeZone: "IST", // Adjust to UTC
+      hour12: false,
+      timeZone: "IST",
     });
 
-    // Construct the request body
     const requestData = {
       mwo_id: formData.mwo_id,
       mwo_number: formData.mwo_number,
@@ -467,8 +451,8 @@ const DashboardWhinch = () => {
       workorder_type: formData.workorder_type,
       cwo_number: formData.mwo_number + "-" + childWorkOrderNumber,
       total_material_cost: totalMaterialAmount,
-      materialItems: materialLineItems, // Array of material line items
-      serviceItems: serviceLineItems, // Array of service line items
+      materialItems: materialLineItems,
+      serviceItems: serviceLineItems,
       created_by: createdBy,
       cwo_approver_email: selectedApproverEmail,
       cwo_approver_name: approverName,
@@ -482,7 +466,6 @@ const DashboardWhinch = () => {
     };
 
     try {
-      // Send data to the backend in a single request
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/workorder/createChild`,
         requestData,
@@ -493,10 +476,8 @@ const DashboardWhinch = () => {
         }
       );
 
-      // Handle success response
       if (response.status === 201) {
         setSuccess(true);
-        // Additional success logic like closing the modal or redirecting
       }
     } catch (error) {
       console.error("Error submitting data:", error);
@@ -527,15 +508,35 @@ const DashboardWhinch = () => {
             <Typography color="error">{error}</Typography>
           ) : (
             <Grid container spacing={2}>
-              {/* Work Order Number Autocomplete */}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100vw",
+                }}
+              >
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: "bold",
+                    color: "#2c3e50",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                    textAlign: "center",
+                  }}
+                >
+                  Child Workorder
+                </Typography>
+              </Box>
+              {}
               <Grid item xs={12} sm={6} md={2}>
                 <Autocomplete
                   options={workOrders}
-                  getOptionLabel={(option) => "MWO-" + option.mwo_id.toString()} // Display mwo_id as a string
+                  getOptionLabel={(option) => "MWO-" + option.mwo_id.toString()}
                   onChange={handleWorkOrderSelect}
-                  isOptionEqualToValue={
-                    (option, value) =>
-                      String(option.mwo_id) === String(value.mwo_id) // Ensure both are strings for comparison
+                  isOptionEqualToValue={(option, value) =>
+                    String(option.mwo_id) === String(value.mwo_id)
                   }
                   renderInput={(params) => (
                     <TextField
@@ -557,7 +558,7 @@ const DashboardWhinch = () => {
                   fullWidth
                 />
               </Grid>
-              {/* Display work order details in readonly fields */}
+              {}
               <Grid item xs={12} sm={6} md={2}>
                 <TextField
                   disabled
@@ -618,7 +619,7 @@ const DashboardWhinch = () => {
                   fullWidth
                 />
               </Grid>
-              {/* Dropdown for activity */}
+              {}
               <Grid item xs={12} sm={6} md={2}>
                 <FormControl variant="outlined" fullWidth>
                   <InputLabel id="activity-label">Activity</InputLabel>
@@ -657,7 +658,7 @@ const DashboardWhinch = () => {
                   fullWidth
                 />
               </Grid>
-              {/* Date Picker for customer approval date */}
+              {}
               <Grid item xs={12} sm={6} md={2}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
@@ -687,13 +688,14 @@ const DashboardWhinch = () => {
                   label="Child W/O Number"
                   variant="outlined"
                   fullWidth
+                  required
                   value={childWorkOrderNumber}
                   onChange={(e) => {
                     const input = e.target.value
                       .toUpperCase()
-                      .replace(/[^A-Z]/g, ""); // Only letters
+                      .replace(/[^A-Z]/g, "");
                     if (input.length <= 2) {
-                      setChildWorkOrderNumber(input); // Allow max 2 letters
+                      setChildWorkOrderNumber(input);
                     }
                   }}
                   InputProps={{
@@ -712,9 +714,10 @@ const DashboardWhinch = () => {
                   id="manager-dropdown"
                   options={managerOptions}
                   getOptionLabel={(option) => option}
-                  value={selectedManager} // Bind the value to the state
+                  value={selectedManager}
+                  required
                   onChange={(event, newValue) => {
-                    setSelectedManager(newValue || ""); // Update state on change
+                    setSelectedManager(newValue || "");
                   }}
                   renderInput={(params) => (
                     <TextField
@@ -736,9 +739,9 @@ const DashboardWhinch = () => {
                     vendorOptions.find(
                       (vendor) => vendor.vendorId === selectedVendorId
                     ) || null
-                  } // Bind the value to the state
+                  }
                   onChange={(event, newValue) => {
-                    setSelectedVendorId(newValue ? newValue.vendorId : null); // Update state on change
+                    setSelectedVendorId(newValue ? newValue.vendorId : null);
                   }}
                   renderInput={(params) => (
                     <TextField
@@ -779,18 +782,18 @@ const DashboardWhinch = () => {
                 <TextField
                   id="vendor-route-allocation"
                   label="Vendor Route Allocation"
+                  required
                   value={vendorRouteAllocation}
                   onChange={(e) => {
                     const value = e.target.value;
                     setvendorRouteAllocation(value);
 
-                    // Check if the value exceeds route_length and set error if it does
                     if (parseFloat(value) > parseFloat(formData.route_length)) {
                       setVendorRouteAllocationError(
                         "Vendor Route Allocation cannot exceed Route Length."
                       );
                     } else {
-                      setVendorRouteAllocationError(""); // Clear error if valid
+                      setVendorRouteAllocationError("");
                     }
                   }}
                   error={Boolean(vendorRouteAllocationError)}
@@ -810,6 +813,7 @@ const DashboardWhinch = () => {
                 <Autocomplete
                   disablePortal
                   id="combo-box-demo"
+                  required
                   options={approvers}
                   getOptionLabel={(option) => option.approver_email.toString()}
                   onChange={(event, newValue) => {
@@ -845,9 +849,7 @@ const DashboardWhinch = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <Divider
-                // style={{ backgroundColor: "#EC7C30", height: "4px" }}
-                />
+                <Divider />
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="h6">Services</Typography>
@@ -897,13 +899,22 @@ const DashboardWhinch = () => {
                       <Grid item xs={12} sm={6} md={1}>
                         <TextField
                           label="Rate"
-                          disabled
                           value={service.service_rate || ""}
-                          InputProps={{ readOnly: true }}
                           variant="outlined"
                           fullWidth
+                          onChange={(e) => {
+                            const newRate = e.target.value;
+                            setMotherServices((prevServices) =>
+                              prevServices.map((s, idx) =>
+                                idx === index
+                                  ? { ...s, service_rate: newRate }
+                                  : s
+                              )
+                            );
+                          }}
                         />
                       </Grid>
+
                       <Grid item xs={12} sm={6} md={1}>
                         <TextField
                           label="Bal QTY"
@@ -936,18 +947,18 @@ const DashboardWhinch = () => {
                                       cwo_qty: value,
                                       error,
                                       service_cwo_price: error
-                                        ? "" // If there is an error, clear CWO Price
+                                        ? ""
                                         : (
                                             cwoQty *
                                             Number(service.service_rate)
-                                          ).toFixed(2), // Calculate CWO Price if no error
+                                          ).toFixed(2),
                                     }
                                   : item
                               )
                             );
                           }}
-                          error={!!serviceLineItems[index]?.error} // Show error if it exists
-                          helperText={serviceLineItems[index]?.error || ""} // Display error message if present
+                          error={!!serviceLineItems[index]?.error}
+                          helperText={serviceLineItems[index]?.error || ""}
                           variant="outlined"
                           fullWidth
                           type="number"
@@ -1080,11 +1091,11 @@ const DashboardWhinch = () => {
                                       cwo_qty: value,
                                       error,
                                       material_cwo_price: error
-                                        ? "" // Clear CWO Price on error
+                                        ? ""
                                         : (
                                             cwoQty *
                                             Number(material.material_rate)
-                                          ).toFixed(2), // Calculate price if valid
+                                          ).toFixed(2),
                                     }
                                   : item
                               )

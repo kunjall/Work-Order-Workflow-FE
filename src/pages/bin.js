@@ -1,9 +1,9 @@
 import React, { useContext, useEffect } from "react";
 import { AuthContext } from "../context/authContext";
 import { useNavigate } from "react-router-dom";
-import MB from "../components/mbCreation/createMB";
+import Example from "../components/bin/binTable";
 
-const Inventory = () => {
+const Bin = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -24,10 +24,10 @@ const Inventory = () => {
           width: "95%",
         }}
       >
-        <MB />
+        <Example />
       </div>
     </div>
   );
 };
 
-export default Inventory;
+export default Bin;

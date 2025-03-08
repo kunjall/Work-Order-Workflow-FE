@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal, Icon } from "@mui/material"; // Replace with your actual library
+import { Modal, Icon } from "@mui/material";
 
 const StatusModal = ({ isOpen, onClose, content }) => {
   const { title, message, icon } = content || {};
