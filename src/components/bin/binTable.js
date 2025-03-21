@@ -27,7 +27,7 @@ const LocatorStock = () => {
     const fetchLocators = async () => {
       try {
         const internalExternal =
-          user.company === "TPS" ? "internal" : "external";
+          user.company.toLowerCase() === "tps" ? "internal" : "external";
 
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/master/find-locators`,

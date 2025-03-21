@@ -15,6 +15,7 @@ import Bin from "./pages/bin";
 import WarehouseStock from "./pages/warehouseStock";
 import Profile from "./components/profile/profile";
 import CreateChild from "./pages/createChild";
+import ModifyMwo from "./pages/modifyMother";
 import Inventory from "./pages/inventoryInward";
 import MRS from "./pages/createMRS";
 import MB from "./components/mbCreation/createMB";
@@ -67,7 +68,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/create"
+                path="/create-mwo"
                 element={
                   <WithAuth role="admin">
                     {}
@@ -75,8 +76,17 @@ const App = () => {
                   </WithAuth>
                 }
               />
+              {/* <Route
+                path="/modify-mwo"
+                element={
+                  <WithAuth role="admin">
+                    {}
+                    <ModifyMwo />
+                  </WithAuth>
+                }
+              /> */}
               <Route
-                path="/find"
+                path="/create-cwo"
                 element={
                   <WithAuth role="admin">
                     {}

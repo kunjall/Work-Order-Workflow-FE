@@ -52,8 +52,9 @@ const Navbar = () => {
   const adminMenuItems = [
     { text: "Actions", icon: <PendingActionsIcon />, path: "/dashboard-admin" },
 
-    { text: "Create MWO", icon: <EngineeringIcon />, path: "/create" },
-    { text: "Create CWO", icon: <RouterIcon />, path: "/find" },
+    { text: "Create MWO", icon: <EngineeringIcon />, path: "/create-mwo" },
+    // { text: "Modify MWO", icon: <EngineeringIcon />, path: "/modify-mwo" },
+    { text: "Create CWO", icon: <RouterIcon />, path: "/create-cwo" },
     {
       text: "Inventory Inward",
       icon: <WarehouseIcon />,

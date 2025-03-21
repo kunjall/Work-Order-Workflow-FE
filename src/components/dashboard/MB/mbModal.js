@@ -66,14 +66,12 @@ const MwoModal = ({
     mbStatus.toLowerCase().includes("pending") &&
     rowData &&
     rowData.requested_by !== username &&
-    ((mbStatus.toLowerCase().includes("pending with tpm") &&
+    ((mbStatus.toLowerCase().includes("pending with deployment head") &&
       username === rowData?.mb_approver1_email) ||
-      (mbStatus.toLowerCase().includes("pending with deployment head") &&
-        username === rowData?.mb_approver2_email) ||
       (mbStatus.toLowerCase().includes("pending with material head") &&
-        username === rowData?.mb_approver3_email) ||
+        username === rowData?.mb_approver2_email) ||
       (mbStatus.toLowerCase().includes("pending with billing spoc") &&
-        username === rowData?.mb_approver4_email));
+        username === rowData?.mb_approver3_email));
 
   const handleApproveButton = () => {
     if (!isActionAllowed) return;
@@ -86,7 +84,7 @@ const MwoModal = ({
     handleReject();
     onClose();
   };
-
+  console.log(childService);
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogContent sx={{ padding: "24px", position: "relative" }}>
@@ -161,7 +159,7 @@ const MwoModal = ({
                       <TableCell>Material ID</TableCell>
                       <TableCell>Description</TableCell>
                       <TableCell>UOM</TableCell>
-                      <TableCell>W/O QTY</TableCell>
+                      <TableCell>MB QTY</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -191,8 +189,7 @@ const MwoModal = ({
                       <TableCell>Service ID</TableCell>
                       <TableCell>Description</TableCell>
                       <TableCell>UOM</TableCell>
-                      <TableCell>W/O QTY</TableCell>
-                      <TableCell>Bal QTY</TableCell>
+                      <TableCell>MB QTY</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -210,7 +207,8 @@ const MwoModal = ({
             ) : (
               <Typography>No services available.</Typography>
             )}
-            {mbStatus.toLowerCase().includes("tpm") && (
+
+            {mbStatus.toLowerCase().includes("deployment head") && (
               <Box sx={{ marginTop: "16px" }}>
                 <Autocomplete
                   disablePortal
@@ -222,30 +220,6 @@ const MwoModal = ({
                       newValue ? newValue.approver_email : null
                     );
                     setApproverName(newValue ? newValue.approver_name : "");
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Deployment Head"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                />
-              </Box>
-            )}
-            {mbStatus.toLowerCase().includes("deployment head") && (
-              <Box sx={{ marginTop: "16px" }}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-demo"
-                  options={approvers}
-                  getOptionLabel={(option) => option.approver2_email.toString()}
-                  onChange={(event, newValue) => {
-                    setSelectedApproverEmail(
-                      newValue ? newValue.approver2_email : null
-                    );
-                    setApproverName(newValue ? newValue.approver2_name : "");
                   }}
                   renderInput={(params) => (
                     <TextField
@@ -264,12 +238,12 @@ const MwoModal = ({
                   disablePortal
                   id="combo-box-demo"
                   options={approvers}
-                  getOptionLabel={(option) => option.approver3_email.toString()}
+                  getOptionLabel={(option) => option.approver2_email.toString()}
                   onChange={(event, newValue) => {
                     setSelectedApproverEmail(
-                      newValue ? newValue.approver3_email : null
+                      newValue ? newValue.approver2_email : null
                     );
-                    setApproverName(newValue ? newValue.approver3_name : "");
+                    setApproverName(newValue ? newValue.approver2_name : "");
                   }}
                   renderInput={(params) => (
                     <TextField

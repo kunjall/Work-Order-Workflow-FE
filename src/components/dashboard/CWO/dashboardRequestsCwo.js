@@ -325,7 +325,9 @@ const Example = ({ refreshKey }) => {
   }, [selectedRow]);
 
   const handleReject = async () => {
-    const actionedBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -360,7 +362,9 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
-    const actionedBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -387,6 +391,7 @@ const Example = ({ refreshKey }) => {
           },
         }
       );
+      alert("Work order approved successfully!");
     } catch (error) {
       console.error("Error in approving: ", error);
       setError("Failed to Approve");

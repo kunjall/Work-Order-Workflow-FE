@@ -190,7 +190,9 @@ const Example = ({ refreshKey }) => {
   }, [selectedRow]);
 
   const handleReject = async () => {
-    const actionedBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -201,7 +203,7 @@ const Example = ({ refreshKey }) => {
       timeZone: "IST",
     });
 
-    if (inventoryStatusPass === "Pending for receipt") {
+    if (inventoryStatusPass.toLowerCase() === "pending for receipt") {
       inventoryStatus = "Rejected by receiver";
       try {
         const response = await axios.patch(
@@ -226,7 +228,7 @@ const Example = ({ refreshKey }) => {
         setError("Failed to submit materials");
       }
     }
-    if (inventoryStatusPass === "Pending for approval") {
+    if (inventoryStatusPass.toLowerCase() === "pending for approval") {
       inventoryStatus = "Rejected by approver";
       try {
         const response = await axios.patch(
@@ -244,6 +246,7 @@ const Example = ({ refreshKey }) => {
             },
           }
         );
+        alert("Inventory rejected successfully!");
       } catch (error) {
         console.error("Error submitting materials:", error);
         setError("Failed to submit materials");
@@ -252,7 +255,9 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
-    const actionedBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -263,7 +268,7 @@ const Example = ({ refreshKey }) => {
       timeZone: "IST",
     });
 
-    if (inventoryStatusPass === "Pending for receipt") {
+    if (inventoryStatusPass.toLowerCase() === "pending for receipt") {
       inventoryStatus = "Pending for approval";
       try {
         const response = await axios.patch(
@@ -288,7 +293,7 @@ const Example = ({ refreshKey }) => {
         setError("Failed to submit materials");
       }
     }
-    if (inventoryStatusPass === "Pending for approval") {
+    if (inventoryStatusPass.toLowerCase() === "pending for approval") {
       inventoryStatus = "Approved";
       try {
         const response = await axios.patch(
@@ -308,6 +313,7 @@ const Example = ({ refreshKey }) => {
             },
           }
         );
+        alert("Inventory approved successfully!");
       } catch (error) {
         console.error("Error submitting materials:", error);
         setError("Failed to submit materials");

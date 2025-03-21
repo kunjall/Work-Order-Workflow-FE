@@ -42,13 +42,31 @@ const InvoiceForm = () => {
   const addOverheadRow = (cwoIndex) => {
     setChildWorkorders((prev) => {
       const updated = [...prev];
-      updated[cwoIndex].overhead = [
-        ...(updated[cwoIndex].overhead || []),
-        { id: Date.now(), A: "", B: "", C: "", D: "", E: "" },
-      ];
+
+      // Define the new row with the correct structure
+      const newRow = {
+        id: Date.now(),
+        "Vendor Name": "",
+        "Invoice Number": "",
+        "Invoice Date": "",
+        Activity: "",
+        QTY: "",
+        UOM: "",
+        "Unit Price": "",
+        Amount: "",
+        Remarks: "",
+      };
+
+      // Ensure overhead exists before adding a new row
+      if (!updated[cwoIndex].overhead) {
+        updated[cwoIndex].overhead = [];
+      }
+
+      updated[cwoIndex].overhead = [...updated[cwoIndex].overhead, newRow];
       return updated;
     });
   };
+
   const removeOverheadRow = (cwoIndex, rowId) => {
     setChildWorkorders((prev) => {
       const updated = [...prev];
@@ -105,6 +123,8 @@ const InvoiceForm = () => {
     fetchWorkOrders();
   }, [user, navigate]);
   const handleSubmit = async (cwoId) => {
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
     try {
       if (
         !childWorkorders ||
@@ -116,16 +136,20 @@ const InvoiceForm = () => {
       }
 
       const expenseData = childWorkorders
-        .filter((cwo) => cwo.overhead?.length)
+        .filter((cwo) => cwo.overhead?.length) // Filter only those with overhead entries
         .flatMap((cwo) =>
           cwo.overhead.map((entry) => ({
             cwo_id: cwo.cwo_id,
             mwo_id: selectedWorkOrder.mwo_id,
-            service: entry.A,
-            vendor_name: entry.B,
-            qty: entry.C,
-            uom: entry.D,
-            expense_amount: entry.E,
+            service: entry["Activity"], // Ensure correct field mapping
+            vendor_name: entry["Vendor Name"], // Match expected key
+            qty: entry["QTY"],
+            uom: entry["UOM"],
+            expense_amount: entry["Amount"], // Correct field name
+            unit_price: entry["Unit Price"],
+            invoice_number: entry["Invoice Number"],
+            invoice_date: entry["Invoice Date"], // Ensure invoice date is included
+            remarks: entry["Remarks"],
           }))
         );
 
@@ -299,6 +323,8 @@ const InvoiceForm = () => {
   let theme = createTheme();
   theme = responsiveFontSizes(theme);
 
+  console.log(formData);
+
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ p: 3 }}>
@@ -340,6 +366,7 @@ const InvoiceForm = () => {
               <TextField
                 label="Balance Material Cost"
                 value={formData.bal_material_cost?.replace("$", "₹") || "₹0"}
+                // value={formData.total_material_cost}
                 InputProps={{ readOnly: true }}
                 fullWidth
                 variant="outlined"
@@ -368,7 +395,7 @@ const InvoiceForm = () => {
             </Grid>
             <Grid item xs={12} sm={2.5}>
               <TextField
-                label="Overhead Budget"
+                label="MISC. Budget"
                 value={overheadBudget}
                 onChange={(event) => setOverheadBudget(event.target.value)}
                 type="number"
@@ -466,7 +493,17 @@ const InvoiceForm = () => {
                                 key={row.id}
                                 alignItems="center"
                               >
-                                {["A", "B", "C", "D", "E"].map((letter) => (
+                                {[
+                                  "Vendor Name",
+                                  "Invoice Number",
+                                  "Invoice Date",
+                                  "Activity",
+                                  "QTY",
+                                  "UOM",
+                                  "Unit Price",
+                                  "Amount",
+                                  "Remarks",
+                                ].map((letter) => (
                                   <Grid item xs={12} sm={2} key={letter}>
                                     <TextField
                                       label={`${letter}`}
@@ -474,11 +511,78 @@ const InvoiceForm = () => {
                                       onChange={(event) => {
                                         let newValue = event.target.value;
 
-                                        if (letter === "E") {
+                                        if (letter === "Unit Price") {
                                           newValue = newValue.replace(
                                             /[^0-9]/g,
                                             ""
                                           );
+                                        }
+
+                                        if (letter === "Amount") {
+                                          newValue = newValue.replace(
+                                            /[^0-9]/g,
+                                            ""
+                                          );
+                                        }
+                                        if (letter === "Invoice Date") {
+                                          newValue = newValue.toUpperCase(); // Convert to uppercase for consistency
+                                          newValue = newValue.replace(
+                                            /[^0-9A-Z-]/g,
+                                            ""
+                                          ); // Allow only numbers, letters, and dashes
+
+                                          // Automatically insert dashes at correct positions
+                                          if (
+                                            newValue.length > 2 &&
+                                            newValue[2] !== "-"
+                                          ) {
+                                            newValue =
+                                              newValue.slice(0, 2) +
+                                              "-" +
+                                              newValue.slice(2);
+                                          }
+                                          if (
+                                            newValue.length > 6 &&
+                                            newValue[6] !== "-"
+                                          ) {
+                                            newValue =
+                                              newValue.slice(0, 6) +
+                                              "-" +
+                                              newValue.slice(6);
+                                          }
+
+                                          // Enforce max length of 9 characters (DD-MMM-YY)
+                                          if (newValue.length > 9) {
+                                            newValue = newValue.slice(0, 9);
+                                          }
+
+                                          // Validate if middle 3 characters are valid months
+                                          const validMonths = [
+                                            "JAN",
+                                            "FEB",
+                                            "MAR",
+                                            "APR",
+                                            "MAY",
+                                            "JUN",
+                                            "JUL",
+                                            "AUG",
+                                            "SEP",
+                                            "OCT",
+                                            "NOV",
+                                            "DEC",
+                                          ];
+
+                                          if (newValue.length >= 6) {
+                                            const monthPart = newValue.slice(
+                                              3,
+                                              6
+                                            ); // Extract MMM part
+                                            if (
+                                              !validMonths.includes(monthPart)
+                                            ) {
+                                              newValue = newValue.slice(0, 3); // Remove incorrect month input
+                                            }
+                                          }
                                         }
 
                                         const updatedRows = [...cwo.overhead];
@@ -494,7 +598,12 @@ const InvoiceForm = () => {
                                       }}
                                       fullWidth
                                       variant="outlined"
-                                      type={letter === "E" ? "number" : "text"}
+                                      type={
+                                        letter === "Unit Price" ||
+                                        letter === "Amount"
+                                          ? "number"
+                                          : "text"
+                                      }
                                     />
                                   </Grid>
                                 ))}

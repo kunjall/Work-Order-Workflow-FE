@@ -266,39 +266,11 @@ const Example = ({ refreshKey }) => {
     };
   }, [username]);
 
-  useEffect(() => {
-    if (selectedRow != null && selectedRow.warehouse_city != null) {
-      const fetchApprovers = async () => {
-        try {
-          const response = await axios.get(
-            `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=Inventory&city=${selectedRow.warehouse_city}`,
-            {
-              headers: {
-                Authorization: user.authToken,
-              },
-            }
-          );
-          const approverArray = response.data.map((reviewer) => ({
-            id: reviewer.record_id,
-            type: reviewer.type,
-            reviewer_email: reviewer.reviewer_email,
-            approver_email: reviewer.approver_email,
-            city: reviewer.city,
-            reviewer_name: reviewer.reviewer_name,
-            approver_name: reviewer.approver_name,
-          }));
-        } catch (err) {
-          console.error("Error fetching reviewer:", err);
-          setError("Failed to load reviewer");
-        }
-      };
-
-      fetchApprovers();
-    }
-  }, [selectedRow]);
-
   const handleReject = async () => {
-    const actionedBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -308,11 +280,11 @@ const Example = ({ refreshKey }) => {
       hour12: false,
       timeZone: "IST",
     });
-    if (mwoStatusPass === "Pending with deployment head") {
+    if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
       mwoStatus = "Rejected by deployment head";
-    } else if (mwoStatusPass === "Pending with head row") {
+    } else if (mwoStatusPass.toLowerCase() === "pending with head row") {
       mwoStatus = "Rejected by head row";
-    } else if (mwoStatusPass === "Pending with billing spoc") {
+    } else if (mwoStatusPass.toLowerCase() === "pending with billing spoc") {
       mwoStatus = "Rejected by billing spoc";
     }
 
@@ -340,14 +312,17 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
-    if (mwoStatusPass === "Pending with deployment head") {
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+
+    if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
       mwoStatus = "Pending with head row";
-    } else if (mwoStatusPass === "Pending with head row") {
+    } else if (mwoStatusPass.toLowerCase() === "pending with head row") {
       mwoStatus = "Pending with billing spoc";
-    } else if (mwoStatusPass === "Pending with billing spoc") {
+    } else if (mwoStatusPass.toLowerCase() === "pending with billing spoc") {
       mwoStatus = "Approved";
     }
-    const actionedBy = user.username || "unknown";
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -365,20 +340,20 @@ const Example = ({ refreshKey }) => {
       approved_by: actionedBy,
       approver_comments: comment,
       mwo_approver1_email:
-        mwoStatusPass === "Pending with deployment head"
+        mwoStatusPass.toLowerCase() === "pending with deployment head"
           ? selectedApproverEmail || selectedRow.mwo_approver1_email || ""
           : selectedRow.mwo_approver1_email || "",
       mwo_approver1_name:
-        mwoStatusPass === "Pending with deployment head"
+        mwoStatusPass.toLowerCase() === "pending with deployment head"
           ? approverName || selectedRow.mwo_approver1_name || ""
           : selectedRow.mwo_approver1_name || "",
 
       mwo_approver2_email:
-        mwoStatusPass === "Pending with head row"
+        mwoStatusPass.toLowerCase() === "pending with head row"
           ? selectedApproverEmail || selectedRow.mwo_approver2_email || ""
           : selectedRow.mwo_approver2_email || "",
       mwo_approver2_name:
-        mwoStatusPass === "Pending with head row"
+        mwoStatusPass.toLowerCase() === "pending with head row"
           ? approverName || selectedRow.mwo_approver2_name || ""
           : selectedRow.mwo_approver3_name || "",
     };
@@ -392,6 +367,7 @@ const Example = ({ refreshKey }) => {
           },
         }
       );
+      alert("Work order approved successfully!");
     } catch (error) {
       console.error("Error in approving: ", error);
       setError("Failed to Approve");

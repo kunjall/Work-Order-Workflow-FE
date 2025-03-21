@@ -41,7 +41,7 @@ export default function Password({ onBackClick, username }) {
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("An error occurred during login.");
+      setError("Error occoured while logging in");
     }
   };
 

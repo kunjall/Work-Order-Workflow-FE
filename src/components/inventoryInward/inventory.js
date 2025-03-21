@@ -276,7 +276,9 @@ const InventoryInward = () => {
   };
 
   const handleSubmit = async () => {
-    const createdBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const createdBy = user.name + " - " + user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -332,6 +334,10 @@ const InventoryInward = () => {
           },
         }
       );
+      if (response.status === 201) {
+        alert(`Inventory Inward submitted`);
+        resetForm();
+      }
     } catch (error) {
       console.error("Error submitting inventory transaction:", error);
       setError("Failed to submit inventory transaction");

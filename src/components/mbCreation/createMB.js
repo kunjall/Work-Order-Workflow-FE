@@ -81,7 +81,9 @@ const CreateMRS = () => {
   };
 
   const handleSubmit = async () => {
-    const createdBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const createdBy = user.name + " - " + user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -102,7 +104,7 @@ const CreateMRS = () => {
       state: formData.state,
       internal_external: internalExternal,
       locator_name: selectedLocator,
-      mb_status: "Pending with TPM",
+      mb_status: "Pending with Deployment Head",
       customer_name: formData.customer_name,
       requested_by: createdBy,
       requested_at: createdAt,
@@ -126,6 +128,11 @@ const CreateMRS = () => {
           },
         }
       );
+
+      if (response.status === 201) {
+        alert(`MB submitted`);
+        handleRadioChange();
+      }
     } catch (error) {
       console.error("Error submitting data:", error);
       setError("An error occurred while submitting the data.");

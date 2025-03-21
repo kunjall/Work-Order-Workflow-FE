@@ -113,7 +113,10 @@ export default function Login() {
                 width: "100%",
               }}
             >
-              <Password onBackClick={handleBackClick} username={username} />
+              <Password
+                onBackClick={handleBackClick}
+                username={username.toLowerCase()}
+              />
             </div>
           </Fade>
         </Box>

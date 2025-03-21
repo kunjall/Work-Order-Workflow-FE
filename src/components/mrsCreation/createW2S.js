@@ -79,7 +79,9 @@ const CreateMRS = () => {
   };
 
   const handleSubmit = async () => {
-    const createdBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const createdBy = user.name + " - " + user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -122,6 +124,10 @@ const CreateMRS = () => {
           },
         }
       );
+      if (response.status === 201) {
+        alert(`MRS submitted`);
+        handleRadioChange();
+      }
     } catch (error) {
       console.error("Error submitting data:", error);
       setError("An error occurred while submitting the data.");

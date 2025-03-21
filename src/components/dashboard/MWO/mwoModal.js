@@ -43,6 +43,7 @@ const MwoModal = ({
   comment,
   handleApprove,
   handleReject,
+  handleReturn,
   mwoStatus,
   username,
   setSelectedApproverEmail,
@@ -64,9 +65,13 @@ const MwoModal = ({
   const isActionAllowed =
     mwoStatus.toLowerCase().includes("pending") &&
     rowData &&
-    rowData.created_by !== username &&
-    (mwoStatus.toLowerCase() !== "pending for approval" ||
-      username === rowData.mwo_approver_email);
+    rowData.requested_by !== username &&
+    ((mwoStatus.toLowerCase().includes("pending with deployment head") &&
+      username === rowData?.mwo_approver_email) ||
+      (mwoStatus.toLowerCase().includes("pending with material incharge") &&
+        username === rowData?.mwo_approver1_email) ||
+      (mwoStatus.toLowerCase().includes("pending with material head") &&
+        username === rowData?.mwo_approver2_email));
 
   const handleApproveButton = () => {
     if (!isActionAllowed) return;
@@ -78,6 +83,18 @@ const MwoModal = ({
     if (!isActionAllowed) return;
     handleReject();
     onClose();
+  };
+
+  const handleReturnButton = () => {
+    if (
+      (mwoStatus.includes("returned") && username === rowData.created_by) ||
+      isActionAllowed
+    ) {
+      handleReturn();
+      onClose();
+    } else {
+      return;
+    }
   };
 
   return (
@@ -294,6 +311,14 @@ const MwoModal = ({
           disabled={!isActionAllowed}
         >
           Reject
+        </Button>
+        <Button
+          variant="contained"
+          color="error"
+          onClick={handleReturnButton}
+          disabled={!isActionAllowed}
+        >
+          Return
         </Button>
         <Button variant="outlined" onClick={onClose}>
           Close

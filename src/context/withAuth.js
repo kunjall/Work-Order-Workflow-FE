@@ -6,25 +6,22 @@ import Loading from "../components/loading/loading";
 const WithAuth = ({ children, role }) => {
   const { user, loading } = useContext(AuthContext);
 
-  return !loading ? (
-    user ? (
-      role ? (
-        user.role === role ? (
-          children
-        ) : (
-          <Navigate to={`/dashboard/${user.role}`} />
-        )
-      ) : (
-        children
-      )
-    ) : (
-      <Navigate to="/login" />
-    )
-  ) : (
-    <div>
-      <Loading />
-    </div>
-  );
+  if (loading) return <Loading />;
+
+  if (!user) return <Navigate to="/login" />;
+
+  // Split user roles into an array
+  const userRoles = user.role ? user.role.split(";") : [];
+
+  // Check if the role prop matches any of the user's roles
+  const hasRequiredRole = Array.isArray(role)
+    ? role.some((r) => userRoles.includes(r))
+    : userRoles.includes(role);
+
+  if (role && !hasRequiredRole)
+    return <Navigate to={`/dashboard/${user.role}`} />;
+
+  return children;
 };
 
 export default WithAuth;

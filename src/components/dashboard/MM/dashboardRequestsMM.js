@@ -272,7 +272,9 @@ const Example = ({ refreshKey }) => {
   }, [selectedRow]);
 
   const handleReject = async () => {
-    const actionedBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -282,13 +284,15 @@ const Example = ({ refreshKey }) => {
       hour12: false,
       timeZone: "IST",
     });
-    if (mmStatusPass === "Pending with deployment head") {
+    if (mmStatusPass.toLowerCase() === "pending with deployment head") {
       mmStatus = "Rejected by deployment head";
-    } else if (mmStatusPass === "Pending with material incharge") {
+    } else if (
+      mmStatusPass.toLowerCase() === "pending with material incharge"
+    ) {
       mmStatus = "Rejected by material incharge";
-    } else if (mmStatusPass === "Pending with material head") {
+    } else if (mmStatusPass.toLowerCase() === "pending with material head") {
       mmStatus = "Rejected by material head";
-    } else if (mmStatusPass === "Waiting for acknowledgement") {
+    } else if (mmStatusPass.toLowerCase() === "waiting for acknowledgement") {
       mmStatus = "Not received";
     }
 
@@ -309,7 +313,7 @@ const Example = ({ refreshKey }) => {
           },
         }
       );
-      alert("Work order rejected successfully!");
+      alert("MRS rejected successfully!");
     } catch (err) {
       console.error("Error rejecting work order:", err);
       alert("Failed to reject work order. Please try again.");
@@ -317,16 +321,20 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
-    if (mmStatusPass === "Pending with deployment head") {
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    if (mmStatusPass.toLowerCase() === "pending with deployment head") {
       mmStatus = "Pending with material incharge";
-    } else if (mmStatusPass === "Pending with material incharge") {
+    } else if (
+      mmStatusPass.toLowerCase() === "pending with material incharge"
+    ) {
       mmStatus = "Pending with material head";
-    } else if (mmStatusPass === "Pending with material head") {
+    } else if (mmStatusPass.toLowerCase() === "pending with material head") {
       mmStatus = "Waiting for acknowledgement";
-    } else if (mmStatusPass === "Waiting for acknowledgement") {
+    } else if (mmStatusPass.toLowerCase() === "waiting for acknowledgement") {
       mmStatus = "Received";
     }
-    const actionedBy = user.username || "unknown";
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -344,7 +352,7 @@ const Example = ({ refreshKey }) => {
       mm_approver2_email: selectedApproverEmail,
       mm_approver2_name: approverName,
       mm_approver3_email:
-        mmStatusPass === "Pending with material incharge"
+        mmStatusPass.toLowerCase() === "pending with material incharge"
           ? selectedApproverEmail || ""
           : null,
       mm_approver3_name: "Pending with material incharge"
@@ -356,8 +364,8 @@ const Example = ({ refreshKey }) => {
       warehouse_id: selectedRow.warehouse_id,
       locator_name: selectedRow.locator_name,
       mmMaterial:
-        mmStatusPass === "Pending with material head" ||
-        mmStatusPass.includes("acknowledgement")
+        mmStatusPass.toLowerCase() === "pending with material head" ||
+        mmStatusPass.toLowerCase().includes("acknowledgement")
           ? mmMaterial || []
           : undefined,
     };
@@ -376,6 +384,7 @@ const Example = ({ refreshKey }) => {
           },
         }
       );
+      alert("MRS approved successfully!");
     } catch (error) {
       console.error("Error in approving: ", error);
       setError("Failed to Approve");

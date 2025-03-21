@@ -88,7 +88,6 @@ const Example = ({ refreshKey }) => {
               },
             }
           );
-
           const mbServiceArray = response.data.map((service) => ({
             record_id: service.record_id,
             cwo_id: service.cwo_id,
@@ -221,12 +220,10 @@ const Example = ({ refreshKey }) => {
       setIsLoading(true);
       try {
         const statuses = [
-          "Pending with TPM",
           "Pending with deployment head",
           "Pending with material head",
           "Pending with billing spoc",
           "Approved",
-          "Rejected by TPM",
           "Rejected by deployment head",
           "Rejected by material head",
           "Rejected by billing spoc",
@@ -268,7 +265,9 @@ const Example = ({ refreshKey }) => {
   }, [username]);
 
   const handleReject = async () => {
-    const actionedBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -278,13 +277,11 @@ const Example = ({ refreshKey }) => {
       hour12: false,
       timeZone: "IST",
     });
-    if (mbStatusPass === "Pending with TPM") {
-      mbStatus = "Rejected by TPM";
-    } else if (mbStatusPass === "Pending with deployment head") {
+    if (mbStatusPass.toLowerCase() === "pending with deployment head") {
       mbStatus = "Rejected by deployment head";
-    } else if (mbStatusPass === "Pending with material head") {
+    } else if (mbStatusPass.toLowerCase() === "pending with material head") {
       mbStatus = "Rejected by material head";
-    } else if (mbStatusPass === "Pending with billing spoc") {
+    } else if (mbStatusPass.toLowerCase() === "pending with billing spoc") {
       mbStatus = "Rejected";
     }
 
@@ -305,7 +302,7 @@ const Example = ({ refreshKey }) => {
           },
         }
       );
-      alert("Work order rejected successfully!");
+      alert("MB rejected successfully!");
     } catch (err) {
       console.error("Error rejecting work order:", err);
       alert("Failed to reject work order. Please try again.");
@@ -313,16 +310,16 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
-    if (mbStatusPass === "Pending with TPM") {
-      mbStatus = "Pending with deployment head";
-    } else if (mbStatusPass === "Pending with deployment head") {
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    if (mbStatusPass.toLowerCase() === "pending with deployment head") {
       mbStatus = "Pending with material head";
-    } else if (mbStatusPass === "Pending with material head") {
+    } else if (mbStatusPass.toLowerCase() === "pending with material head") {
       mbStatus = "Pending with billing spoc";
-    } else if (mbStatusPass === "Pending with billing spoc") {
+    } else if (mbStatusPass.toLowerCase() === "pending with billing spoc") {
       mbStatus = "Approved";
     }
-    const actionedBy = user.username || "unknown";
+    const actionedBy = user.name + " - " + user.username || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -343,20 +340,20 @@ const Example = ({ refreshKey }) => {
       mb_approver2_name: approverName || selectedRow.mb_approver2_name || "",
 
       mb_approver3_email:
-        mbStatusPass === "Pending with deployment head"
+        mbStatusPass.toLowerCase() === "pending with deployment head"
           ? selectedApproverEmail || selectedRow.mb_approver3_email || ""
           : selectedRow.mb_approver3_email || "",
       mb_approver3_name:
-        mbStatusPass === "Pending with deployment head"
+        mbStatusPass.toLowerCase() === "pending with deployment head"
           ? approverName || selectedRow.mb_approver3_name || ""
           : selectedRow.mb_approver3_name || "",
 
       mb_approver4_email:
-        mbStatusPass === "Pending with material head"
+        mbStatusPass.toLowerCase() === "pending with material head"
           ? selectedApproverEmail || selectedRow.mb_approver4_email || ""
           : selectedRow.mb_approver4_email || "",
       mb_approver4_name:
-        mbStatusPass === "Pending with material head"
+        mbStatusPass.toLowerCase() === "pending with material head"
           ? approverName || selectedRow.mb_approver4_name || ""
           : selectedRow.mb_approver4_name || "",
 
@@ -367,11 +364,11 @@ const Example = ({ refreshKey }) => {
       locator_name: selectedRow.locator_name,
 
       mbMaterial:
-        mbStatusPass === "Pending with billing spoc"
+        mbStatusPass.toLowerCase() === "pending with billing spoc"
           ? mbMaterial || []
           : undefined,
       mbService:
-        mbStatusPass === "Pending with billing spoc"
+        mbStatusPass.toLowerCase() === "pending with billing spoc"
           ? mbService || []
           : undefined,
     };
@@ -390,6 +387,7 @@ const Example = ({ refreshKey }) => {
           },
         }
       );
+      alert("MB approved successfully!");
     } catch (error) {
       console.error("Error in approving: ", error);
       setError("Failed to Approve");

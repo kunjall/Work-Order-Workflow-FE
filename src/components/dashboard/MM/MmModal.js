@@ -223,10 +223,11 @@ const MmModal = ({
                       <TableCell>Req QTY</TableCell>
                       <TableCell>CWO Bal QTY</TableCell>
                       <TableCell>Locator Stock</TableCell>
-                      {mmStatus === "Pending with material head" && (
+                      {mmStatus.toLowerCase() ===
+                        "pending with material head" && (
                         <TableCell>MRS QTY Approved</TableCell>
                       )}
-                      {mmStatus.includes("acknowledgement") && (
+                      {mmStatus.toLowerCase().includes("acknowledgement") && (
                         <TableCell>Issued QTY</TableCell>
                       )}
                     </TableRow>

@@ -26,12 +26,12 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import AddMaterials from "../materials/materialsLineItems";
 import AddServices from "../services/servicesLineItems";
-import StatusModal from "../statusPopUp";
 import { jsPDF } from "jspdf";
 import html2canvas from "html2canvas";
 
 const DashboardWhinch = () => {
   const { user } = useContext(AuthContext);
+  console.log(user);
   const navigate = useNavigate();
 
   const [customerName, setCustomerName] = useState("");
@@ -116,7 +116,7 @@ const DashboardWhinch = () => {
         );
 
         const filteredCities = response.data.filter(
-          (city) => city.company === "The Pinnacle Search"
+          (city) => city.company.toLowerCase() === "the pinnacle search"
         );
 
         const cityMap = filteredCities.reduce((acc, city) => {
@@ -269,6 +269,36 @@ const DashboardWhinch = () => {
       setApprovers([]);
       setApproverName(null);
     }
+  };
+
+  const resetForm = () => {
+    setSelectedVendorId(null);
+    setvendorRouteAllocation("");
+    setSelectedManager(null);
+    setFormData({
+      mwo_id: "",
+      mwo_number: "",
+      workorder_type: "",
+      type: "",
+      customer_id: "",
+      gis_code: "",
+      route_name: "",
+      route_length: "",
+      homepass_count: "",
+      activity: "",
+      execution_city: "",
+      state: "",
+      customer_approval_date: null,
+      customer_project_manager: "",
+    });
+    setMotherMaterials([]);
+    setMotherServices([]);
+    setSelectedWorkOrder(null);
+    setMaterialLineItems([]);
+    setServiceLineItems([]);
+    setSelectedApproverEmail(null);
+    setApprovers([]);
+    setApproverName(null);
   };
 
   const [status, setStatus] = useState({
@@ -427,7 +457,10 @@ const DashboardWhinch = () => {
   }, [formData.execution_city, cityOptions]);
 
   const handleSubmit = async () => {
-    const createdBy = user.username || "unknown";
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+    const createdBy =
+      user.name + " - " + user.name + " - " + user.username || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -437,6 +470,22 @@ const DashboardWhinch = () => {
       hour12: false,
       timeZone: "IST",
     });
+
+    const cwo_number = formData.mwo_number + "-" + childWorkOrderNumber;
+    const checkResponse = await axios.get(
+      `${process.env.REACT_APP_API_URL}/workorder/check-child-workorder`,
+      {
+        params: { mwo_number: formData.mwo_number, cwo_number },
+        headers: { Authorization: user.authToken },
+      }
+    );
+
+    if (checkResponse.data.exists) {
+      alert(
+        "Child Work Order number already exists. Please use a different number."
+      );
+      return; // Stop submission if CWO exists
+    }
 
     const requestData = {
       mwo_id: formData.mwo_id,
@@ -478,6 +527,8 @@ const DashboardWhinch = () => {
 
       if (response.status === 201) {
         setSuccess(true);
+        alert(`Child workorder submitted - ${cwo_number}`);
+        resetForm();
       }
     } catch (error) {
       console.error("Error submitting data:", error);
@@ -1168,15 +1219,6 @@ const DashboardWhinch = () => {
                   Submit
                 </Button>
               </Grid>
-              <StatusModal
-                open={modalOpen}
-                status={status}
-                success={success}
-                woID={cwoId}
-                onClose={() => setModalOpen(false)}
-                onFillFormAgain={handleFillFormAgain}
-                onGoToDashboard={handleGoToDashboard}
-              />
             </Grid>
           )}
         </Box>
