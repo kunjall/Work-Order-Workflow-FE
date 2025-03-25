@@ -50,7 +50,7 @@ const Navbar = () => {
   });
 
   const adminMenuItems = [
-    { text: "Actions", icon: <PendingActionsIcon />, path: "/dashboard-admin" },
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
 
     { text: "Create MWO", icon: <EngineeringIcon />, path: "/create-mwo" },
     // { text: "Modify MWO", icon: <EngineeringIcon />, path: "/modify-mwo" },
@@ -68,21 +68,64 @@ const Navbar = () => {
     { text: "Access", icon: <VpnKeyIcon />, path: "/user-access" },
   ];
 
-  const whinchMenuItems = [
+  const cwoMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
+    { text: "Create CWO", icon: <RouterIcon />, path: "/create-cwo" },
+    { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
+    { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+  ];
+
+  const mwoMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
+    { text: "Create MWO", icon: <EngineeringIcon />, path: "/create-mwo" },
+    { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
+    { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+  ];
+
+  const mbMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
+    { text: "MB", icon: <StraightenIcon />, path: "/MB" },
+    { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
+    { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+  ];
+  const invMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
     {
       text: "Inventory Inward",
       icon: <WarehouseIcon />,
       path: "/inventory-inward",
     },
     { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
-    { text: "MM", icon: <LocalShippingIcon />, path: "/MRS" },
+    { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+  ];
+
+  const mmMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
+    { text: "Mat Mov", icon: <LocalShippingIcon />, path: "/MRS" },
+    { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
+    { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+  ];
+
+  const expenseMenuItems = [
+    { text: "Budget", icon: <MenuBookIcon />, path: "/budget" },
   ];
 
   let menuItems = [];
-  if (user?.role === "admin") {
+
+  if (user?.role.toLowerCase().includes("admin")) {
     menuItems = adminMenuItems;
-  } else if (user?.role === "whinch") {
-    menuItems = whinchMenuItems;
+  } else if (user?.role.toLowerCase().includes("cwo")) {
+    menuItems = cwoMenuItems;
+  } else if (user?.role.toLowerCase().includes("mwo")) {
+    menuItems = mwoMenuItems;
+  } else if (user?.role.toLowerCase().includes("mb")) {
+    menuItems = mbMenuItems;
+  } else if (user?.role.toLowerCase().includes("inv")) {
+    menuItems = invMenuItems;
+  } else if (user?.role.toLowerCase().includes("mm")) {
+    menuItems = mmMenuItems;
+  } else if (user?.role.toLowerCase().includes("expense")) {
+    menuItems = expenseMenuItems;
   }
 
   return user ? (

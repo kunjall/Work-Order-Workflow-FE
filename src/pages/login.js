@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
@@ -14,6 +15,7 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const { user, logout } = useContext(AuthContext);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleLoginClick = () => {
     if (username.trim()) {
@@ -28,7 +30,33 @@ export default function Login() {
     setLoginMethod(null);
   };
 
-  return !user ? (
+  // Handle redirection after login
+  if (user) {
+    const userRoles = user.role ? user.role.split(";") : [];
+
+    if (
+      userRoles.includes("admin") ||
+      userRoles.includes("mm") ||
+      userRoles.includes("mb") ||
+      userRoles.includes("expense") ||
+      userRoles.includes("mwo") ||
+      userRoles.includes("inv") ||
+      userRoles.includes("cwo")
+    ) {
+      navigate("/profile");
+    } else {
+      return (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <p>
+            You are logged in but don't have permissions to access this page.
+          </p>
+          <button onClick={logout}>Logout</button>
+        </div>
+      );
+    }
+  }
+
+  return (
     <React.Fragment>
       <CssBaseline />
       <div
@@ -122,10 +150,5 @@ export default function Login() {
         </Box>
       </div>
     </React.Fragment>
-  ) : (
-    <div style={{ textAlign: "center", marginTop: "20px" }}>
-      <p>Already Logged In</p>
-      <button onClick={logout}>Logout</button>
-    </div>
   );
 }

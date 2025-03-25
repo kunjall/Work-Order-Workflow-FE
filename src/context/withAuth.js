@@ -18,8 +18,12 @@ const WithAuth = ({ children, role }) => {
     ? role.some((r) => userRoles.includes(r))
     : userRoles.includes(role);
 
-  if (role && !hasRequiredRole)
-    return <Navigate to={`/dashboard/${user.role}`} />;
+  if (role && !hasRequiredRole) {
+    <div>
+      <h2>403 - Unauthorized</h2>
+      <p>You don't have permission to view this page.</p>
+    </div>;
+  }
 
   return children;
 };

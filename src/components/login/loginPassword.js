@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import WOW from "../../assets/images/wow.png";
+import WithAuth from "../../context/withAuth";
 
 export default function Password({ onBackClick, username }) {
   const [password, setPassword] = useState("");
@@ -37,7 +38,7 @@ export default function Password({ onBackClick, username }) {
         setError(response.data.error);
       } else {
         login(response.data.token);
-        navigate(`/dashboard-${response.data.role}`);
+        <WithAuth />;
       }
     } catch (err) {
       console.error("Login error:", err);

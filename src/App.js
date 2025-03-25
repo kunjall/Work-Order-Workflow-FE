@@ -13,7 +13,7 @@ import WithAuth from "./context/withAuth";
 import Navbar from "./components/navbar/navbar";
 import Bin from "./pages/bin";
 import WarehouseStock from "./pages/warehouseStock";
-import Profile from "./components/profile/profile";
+import Profile from "./pages/profile";
 import CreateChild from "./pages/createChild";
 import ModifyMwo from "./pages/modifyMother";
 import Inventory from "./pages/inventoryInward";
@@ -52,7 +52,7 @@ const App = () => {
               <Route path="/" element={<WithAuth></WithAuth>} />
               <Route path="/login" element={<Login />} />
               <Route
-                path="/dashboard-admin"
+                path="/actions"
                 element={
                   <WithAuth role="admin">
                     <Requests />
