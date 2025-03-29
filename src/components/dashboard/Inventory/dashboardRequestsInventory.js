@@ -348,8 +348,8 @@ const Example = ({ refreshKey }) => {
       filterFn: "contains",
     },
     {
-      accessorKey: "warehouse_city",
-      header: "Warehouse City",
+      accessorKey: "warehouse_id",
+      header: "Warehouse ID",
       size: 200,
       filterFn: "contains",
     },
