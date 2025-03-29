@@ -364,7 +364,7 @@ const InvoiceForm = () => {
             </Grid>
             <Grid item xs={12} sm={2}>
               <TextField
-                label="Balance Material Cost"
+                label="Budgeted Material Cost"
                 value={formData.bal_material_cost?.replace("$", "₹") || "₹0"}
                 // value={formData.total_material_cost}
                 InputProps={{ readOnly: true }}
@@ -375,7 +375,7 @@ const InvoiceForm = () => {
             </Grid>
             <Grid item xs={12} sm={2}>
               <TextField
-                label="Balance Service Cost"
+                label="Budgeted Service Cost"
                 value={formData.bal_service_cost?.replace("$", "₹") || "₹0"}
                 InputProps={{ readOnly: true }}
                 fullWidth
@@ -452,7 +452,7 @@ const InvoiceForm = () => {
                         </Grid>
                         <Grid item xs={12} sm={2}>
                           <TextField
-                            label="Material Payment"
+                            label="Material MB Submitted"
                             value={cwo.material_budget || "₹0"}
                             variant="outlined"
                             fullWidth
@@ -461,7 +461,7 @@ const InvoiceForm = () => {
                         </Grid>
                         <Grid item xs={12} sm={2}>
                           <TextField
-                            label="Service Payment"
+                            label="Service MB Submitted"
                             value={cwo.service_budget || "₹0"}
                             variant="outlined"
                             fullWidth

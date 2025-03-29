@@ -808,7 +808,7 @@ const CreateMRS = () => {
                           <Grid item xs={12} sm={6} md={1}>
                             <TextField
                               disabled
-                              label="Rate"
+                              label="Price"
                               value={material.material_rate || ""}
                               InputProps={{ readOnly: true }}
                               variant="outlined"

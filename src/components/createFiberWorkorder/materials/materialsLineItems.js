@@ -205,7 +205,7 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
             </Grid>
             <Grid item xs={6} sm={3} md={1}>
               <TextField
-                label="Rate"
+                label="Price"
                 value={item.itemRate}
                 onChange={(e) => handleRateChange(index, e.target.value)}
                 fullWidth
@@ -228,7 +228,7 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
 
             <Grid item xs={6} sm={3} md={1.5}>
               <TextField
-                label="Price"
+                label="Amount"
                 value={item.itemPrice}
                 fullWidth
                 disabled
@@ -267,7 +267,7 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          Budget Amount:
+          Total Material Cost:
         </Typography>
         <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1976d2" }}>
           ₹{totalAmount}

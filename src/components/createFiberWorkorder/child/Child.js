@@ -48,6 +48,8 @@ const DashboardWhinch = () => {
   const [vendorRouteAllocation, setvendorRouteAllocation] = useState("");
   const [workOrders, setWorkOrders] = useState([]);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
+  const [isTouched, setIsTouched] = React.useState(false);
+
   const [childWorkOrderNumber, setChildWorkOrderNumber] = useState("");
   const [motherServices, setMotherServices] = useState([]);
   const [motherMaterials, setMotherMaterials] = useState([]);
@@ -749,6 +751,7 @@ const DashboardWhinch = () => {
                       setChildWorkOrderNumber(input);
                     }
                   }}
+                  onBlur={(e) => setIsTouched(true)} // Marks the field as touched when focus is lost
                   InputProps={{
                     startAdornment: (
                       <span style={{ fontWeight: "bold", marginRight: "4px" }}>
@@ -757,6 +760,15 @@ const DashboardWhinch = () => {
                     ),
                   }}
                 />
+                {isTouched && childWorkOrderNumber.length !== 2 && (
+                  <Typography
+                    variant="caption"
+                    color="error"
+                    style={{ marginTop: "4px" }}
+                  >
+                    Please enter exactly 2 letters.
+                  </Typography>
+                )}
               </Grid>
 
               <Grid item xs={12} sm={6} md={2}>
@@ -949,7 +961,7 @@ const DashboardWhinch = () => {
                       </Grid>
                       <Grid item xs={12} sm={6} md={1}>
                         <TextField
-                          label="Rate"
+                          label="Price"
                           value={service.service_rate || ""}
                           variant="outlined"
                           fullWidth
@@ -1018,7 +1030,7 @@ const DashboardWhinch = () => {
 
                       <Grid item xs={12} sm={6} md={1.5}>
                         <TextField
-                          label="CWO Price"
+                          label="CWO Amount"
                           value={
                             serviceLineItems[index]?.service_cwo_price || ""
                           }
@@ -1046,7 +1058,7 @@ const DashboardWhinch = () => {
                   }}
                 >
                   <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                    Budget Amount:
+                    Total Service Cost:
                   </Typography>
                   <Typography
                     variant="h6"
@@ -1105,7 +1117,7 @@ const DashboardWhinch = () => {
                       <Grid item xs={12} sm={6} md={1}>
                         <TextField
                           disabled
-                          label="Rate"
+                          label="Price"
                           value={material.material_rate || ""}
                           InputProps={{ readOnly: true }}
                           variant="outlined"
@@ -1161,7 +1173,7 @@ const DashboardWhinch = () => {
                       </Grid>
                       <Grid item xs={12} sm={6} md={1.5}>
                         <TextField
-                          label="CWO Price"
+                          label="CWO Amount"
                           value={
                             materialLineItems[index]?.material_cwo_price || ""
                           }
@@ -1190,7 +1202,7 @@ const DashboardWhinch = () => {
                   }}
                 >
                   <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                    Budget Amount:
+                    Total Material Cost:
                   </Typography>
                   <Typography
                     variant="h6"

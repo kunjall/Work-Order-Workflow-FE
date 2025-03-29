@@ -347,6 +347,18 @@ const Example = ({ refreshKey }) => {
       size: 200,
       filterFn: "contains",
     },
+    {
+      accessorKey: "warehouse_city",
+      header: "Warehouse City",
+      size: 200,
+      filterFn: "contains",
+    },
+    {
+      accessorKey: "customer_name",
+      header: "Customer",
+      size: 200,
+      filterFn: "contains",
+    },
 
     {
       accessorKey: "inventory_inward_status",

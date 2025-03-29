@@ -420,6 +420,18 @@ const Example = ({ refreshKey }) => {
       size: 200,
       filterFn: "contains",
     },
+    {
+      accessorKey: "customer_name",
+      header: "Customer Name",
+      filterFn: "contains",
+      size: 250,
+    },
+    {
+      accessorKey: "route_name",
+      header: "Route Name",
+      filterFn: "contains",
+      size: 250,
+    },
 
     {
       accessorKey: "mb_status",
@@ -445,14 +457,6 @@ const Example = ({ refreshKey }) => {
       header: "Created Dt",
       size: 150,
       Cell: ({ cell }) => cell.getValue(),
-    },
-
-    {
-      accessorKey: "customer_name",
-      header: "Customer Name",
-      filterVariant: "multi-select",
-      filterFn: "contains",
-      size: 250,
     },
   ]);
 

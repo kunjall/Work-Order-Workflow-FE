@@ -203,7 +203,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
 
             <Grid item xs={12} sm={6} md={1}>
               <TextField
-                label="Rate"
+                label="Price"
                 value={item.serviceRate}
                 onChange={(e) =>
                   handleChange(index, "serviceRate", e.target.value)
@@ -227,7 +227,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
 
             <Grid item xs={12} sm={6} md={1.5}>
               <TextField
-                label="Price"
+                label="Amount"
                 value={item.servicePrice}
                 fullWidth
                 disabled
@@ -266,7 +266,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-          Budget Amount:
+          Total Services Cost:
         </Typography>
         <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1976d2" }}>
           ₹{totalAmount}

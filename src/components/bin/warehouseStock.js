@@ -113,7 +113,7 @@ const StockTable = () => {
                         <strong>Company</strong>
                       </TableCell>
                       <TableCell>
-                        <strong>Rate</strong>
+                        <strong>Price</strong>
                       </TableCell>
                     </TableRow>
                   </TableHead>

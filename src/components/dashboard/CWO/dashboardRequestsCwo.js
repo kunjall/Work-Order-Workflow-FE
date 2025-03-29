@@ -432,6 +432,12 @@ const Example = ({ refreshKey }) => {
       filterFn: "contains",
     },
     {
+      accessorKey: "route_name",
+      header: "Route Name",
+      size: 150,
+      Cell: ({ cell }) => cell.getValue(),
+    },
+    {
       accessorKey: "execution_city",
       header: "Execution City",
       size: 150,
