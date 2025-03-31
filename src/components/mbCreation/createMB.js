@@ -83,7 +83,7 @@ const CreateMRS = () => {
   const handleSubmit = async () => {
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
-    const createdBy = user.name + " - " + user.username || "unknown";
+    const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -104,7 +104,7 @@ const CreateMRS = () => {
       state: formData.state,
       internal_external: internalExternal,
       locator_name: selectedLocator,
-      mb_status: "Pending with Deployment Head",
+      mb_status: "Pending with deployment head",
       customer_name: formData.customer_name,
       requested_by: createdBy,
       requested_at: createdAt,
@@ -147,7 +147,7 @@ const CreateMRS = () => {
           {
             params: {
               cwo_number: formData.cwo_number,
-              mbstatus: "Pending",
+              mbstatus: "Pending with billing spoc",
             },
             headers: {
               Authorization: user.authToken,
@@ -447,6 +447,19 @@ const CreateMRS = () => {
     }
   }, [selectedWorkOrder]);
 
+  const resetForm = () => {
+    setSelectedWorkOrder(null);
+    setFormData({});
+    setChildMaterials([]);
+    setMaterialLineItems([]);
+    setServiceLineItems([]);
+    setChildServices([]);
+    setLocators([]);
+    setApprovers([]);
+    setSelectedApproverEmail([]);
+    setApproverName("");
+  };
+
   const handleWorkOrderSelect = (event, newValue) => {
     if (newValue) {
       setSelectedWorkOrder(newValue);
@@ -497,7 +510,13 @@ const CreateMRS = () => {
               Please wait until previous MB's are processed
             </DialogTitle>
             <DialogActions>
-              <Button onClick={() => setExists(false)} color="primary">
+              <Button
+                onClick={() => {
+                  setExists(false);
+                  resetForm();
+                }}
+              >
+                {" "}
                 Close
               </Button>
             </DialogActions>

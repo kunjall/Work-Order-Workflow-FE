@@ -77,48 +77,58 @@ const CreateMRS = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchMBData = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/mb/find-mb`,
-          {
-            params: {
-              cwo_number: formData.cwo_number,
-              mbstatus: "Pending",
-            },
-            headers: {
-              Authorization: user.authToken,
-            },
-          }
-        );
-        if (response.data.length > 0) {
-          setExists(true);
-          setSelectedWorkOrder(null);
-          setFormData({});
-          setChildMaterials([]);
-          setMaterialLineItems([]);
-          setSelectedLocator(null);
-          setSelectedWarehouseId(null);
-          setSelectedApproverEmail(null);
-          setWarehouses([]);
-          setLocators([]);
-          setSelectedLocator("");
-          setVendorOptions([]);
-          setSelectedVendorId([]);
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchMBData = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         `${process.env.REACT_APP_API_URL}/mb/find-mb`,
+  //         {
+  //           params: {
+  //             cwo_number: formData.cwo_number,
+  //             mbstatus: "Pending",
+  //           },
+  //           headers: {
+  //             Authorization: user.authToken,
+  //           },
+  //         }
+  //       );
+  //       if (response.data.length > 0) {
+  //         setExists(true);
+  //         setSelectedWorkOrder(null);
+  //         setFormData({});
+  //         setChildMaterials([]);
+  //         setMaterialLineItems([]);
+  //         setSelectedLocator(null);
+  //         setSelectedWarehouseId(null);
+  //         setSelectedApproverEmail(null);
+  //         setWarehouses([]);
+  //         setLocators([]);
+  //         setSelectedLocator("");
+  //         setVendorOptions([]);
+  //         setSelectedVendorId([]);
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching data:", error);
+  //     }
+  //   };
 
-    if (formData) fetchMBData();
-  }, [formData]);
+  //   if (formData) fetchMBData();
+  // }, [formData]);
 
   const handleSubmit = async () => {
-    const isConfirmed = window.confirm("Are you sure you want to submit?");
-    if (!isConfirmed) return;
-    const createdBy = user.name + " - " + user.username || "unknown";
+    const isConfirmed = window.confirm(
+      "Kindly confirm that no prior MBs are pending for approval"
+    );
+    if (isConfirmed) {
+      const isConfirmedAgain = window.confirm(
+        "Are you sure you want to submit?"
+      );
+      if (!isConfirmedAgain) {
+        return;
+      }
+    }
+
+    const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -164,7 +174,7 @@ const CreateMRS = () => {
 
       if (response.status === 201) {
         alert(`MRS submitted`);
-        handleRadioChange();
+        resetForm();
       }
     } catch (error) {
       console.error("Error submitting data:", error);
@@ -483,15 +493,17 @@ const CreateMRS = () => {
       setSelectedLocator("");
     }
   };
-
   const resetForm = () => {
     setSelectedWorkOrder(null);
     setFormData({});
     setChildMaterials([]);
     setMaterialLineItems([]);
+    setSelectedLocator(null);
+    setSelectedWarehouseId(null);
+    setSelectedApproverEmail(null);
     setWarehouses([]);
     setLocators([]);
-    setSelectedLocator("");
+    setInternalExternal("external");
   };
 
   useEffect(() => {

@@ -327,7 +327,7 @@ const Example = ({ refreshKey }) => {
   const handleReject = async () => {
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
-    const actionedBy = user.name + " - " + user.username || "unknown";
+    const actionedBy = user.name || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -364,7 +364,7 @@ const Example = ({ refreshKey }) => {
   const handleApprove = async () => {
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
-    const actionedBy = user.name + " - " + user.username || "unknown";
+    const actionedBy = user.name || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",

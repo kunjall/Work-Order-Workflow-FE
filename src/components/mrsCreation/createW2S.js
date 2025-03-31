@@ -71,17 +71,28 @@ const CreateMRS = () => {
     setWarehouses([]);
     setLocators([]);
 
-    if (event.target.value === "internal") {
-      setInternalExternal("internal");
-    } else {
-      setInternalExternal("external");
-    }
+    const value = event?.target?.value || "external";
+    setInternalExternal(value);
+  };
+
+  const resetForm = () => {
+    setSelectedWorkOrder(null);
+    setFormData({});
+    setChildMaterials([]);
+    setMaterialLineItems([]);
+    setSelectedLocator(null);
+    setSelectedWarehouseId(null);
+    setSelectedApproverEmail(null);
+    setChildServices([]);
+    setWarehouses([]);
+    setLocators([]);
+    setInternalExternal("external");
   };
 
   const handleSubmit = async () => {
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
-    const createdBy = user.name + " - " + user.username || "unknown";
+    const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -126,7 +137,7 @@ const CreateMRS = () => {
       );
       if (response.status === 201) {
         alert(`MRS submitted`);
-        handleRadioChange();
+        resetForm();
       }
     } catch (error) {
       console.error("Error submitting data:", error);

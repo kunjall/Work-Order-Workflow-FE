@@ -165,14 +165,26 @@ export default function AdminPanel() {
             fullWidth
             margin="normal"
             select
-            value={newUser.role}
-            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+            SelectProps={{
+              multiple: true,
+              renderValue: (selected) => selected.filter(Boolean).join(";"), // Remove empty values
+            }}
+            value={newUser.role ? newUser.role.split(";").filter(Boolean) : []} // Handle empty case
+            onChange={(e) => {
+              const selectedRoles = e.target.value;
+              setNewUser({ ...newUser, role: selectedRoles.join(";") }); // Convert array to semicolon-separated string
+            }}
             required
           >
-            <MenuItem value="Admin">admin</MenuItem>
-            <MenuItem value="User">user</MenuItem>
-            <MenuItem value="Manager">manager</MenuItem>
+            <MenuItem value="admin">Admin</MenuItem>
+            <MenuItem value="cwo">CWO</MenuItem>
+            <MenuItem value="mwo">MWO</MenuItem>
+            <MenuItem value="mb">MB</MenuItem>
+            <MenuItem value="inv">Inventory Management</MenuItem>
+            <MenuItem value="mm">Material Management</MenuItem>
+            <MenuItem value="expense">Expense Management</MenuItem>
           </TextField>
+
           <TextField
             label="Status"
             variant="outlined"

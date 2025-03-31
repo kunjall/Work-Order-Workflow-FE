@@ -267,7 +267,7 @@ const Example = ({ refreshKey }) => {
   const handleReject = async () => {
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
-    const actionedBy = user.name + " - " + user.username || "unknown";
+    const actionedBy = user.name || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
@@ -319,7 +319,7 @@ const Example = ({ refreshKey }) => {
     } else if (mbStatusPass.toLowerCase() === "pending with billing spoc") {
       mbStatus = "Approved";
     }
-    const actionedBy = user.name + " - " + user.username || "unknown";
+    const actionedBy = user.name || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",

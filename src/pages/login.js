@@ -43,7 +43,7 @@ export default function Login() {
       userRoles.includes("inv") ||
       userRoles.includes("cwo")
     ) {
-      navigate("/profile");
+      navigate("/actions");
     } else {
       return (
         <div style={{ textAlign: "center", marginTop: "20px" }}>

@@ -461,8 +461,7 @@ const DashboardWhinch = () => {
   const handleSubmit = async () => {
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
-    const createdBy =
-      user.name + " - " + user.name + " - " + user.username || "unknown";
+    const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
       month: "short",
