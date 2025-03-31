@@ -84,13 +84,13 @@ const MmModal = ({
   const isActionAllowed =
     mmStatus.toLowerCase().includes("pending") &&
     rowData &&
-    rowData.requested_by !== username &&
+    rowData.requested_by !== username.name &&
     ((mmStatus.toLowerCase().includes("pending with deployment head") &&
-      username === rowData?.mm_approver1_email) ||
+      username.username === rowData?.mm_approver1_email) ||
       (mmStatus.toLowerCase().includes("pending with material incharge") &&
-        username === rowData?.mm_approver2_email) ||
+        username.username === rowData?.mm_approver2_email) ||
       (mmStatus.toLowerCase().includes("pending with material head") &&
-        username === rowData?.mm_approver3_email));
+        username.username === rowData?.mm_approver3_email));
 
   const handleApproveButton = () => {
     if (

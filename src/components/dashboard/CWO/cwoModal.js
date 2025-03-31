@@ -61,9 +61,9 @@ const MwoModal = ({
   const isActionAllowed =
     cwoStatus.toLowerCase().includes("pending") &&
     rowData &&
-    rowData.created_by !== username &&
+    rowData.created_by !== username.name &&
     (cwoStatus.toLowerCase() !== "pending for approval" ||
-      username === rowData.cwo_approver_email);
+      username.username === rowData.cwo_approver_email);
 
   const handleApproveButton = () => {
     if (!isActionAllowed) return;

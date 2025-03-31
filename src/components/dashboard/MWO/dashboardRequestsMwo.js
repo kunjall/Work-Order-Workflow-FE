@@ -674,7 +674,7 @@ const Example = ({ refreshKey }) => {
         approvers={approvers}
         mwoStatus={mwoStatusPass}
         handleReject={handleReject}
-        username={username}
+        username={user}
       />
     </Box>
   );

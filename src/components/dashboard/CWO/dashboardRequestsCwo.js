@@ -712,7 +712,7 @@ const Example = ({ refreshKey }) => {
         handleApprove={handleApprove}
         cwoStatus={cwoStatusPass}
         handleReject={handleReject}
-        username={username}
+        username={user}
       />
     </Box>
   );

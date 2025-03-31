@@ -65,13 +65,13 @@ const MwoModal = ({
   const isActionAllowed =
     mwoStatus.toLowerCase().includes("pending") &&
     rowData &&
-    rowData.requested_by !== username &&
+    rowData.requested_by !== username.name &&
     ((mwoStatus.toLowerCase().includes("pending with deployment head") &&
-      username === rowData?.mwo_approver_email) ||
+      username.username === rowData?.mwo_approver_email) ||
       (mwoStatus.toLowerCase().includes("pending with material incharge") &&
-        username === rowData?.mwo_approver1_email) ||
+        username.username === rowData?.mwo_approver1_email) ||
       (mwoStatus.toLowerCase().includes("pending with material head") &&
-        username === rowData?.mwo_approver2_email));
+        username.username === rowData?.mwo_approver2_email));
 
   const handleApproveButton = () => {
     if (!isActionAllowed) return;

@@ -599,7 +599,7 @@ const Example = ({ refreshKey }) => {
         setApproverName={setApproverName}
         inventoryStatus={inventoryStatusPass}
         handleReject={handleReject}
-        username={username}
+        username={user}
       />
     </Box>
   );

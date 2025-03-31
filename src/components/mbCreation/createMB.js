@@ -131,7 +131,7 @@ const CreateMRS = () => {
 
       if (response.status === 201) {
         alert(`MB submitted`);
-        handleRadioChange();
+        resetForm();
       }
     } catch (error) {
       console.error("Error submitting data:", error);

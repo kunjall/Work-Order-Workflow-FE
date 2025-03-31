@@ -335,27 +335,27 @@ const Example = ({ refreshKey }) => {
       cwo_id: selectedRow.cwo_id,
       mb_status: mbStatus,
 
-      mb_approver2_email:
-        selectedApproverEmail || selectedRow.mb_approver2_email || "",
-      mb_approver2_name: approverName || selectedRow.mb_approver2_name || "",
+      // mb_approver2_email:
+      //   selectedApproverEmail || selectedRow.mb_approver2_email || "",
+      // mb_approver2_name: approverName || selectedRow.mb_approver2_name || "",
 
-      mb_approver3_email:
+      mb_approver2_email:
         mbStatusPass.toLowerCase() === "pending with deployment head"
           ? selectedApproverEmail || selectedRow.mb_approver3_email || ""
           : selectedRow.mb_approver3_email || "",
-      mb_approver3_name:
+      mb_approver2_name:
         mbStatusPass.toLowerCase() === "pending with deployment head"
           ? approverName || selectedRow.mb_approver3_name || ""
           : selectedRow.mb_approver3_name || "",
 
-      mb_approver4_email:
+      mb_approver3_email:
         mbStatusPass.toLowerCase() === "pending with material head"
-          ? selectedApproverEmail || selectedRow.mb_approver4_email || ""
-          : selectedRow.mb_approver4_email || "",
-      mb_approver4_name:
+          ? selectedApproverEmail || selectedRow.mb_approver3_email || ""
+          : selectedRow.mb_approver3_email || "",
+      mb_approver3_name:
         mbStatusPass.toLowerCase() === "pending with material head"
-          ? approverName || selectedRow.mb_approver4_name || ""
-          : selectedRow.mb_approver4_name || "",
+          ? approverName || selectedRow.mb_approver3_name || ""
+          : selectedRow.mb_approver3_name || "",
 
       actioned_at: actionedAt,
       actioned_by: actionedBy,
@@ -690,7 +690,7 @@ const Example = ({ refreshKey }) => {
         handleApprove={handleApprove}
         mbStatus={mbStatusPass}
         handleReject={handleReject}
-        username={username}
+        username={user}
         approvers={approvers}
       />
     </Box>

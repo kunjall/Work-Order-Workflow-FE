@@ -665,7 +665,7 @@ const Example = ({ refreshKey }) => {
         handleApprove={handleApprove}
         mmStatus={mmStatusPass}
         handleReject={handleReject}
-        username={username}
+        username={user}
         approvers={approvers}
         setSelectedApproverEmail={setSelectedApproverEmail}
         setApproverName={setApproverName}

@@ -83,9 +83,9 @@ const InventoryModal = ({
   const isActionAllowed =
     inventoryStatus.toLowerCase().includes("pending") &&
     rowData &&
-    username !== rowData.created_by &&
+    username.name !== rowData.created_by &&
     (inventoryStatus.toLowerCase() !== "pending for approval" ||
-      username === rowData.inventory_approver_email);
+      username.username === rowData.inventory_approver_email);
 
   const handleApproveButton = () => {
     if (!isActionAllowed) return;
