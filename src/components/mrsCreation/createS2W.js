@@ -77,43 +77,45 @@ const CreateMRS = () => {
     }
   };
 
-  // useEffect(() => {
-  //   const fetchMBData = async () => {
-  //     try {
-  //       const response = await axios.get(
-  //         `${process.env.REACT_APP_API_URL}/mb/find-mb`,
-  //         {
-  //           params: {
-  //             cwo_number: formData.cwo_number,
-  //             mbstatus: "Pending",
-  //           },
-  //           headers: {
-  //             Authorization: user.authToken,
-  //           },
-  //         }
-  //       );
-  //       if (response.data.length > 0) {
-  //         setExists(true);
-  //         setSelectedWorkOrder(null);
-  //         setFormData({});
-  //         setChildMaterials([]);
-  //         setMaterialLineItems([]);
-  //         setSelectedLocator(null);
-  //         setSelectedWarehouseId(null);
-  //         setSelectedApproverEmail(null);
-  //         setWarehouses([]);
-  //         setLocators([]);
-  //         setSelectedLocator("");
-  //         setVendorOptions([]);
-  //         setSelectedVendorId([]);
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching data:", error);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchMBData = async () => {
+      if (!formData?.cwo_number) return; // Prevent API call if cwo_number is missing
 
-  //   if (formData) fetchMBData();
-  // }, [formData]);
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/mb/find-mb`,
+          {
+            params: {
+              cwo_number: formData.cwo_number,
+              mbstatus: "Pending with billing spoc",
+            },
+            headers: {
+              Authorization: user.authToken,
+            },
+          }
+        );
+        if (response.data.length > 0) {
+          setExists(true);
+          setSelectedWorkOrder(null);
+          setFormData({});
+          setChildMaterials([]);
+          setMaterialLineItems([]);
+          setSelectedLocator(null);
+          setSelectedWarehouseId(null);
+          setSelectedApproverEmail(null);
+          setWarehouses([]);
+          setLocators([]);
+          setSelectedLocator("");
+          setVendorOptions([]);
+          setSelectedVendorId([]);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    if (formData?.cwo_number) fetchMBData(); // Ensure cwo_number exists before calling
+  }, [formData]); // Dependency array
 
   const handleSubmit = async () => {
     const isConfirmed = window.confirm(
