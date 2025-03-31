@@ -207,7 +207,7 @@ const Example = ({ refreshKey }) => {
         setAllMbService(mbServiceArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
-        setError("Failed to load inventory materials");
+        setAllMbService([]);
       }
     };
     fetchAllMbService();
