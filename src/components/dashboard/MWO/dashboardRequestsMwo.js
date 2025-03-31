@@ -176,7 +176,7 @@ const Example = ({ refreshKey }) => {
         setAllMotherMaterial(motherMaterialArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
-        setAllMotherService([]);
+        setAllMotherMaterial([]);
       }
     };
     fetchAllMotherMaterial();
