@@ -281,6 +281,8 @@ const DashboardWhinch = () => {
     setCustomerProjectManager("");
     setApproverName("");
     setSelectedApproverEmail("");
+    setServiceLineItems([]);
+    setLineItems([]);
   };
   const handleServiceLineItemsUpdate = (updatedServiceLineItems) => {
     setServiceLineItems(updatedServiceLineItems);
@@ -372,6 +374,7 @@ const DashboardWhinch = () => {
 
       if (response.status === 201) {
         setSuccessPopupOpen(true);
+        resetForm();
       }
     } catch (error) {
       console.error("Error submitting data:", error);
@@ -391,7 +394,7 @@ const DashboardWhinch = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <div>
+      <div id="fiber-rollout">
         <Box sx={{ flexGrow: 1 }}>
           {error ? (
             <Typography color="error">{error}</Typography>
@@ -423,7 +426,6 @@ const DashboardWhinch = () => {
                 item
                 xs={12}
                 sx={{
-                  position: "sticky",
                   top: 0,
                   backgroundColor: "white",
                   zIndex: 10,
@@ -494,9 +496,12 @@ const DashboardWhinch = () => {
                         variant="outlined"
                         fullWidth
                         value={gisCode}
-                        onChange={(e) => setGisCode(e.target.value)}
+                        onChange={(e) =>
+                          setGisCode(e.target.value.toUpperCase())
+                        }
                       />
                     </Grid>
+                     ⁠
                     <Grid item xs={12} sm={6} md={2}>
                       <FormControl variant="outlined" fullWidth>
                         <InputLabel id="execution-city-label">
@@ -533,15 +538,16 @@ const DashboardWhinch = () => {
                         }}
                       />
                     </Grid>
-
-                    <Grid item xs={12} sm={6} md={5}>
+                    <Grid item xs={12} sm={6} md={6.5}>
                       <TextField
                         id="route-name"
                         label="Route Name"
                         variant="outlined"
                         fullWidth
                         value={routeName}
-                        onChange={(e) => setRouteName(e.target.value)}
+                        onChange={(e) =>
+                          setRouteName(e.target.value.toUpperCase())
+                        }
                       />
                     </Grid>
                     <Grid item xs={12} sm={6} md={2}>
@@ -662,14 +668,13 @@ const DashboardWhinch = () => {
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            label="Approver Email"
+                            label="Approver"
                             variant="outlined"
                             fullWidth
                           />
                         )}
                       />
                     </Grid>
-
                     <Grid item xs={12} sm={6} md={4}>
                       <TextField
                         id="approver-name"

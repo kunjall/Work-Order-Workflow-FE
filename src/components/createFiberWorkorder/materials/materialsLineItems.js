@@ -182,7 +182,7 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3.5}>
+            <Grid item xs={12} sm={6} md={2.5}>
               <TextField
                 label="Material Desc"
                 value={item.itemName}
@@ -203,7 +203,7 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
                 disabled
               />
             </Grid>
-            <Grid item xs={6} sm={3} md={1}>
+            <Grid item xs={6} sm={3} md={2}>
               <TextField
                 label="Price"
                 value={item.itemRate}

@@ -177,7 +177,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={8} md={3.5}>
+            <Grid item xs={12} sm={8} md={2.5}>
               <TextField
                 label="Service Desc"
                 value={item.serviceDescription}
@@ -201,7 +201,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={1}>
+            <Grid item xs={12} sm={6} md={2}>
               <TextField
                 label="Price"
                 value={item.serviceRate}

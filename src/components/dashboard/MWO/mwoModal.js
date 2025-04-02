@@ -43,7 +43,7 @@ const MwoModal = ({
   comment,
   handleApprove,
   handleReject,
-  handleReturn,
+  // handleReturn,
   mwoStatus,
   username,
   setSelectedApproverEmail,
@@ -65,12 +65,12 @@ const MwoModal = ({
   const isActionAllowed =
     mwoStatus.toLowerCase().includes("pending") &&
     rowData &&
-    rowData.requested_by !== username.name &&
+    rowData.created_by !== username.name &&
     ((mwoStatus.toLowerCase().includes("pending with deployment head") &&
       username.username === rowData?.mwo_approver_email) ||
-      (mwoStatus.toLowerCase().includes("pending with material incharge") &&
+      (mwoStatus.toLowerCase().includes("pending with acquisition manager") &&
         username.username === rowData?.mwo_approver1_email) ||
-      (mwoStatus.toLowerCase().includes("pending with material head") &&
+      (mwoStatus.toLowerCase().includes("pending with billing spoc") &&
         username.username === rowData?.mwo_approver2_email));
 
   const handleApproveButton = () => {
@@ -85,17 +85,17 @@ const MwoModal = ({
     onClose();
   };
 
-  const handleReturnButton = () => {
-    if (
-      (mwoStatus.includes("returned") && username === rowData.created_by) ||
-      isActionAllowed
-    ) {
-      handleReturn();
-      onClose();
-    } else {
-      return;
-    }
-  };
+  // const handleReturnButton = () => {
+  //   if (
+  //     (mwoStatus.includes("returned") && username === rowData.created_by) ||
+  //     isActionAllowed
+  //   ) {
+  //     handleReturn();
+  //     onClose();
+  //   } else {
+  //     return;
+  //   }
+  // };
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
@@ -127,12 +127,19 @@ const MwoModal = ({
                       variant="body2"
                       sx={{ fontWeight: "bold", textTransform: "capitalize" }}
                     >
-                      {key.replace(/_/g, " ")}:
+                      {key.toLowerCase().includes("email") // ✅ If key contains "email", remove it from the label
+                        ? key
+                            .replace(/_/g, " ")
+                            .replace(/email/gi, "mobile")
+                            .trim() + ":"
+                        : key.replace(/_/g, " ") + ":"}
                     </Typography>
                     <Typography variant="body1">
                       {key.toLowerCase().includes("date") ||
                       key.toLowerCase().includes("time")
                         ? formatDate(rowData[key])
+                        : typeof rowData[key] === "string"
+                        ? rowData[key].replace(/\$/g, "") // ✅ Removes `$` from values
                         : rowData[key] || "N/A"}
                     </Typography>
                   </Grid>
@@ -249,7 +256,7 @@ const MwoModal = ({
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Head row"
+                      label="Acquisition Manager"
                       variant="outlined"
                       fullWidth
                     />
@@ -257,7 +264,7 @@ const MwoModal = ({
                 />
               </Box>
             )}
-            {mwoStatus.toLowerCase().includes("row") && (
+            {mwoStatus.toLowerCase().includes("acquisition") && (
               <Box sx={{ marginTop: "16px" }}>
                 <Autocomplete
                   disablePortal
@@ -312,14 +319,14 @@ const MwoModal = ({
         >
           Reject
         </Button>
-        <Button
+        {/* <Button
           variant="contained"
           color="error"
-          onClick={handleReturnButton}
+          // onClick={handleReturnButton}
           disabled={!isActionAllowed}
         >
           Return
-        </Button>
+        </Button> */}
         <Button variant="outlined" onClick={onClose}>
           Close
         </Button>

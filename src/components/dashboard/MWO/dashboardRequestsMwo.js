@@ -74,7 +74,7 @@ const Example = ({ refreshKey }) => {
           setMotherMaterial(motherMaterialArray);
         } catch (err) {
           console.error("Error fetching mother materials:", err);
-          setError("Failed to load mother materials");
+          setMotherMaterial([]);
         }
       };
 
@@ -223,17 +223,17 @@ const Example = ({ refreshKey }) => {
       try {
         const statuses = [
           "Pending with deployment head",
-          "Pending with head row",
+          "Pending with acquisition manager",
           "Pending with billing spoc",
           "Approved",
           "Rejected by deployment head",
-          "Rejected by with head row",
+          "Rejected by acquisition manager",
           "Rejected by with billing spoc",
         ];
 
         const promises = statuses.map((status) =>
           axios.get(
-            `${process.env.REACT_APP_API_URL}/workorder/find-workorder-actions?user=${username}&mwostatus=${status}`,
+            `${process.env.REACT_APP_API_URL}/workorder/find-workorder-actions?user=${user.name}&mwostatus=${status}`,
             {
               headers: { Authorization: user.authToken },
             }
@@ -282,8 +282,10 @@ const Example = ({ refreshKey }) => {
     });
     if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
       mwoStatus = "Rejected by deployment head";
-    } else if (mwoStatusPass.toLowerCase() === "pending with head row") {
-      mwoStatus = "Rejected by head row";
+    } else if (
+      mwoStatusPass.toLowerCase() === "Pending with acquisition manager"
+    ) {
+      mwoStatus = "Rejected by acquisition manager";
     } else if (mwoStatusPass.toLowerCase() === "pending with billing spoc") {
       mwoStatus = "Rejected by billing spoc";
     }
@@ -316,8 +318,10 @@ const Example = ({ refreshKey }) => {
     if (!isConfirmed) return;
 
     if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
-      mwoStatus = "Pending with head row";
-    } else if (mwoStatusPass.toLowerCase() === "pending with head row") {
+      mwoStatus = "Pending with acquisition manager";
+    } else if (
+      mwoStatusPass.toLowerCase() === "pending with acquisition manager"
+    ) {
       mwoStatus = "Pending with billing spoc";
     } else if (mwoStatusPass.toLowerCase() === "pending with billing spoc") {
       mwoStatus = "Approved";
@@ -349,11 +353,11 @@ const Example = ({ refreshKey }) => {
           : selectedRow.mwo_approver1_name || "",
 
       mwo_approver2_email:
-        mwoStatusPass.toLowerCase() === "pending with head row"
+        mwoStatusPass.toLowerCase() === "pending with acquisition manager"
           ? selectedApproverEmail || selectedRow.mwo_approver2_email || ""
           : selectedRow.mwo_approver2_email || "",
       mwo_approver2_name:
-        mwoStatusPass.toLowerCase() === "pending with head row"
+        mwoStatusPass.toLowerCase() === "pending with acquisition manager"
           ? approverName || selectedRow.mwo_approver2_name || ""
           : selectedRow.mwo_approver3_name || "",
     };

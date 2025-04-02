@@ -151,7 +151,8 @@ const Navbar = () => {
 
           {}
           <IconButton color="inherit" component={Link} to="/profile">
-            <AccountCircleIcon sx={{ fontSize: "35px" }} />
+            <AccountCircleIcon sx={{ fontSize: 35 }} />
+            <p style={{ fontSize: "20px" }}>{user.name}</p>
           </IconButton>
         </Toolbar>
       </AppBar>
