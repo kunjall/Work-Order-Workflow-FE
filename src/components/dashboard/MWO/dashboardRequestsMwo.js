@@ -242,8 +242,6 @@ const Example = ({ refreshKey }) => {
 
         const responses = await Promise.all(promises);
 
-        console.log(responses);
-
         if (isMounted) {
           const combinedData = responses.flatMap((response) =>
             Array.isArray(response.data) ? response.data : []
@@ -252,7 +250,6 @@ const Example = ({ refreshKey }) => {
           setTableData(combinedData);
           setIsLoading(false);
         }
-        console.log(tableData);
       } catch (err) {
         if (isMounted) {
           setError("Failed to load inventory");
