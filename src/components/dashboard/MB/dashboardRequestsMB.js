@@ -231,7 +231,7 @@ const Example = ({ refreshKey }) => {
 
         const promises = statuses.map((status) =>
           axios.get(
-            `${process.env.REACT_APP_API_URL}/mb/find-mb-actions?user=${username}&mbstatus=${status}`,
+            `${process.env.REACT_APP_API_URL}/mb/find-mb-actions?user=${user.name}&mbstatus=${status}&role=${user.role}`,
             {
               headers: { Authorization: user.authToken },
             }
