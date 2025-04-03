@@ -243,6 +243,12 @@ const MwoModal = ({
             {mwoStatus.toLowerCase().includes("deployment head") && (
               <Box sx={{ marginTop: "16px" }}>
                 <Autocomplete
+                  sx={{
+                    "& .MuiAutocomplete-listbox .MuiAutocomplete-option": {
+                      color: "blue",
+                    }, // Dropdown options color
+                    "& .MuiOutlinedInput-root": { color: "blue" }, // Selected value color
+                  }}
                   disablePortal
                   id="combo-box-demo"
                   options={approvers}
@@ -259,6 +265,9 @@ const MwoModal = ({
                       label="Acquisition Manager"
                       variant="outlined"
                       fullWidth
+                      sx={{
+                        "& .MuiInputBase-input": { color: "blue" }, // Ensures typed text stays blue
+                      }}
                     />
                   )}
                 />
@@ -267,6 +276,12 @@ const MwoModal = ({
             {mwoStatus.toLowerCase().includes("acquisition") && (
               <Box sx={{ marginTop: "16px" }}>
                 <Autocomplete
+                  sx={{
+                    "& .MuiAutocomplete-listbox .MuiAutocomplete-option": {
+                      color: "blue",
+                    }, // Dropdown options color
+                    "& .MuiOutlinedInput-root": { color: "blue" }, // Selected value color
+                  }}
                   disablePortal
                   id="combo-box-demo"
                   options={approvers}
@@ -283,6 +298,9 @@ const MwoModal = ({
                       label="Billing Spoc"
                       variant="outlined"
                       fullWidth
+                      sx={{
+                        "& .MuiInputBase-input": { color: "blue" }, // Ensures typed text stays blue
+                      }}
                     />
                   )}
                 />

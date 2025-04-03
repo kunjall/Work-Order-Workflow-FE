@@ -43,11 +43,13 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
     setLineItems(updatedLineItems);
     onUpdate(updatedLineItems);
   };
-
   const handleChange = (index, field, value) => {
+    if (field === "itemQTY" && parseFloat(value) < 0) return; // Prevent negative values
+
     const updatedLineItems = lineItems.map((item, i) =>
       i === index ? { ...item, [field]: value } : item
     );
+
     setLineItems(updatedLineItems);
     onUpdate(updatedLineItems);
   };
@@ -123,7 +125,6 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
                 disabled
               />
             </Grid>
-
             <Grid item xs={6} sm={3} md={3}>
               <TextField
                 label="QTY"
@@ -132,6 +133,9 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
                 fullWidth
                 type="number"
                 inputProps={{ step: "0.01", min: "0" }}
+                onInput={(e) => {
+                  if (e.target.value < 0) e.target.value = 0; // Reset negative input
+                }}
               />
             </Grid>
 

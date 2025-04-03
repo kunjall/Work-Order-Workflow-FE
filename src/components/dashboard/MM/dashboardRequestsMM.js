@@ -549,7 +549,7 @@ const Example = ({ refreshKey }) => {
     },
     muiTableProps: {
       sx: {
-        backgroundColor: "black",
+        backgroundColor: "white",
         color: "#ec7c30",
         fontWeight: "bold",
       },

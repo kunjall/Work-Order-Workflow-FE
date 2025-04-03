@@ -267,10 +267,18 @@ const InventoryInward = () => {
   const resetForm = () => {
     setSelectedWarehouseId("");
     setWarehouseState("");
-
-    setDCDate(dayjs().format("MMM DD, YYYY, hh:mm:ss A"));
-    setEntryDate(dayjs().format("MMM DD, YYYY, hh:mm:ss A"));
-
+    setSelectedReviewerEmail(null);
+    setSelectedCustomerId(null);
+    setCustomerName("");
+    setCustomerState("");
+    setWarehouseState("");
+    setClientWarehouseState("");
+    setSelectedClientWarehouseId(null);
+    setReviewerName("");
+    setDCDate(dayjs());
+    setEntryDate(dayjs());
+    setLineItems([]);
+    setMRSNumber("");
     setEWayBillNumber("");
     setdeliveryChallanNumber("");
   };
@@ -289,8 +297,10 @@ const InventoryInward = () => {
       timeZone: "IST",
     });
 
-    const formatDate = (date) =>
-      dayjs(date).tz("Asia/Kolkata").format("MMM DD, YYYY, HH:mm");
+    const formatDate = (date) => {
+      if (!date) return "N/A"; // Handles null, undefined, or empty values
+      return dayjs(date).tz("Asia/Kolkata").format("MMM DD, YYYY, HH:mm");
+    };
 
     const entryDateFormatted = formatDate(entryDate);
     const dcDateFormatted = formatDate(dcDate);
@@ -468,8 +478,10 @@ const InventoryInward = () => {
                   <DatePicker
                     disabled
                     label="Entry Date"
-                    value={entryDate}
-                    onChange={(newValue) => setEntryDate(newValue)}
+                    value={entryDate || null} // Prevents undefined error
+                    onChange={(newValue) =>
+                      setEntryDate(newValue ? dayjs(newValue) : null)
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -522,24 +534,21 @@ const InventoryInward = () => {
                   variant="outlined"
                   fullWidth
                   value={deliveryChallanNumber}
-                  onChange={(e) => setdeliveryChallanNumber(e.target.value)}
+                  onChange={(e) =>
+                    setdeliveryChallanNumber(e.target.value.toUpperCase())
+                  }
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={2}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     label="DC Date"
-                    value={dcDate}
-                    onChange={(newValue) => setDCDate(newValue)}
+                    value={dcDate || null} // Prevents undefined issues
+                    onChange={(newValue) =>
+                      setDCDate(newValue ? dayjs(newValue) : null)
+                    } // Convert to Dayjs
                     renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        fullWidth
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                      />
+                      <TextField {...params} variant="outlined" fullWidth />
                     )}
                     format="DD-MMM-YYYY"
                   />
@@ -552,7 +561,9 @@ const InventoryInward = () => {
                   variant="outlined"
                   fullWidth
                   value={eWayBillNumber}
-                  onChange={(e) => setEWayBillNumber(e.target.value)}
+                  onChange={(e) =>
+                    setEWayBillNumber(e.target.value.toUpperCase())
+                  }
                 />
               </Grid>
               <Grid item xs={12} sm={6} md={5}>
@@ -575,17 +586,10 @@ const InventoryInward = () => {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     label="MRS Date"
-                    value={mrsDate}
-                    onChange={(newValue) => setMRSDate(newValue)}
+                    value={mrsDate || null} // Ensures no undefined value
+                    onChange={(newValue) => setMRSDate(dayjs(newValue))} // Convert to Dayjs
                     renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        variant="outlined"
-                        fullWidth
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
-                      />
+                      <TextField {...params} variant="outlined" fullWidth />
                     )}
                     format="DD-MMM-YYYY"
                   />

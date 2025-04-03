@@ -253,6 +253,10 @@ const InventoryModal = ({
             {inventoryStatus.toLowerCase() === "pending for receipt" && (
               <Box sx={{ marginTop: "16px" }}>
                 <Autocomplete
+                  sx={{
+                    "& .MuiAutocomplete-option": { color: "blue" }, // Options in dropdown
+                    "& .MuiInputBase-root": { color: "blue" }, // Selected value color
+                  }}
                   disablePortal
                   id="combo-box-demo"
                   options={approvers}
@@ -269,6 +273,9 @@ const InventoryModal = ({
                       label="Approver Email"
                       variant="outlined"
                       fullWidth
+                      sx={{
+                        "& .MuiInputBase-input": { color: "blue" }, // Ensures text inside input is blue
+                      }}
                     />
                   )}
                 />

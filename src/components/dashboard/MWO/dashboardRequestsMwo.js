@@ -283,7 +283,7 @@ const Example = ({ refreshKey }) => {
     if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
       mwoStatus = "Rejected by deployment head";
     } else if (
-      mwoStatusPass.toLowerCase() === "Pending with acquisition manager"
+      mwoStatusPass.toLowerCase() === "pending with acquisition manager"
     ) {
       mwoStatus = "Rejected by acquisition manager";
     } else if (mwoStatusPass.toLowerCase() === "pending with billing spoc") {
@@ -558,7 +558,7 @@ const Example = ({ refreshKey }) => {
     },
     muiTableProps: {
       sx: {
-        backgroundColor: "black",
+        backgroundColor: "white",
         color: "#ec7c30",
         fontWeight: "bold",
       },

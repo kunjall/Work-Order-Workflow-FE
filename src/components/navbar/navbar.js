@@ -112,21 +112,22 @@ const Navbar = () => {
 
   let menuItems = [];
 
-  if (user?.role.toLowerCase().includes("admin")) {
-    menuItems = adminMenuItems;
-  } else if (user?.role.toLowerCase().includes("cwo")) {
-    menuItems = cwoMenuItems;
-  } else if (user?.role.toLowerCase().includes("mwo")) {
-    menuItems = mwoMenuItems;
-  } else if (user?.role.toLowerCase().includes("mb")) {
-    menuItems = mbMenuItems;
-  } else if (user?.role.toLowerCase().includes("inv")) {
-    menuItems = invMenuItems;
-  } else if (user?.role.toLowerCase().includes("mm")) {
-    menuItems = mmMenuItems;
-  } else if (user?.role.toLowerCase().includes("expense")) {
-    menuItems = expenseMenuItems;
-  }
+  const role = user?.role?.trim().toLowerCase().split(" "); // Split roles into an array
+
+  role.forEach((r) => {
+    if (r.includes("admin")) menuItems = [...menuItems, ...adminMenuItems];
+    if (r.includes("cwo")) menuItems = [...menuItems, ...cwoMenuItems];
+    if (r.includes("mwo")) menuItems = [...menuItems, ...mwoMenuItems];
+    if (r.includes("mb")) menuItems = [...menuItems, ...mbMenuItems];
+    if (r.includes("inv")) menuItems = [...menuItems, ...invMenuItems];
+    if (r.includes("mm")) menuItems = [...menuItems, ...mmMenuItems];
+    if (r.includes("expense")) menuItems = [...menuItems, ...expenseMenuItems];
+  });
+
+  // Remove duplicates
+  menuItems = menuItems.filter(
+    (item, index, self) => index === self.findIndex((t) => t.path === item.path)
+  );
 
   return user ? (
     <>
@@ -152,7 +153,7 @@ const Navbar = () => {
           {}
           <IconButton color="inherit" component={Link} to="/profile">
             <AccountCircleIcon sx={{ fontSize: 35 }} />
-            <p style={{ fontSize: "20px" }}>{user.name}</p>
+            <p style={{ fontSize: "16px" }}>{user.name}</p>
           </IconButton>
         </Toolbar>
       </AppBar>
