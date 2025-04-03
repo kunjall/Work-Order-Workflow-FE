@@ -112,22 +112,26 @@ const Navbar = () => {
 
   let menuItems = [];
 
-  const role = user?.role?.trim().toLowerCase().split(" "); // Split roles into an array
+  if (user?.role) {
+    const roles = user.role.trim().toLowerCase().split(" "); // Split roles into an array
 
-  role.forEach((r) => {
-    if (r.includes("admin")) menuItems = [...menuItems, ...adminMenuItems];
-    if (r.includes("cwo")) menuItems = [...menuItems, ...cwoMenuItems];
-    if (r.includes("mwo")) menuItems = [...menuItems, ...mwoMenuItems];
-    if (r.includes("mb")) menuItems = [...menuItems, ...mbMenuItems];
-    if (r.includes("inv")) menuItems = [...menuItems, ...invMenuItems];
-    if (r.includes("mm")) menuItems = [...menuItems, ...mmMenuItems];
-    if (r.includes("expense")) menuItems = [...menuItems, ...expenseMenuItems];
-  });
+    roles.forEach((r) => {
+      if (r.includes("admin")) menuItems = [...menuItems, ...adminMenuItems];
+      if (r.includes("cwo")) menuItems = [...menuItems, ...cwoMenuItems];
+      if (r.includes("mwo")) menuItems = [...menuItems, ...mwoMenuItems];
+      if (r.includes("mb")) menuItems = [...menuItems, ...mbMenuItems];
+      if (r.includes("inv")) menuItems = [...menuItems, ...invMenuItems];
+      if (r.includes("mm")) menuItems = [...menuItems, ...mmMenuItems];
+      if (r.includes("expense"))
+        menuItems = [...menuItems, ...expenseMenuItems];
+    });
 
-  // Remove duplicates
-  menuItems = menuItems.filter(
-    (item, index, self) => index === self.findIndex((t) => t.path === item.path)
-  );
+    // Remove duplicates based on path
+    menuItems = menuItems.filter(
+      (item, index, self) =>
+        index === self.findIndex((t) => t.path === item.path)
+    );
+  }
 
   return user ? (
     <>
