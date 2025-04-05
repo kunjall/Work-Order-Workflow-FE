@@ -60,15 +60,23 @@ const DashboardWhinch = () => {
   const [approverName, setApproverName] = useState("");
 
   const [serviceLineItems, setServiceLineItems] = useState(
-    motherServices.map(() => ({ cwo_qty: "" }))
+    motherServices ? motherServices.map(() => ({ cwo_qty: "" })) : []
   );
-  const [materialLineItems, setMaterialLineItems] = useState(
-    motherMaterials.map(() => ({ cwo_qty: "" }))
-  );
-  const totalMaterialAmount = materialLineItems.reduce(
-    (acc, item) => acc + Number(item.material_cwo_price || 0),
-    0
-  );
+
+  const [materialLineItems, setMaterialLineItems] = useState([]);
+
+  useEffect(() => {
+    if (Array.isArray(motherMaterials)) {
+      setMaterialLineItems(motherMaterials.map(() => ({ cwo_qty: "" })));
+    }
+  }, [motherMaterials]);
+
+  const totalMaterialAmount = Array.isArray(materialLineItems)
+    ? materialLineItems.reduce(
+        (acc, item) => acc + Number(item.material_cwo_price || 0),
+        0
+      )
+    : 0;
 
   let cwoId = null;
 
@@ -301,6 +309,7 @@ const DashboardWhinch = () => {
     setSelectedApproverEmail(null);
     setApprovers([]);
     setApproverName(null);
+    setChildWorkOrderNumber("");
   };
 
   const [status, setStatus] = useState({
@@ -371,19 +380,20 @@ const DashboardWhinch = () => {
   useEffect(() => {
     if (materialLineItems.length === 0) {
       setMaterialLineItems(
-        motherMaterials.map((material) => ({
-          mwo_id: material.mwo_id || "",
-          mwo_number: material.mwo_number || "",
-          material_record_id: material.record_id || "",
-          material_id: material.material_id || "",
-          material_desc: material.material_desc || "",
-          material_uom: material.material_uom || "",
-          material_bal_qty: material.material_bal_qty || "",
-          material_wo_qty: material.material_wo_qty || "",
-          material_rate: material.material_rate || "",
-          material_cwo_qty: "",
-          material_cwo_price: "",
-        }))
+        Array.isArray(motherMaterials) &&
+          motherMaterials.map((material) => ({
+            mwo_id: material.mwo_id || "",
+            mwo_number: material.mwo_number || "",
+            material_record_id: material.record_id || "",
+            material_id: material.material_id || "",
+            material_desc: material.material_desc || "",
+            material_uom: material.material_uom || "",
+            material_bal_qty: material.material_bal_qty || "",
+            material_wo_qty: material.material_wo_qty || "",
+            material_rate: material.material_rate || "",
+            material_cwo_qty: "",
+            material_cwo_price: "",
+          }))
       );
     }
   }, [motherMaterials, materialLineItems]);
@@ -459,7 +469,17 @@ const DashboardWhinch = () => {
   }, [formData.execution_city, cityOptions]);
 
   const handleSubmit = async () => {
-    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    const isConfirmed = window.confirm(
+      "Kindly select the approver from dropdown"
+    );
+    if (isConfirmed) {
+      const isConfirmedAgain = window.confirm(
+        "Are you sure you want to submit?"
+      );
+      if (!isConfirmedAgain) {
+        return;
+      }
+    }
     if (!isConfirmed) return;
     const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
@@ -1071,122 +1091,123 @@ const DashboardWhinch = () => {
               <Grid item xs={12}>
                 <Typography variant="h6">Materials</Typography>
                 <Grid container spacing={2} mt={1}>
-                  {motherMaterials.map((material, index) => (
-                    <React.Fragment key={material.record_id}>
-                      <Grid item xs={12} sm={6} md={1.5}>
-                        <TextField
-                          disabled
-                          label="ID"
-                          value={material.material_id || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={2}>
-                        <TextField
-                          disabled
-                          label="Description"
-                          value={material.material_desc || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={1}>
-                        <TextField
-                          disabled
-                          label="UOM"
-                          value={material.material_uom || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={1}>
-                        <TextField
-                          disabled
-                          label="Quantity"
-                          value={material.material_wo_qty || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={1}>
-                        <TextField
-                          disabled
-                          label="Price"
-                          value={material.material_rate || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={1}>
-                        <TextField
-                          disabled
-                          label="Bal QTY"
-                          value={material.material_bal_qty || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={1.5}>
-                        <TextField
-                          label="CWO Qty"
-                          value={materialLineItems[index]?.cwo_qty || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            const cwoQty = Number(value);
-                            const error =
-                              cwoQty > Number(material.material_bal_qty)
-                                ? "CWO Qty cannot exceed Bal Qty"
-                                : "";
+                  {Array.isArray(motherMaterials) &&
+                    motherMaterials.map((material, index) => (
+                      <React.Fragment key={material.record_id}>
+                        <Grid item xs={12} sm={6} md={1.5}>
+                          <TextField
+                            disabled
+                            label="ID"
+                            value={material.material_id || ""}
+                            InputProps={{ readOnly: true }}
+                            variant="outlined"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={2}>
+                          <TextField
+                            disabled
+                            label="Description"
+                            value={material.material_desc || ""}
+                            InputProps={{ readOnly: true }}
+                            variant="outlined"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={1}>
+                          <TextField
+                            disabled
+                            label="UOM"
+                            value={material.material_uom || ""}
+                            InputProps={{ readOnly: true }}
+                            variant="outlined"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={1}>
+                          <TextField
+                            disabled
+                            label="Quantity"
+                            value={material.material_wo_qty || ""}
+                            InputProps={{ readOnly: true }}
+                            variant="outlined"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={1}>
+                          <TextField
+                            disabled
+                            label="Price"
+                            value={material.material_rate || ""}
+                            InputProps={{ readOnly: true }}
+                            variant="outlined"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={1}>
+                          <TextField
+                            disabled
+                            label="Bal QTY"
+                            value={material.material_bal_qty || ""}
+                            InputProps={{ readOnly: true }}
+                            variant="outlined"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={1.5}>
+                          <TextField
+                            label="CWO Qty"
+                            value={materialLineItems[index]?.cwo_qty || ""}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              const cwoQty = Number(value);
+                              const error =
+                                cwoQty > Number(material.material_bal_qty)
+                                  ? "CWO Qty cannot exceed Bal Qty"
+                                  : "";
 
-                            setMaterialLineItems((prevItems) =>
-                              prevItems.map((item, idx) =>
-                                idx === index
-                                  ? {
-                                      ...item,
-                                      cwo_qty: value,
-                                      error,
-                                      material_cwo_price: error
-                                        ? ""
-                                        : (
-                                            cwoQty *
-                                            Number(material.material_rate)
-                                          ).toFixed(2),
-                                    }
-                                  : item
-                              )
-                            );
-                          }}
-                          error={!!materialLineItems[index]?.error}
-                          helperText={materialLineItems[index]?.error || ""}
-                          variant="outlined"
-                          fullWidth
-                          type="number"
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={1.5}>
-                        <TextField
-                          label="CWO Amount"
-                          value={
-                            materialLineItems[index]?.material_cwo_price || ""
-                          }
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
+                              setMaterialLineItems((prevItems) =>
+                                prevItems.map((item, idx) =>
+                                  idx === index
+                                    ? {
+                                        ...item,
+                                        cwo_qty: value,
+                                        error,
+                                        material_cwo_price: error
+                                          ? ""
+                                          : (
+                                              cwoQty *
+                                              Number(material.material_rate)
+                                            ).toFixed(2),
+                                      }
+                                    : item
+                                )
+                              );
+                            }}
+                            error={!!materialLineItems[index]?.error}
+                            helperText={materialLineItems[index]?.error || ""}
+                            variant="outlined"
+                            fullWidth
+                            type="number"
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={1.5}>
+                          <TextField
+                            label="CWO Amount"
+                            value={
+                              materialLineItems[index]?.material_cwo_price || ""
+                            }
+                            InputProps={{ readOnly: true }}
+                            variant="outlined"
+                            fullWidth
+                          />
+                        </Grid>
 
-                      <Grid item xs={12}>
-                        <Divider />
-                      </Grid>
-                    </React.Fragment>
-                  ))}
+                        <Grid item xs={12}>
+                          <Divider />
+                        </Grid>
+                      </React.Fragment>
+                    ))}
                 </Grid>
                 <Box
                   mt={2}

@@ -68,6 +68,7 @@ const DashboardWhinch = () => {
   const [selectedApproverEmail, setSelectedApproverEmail] = useState(null);
   const [approverName, setApproverName] = useState("");
   const [selectedState, setSelectedState] = useState("");
+  const [showWarning, setShowWarning] = useState(false);
 
   let mwoId = null;
 
@@ -319,8 +320,17 @@ const DashboardWhinch = () => {
   }, [user, navigate]);
 
   const handleSubmit = async () => {
-    const isConfirmed = window.confirm("Are you sure you want to submit?");
-    if (!isConfirmed) return;
+    const isConfirmed = window.confirm(
+      "Kindly select the approver from dropdown"
+    );
+    if (isConfirmed) {
+      const isConfirmedAgain = window.confirm(
+        "Are you sure you want to submit?"
+      );
+      if (!isConfirmedAgain) {
+        return;
+      }
+    }
     const createdBy = user.name || "unknown";
     const createdAt = new Date()
       .toLocaleString("en-US", {
@@ -433,45 +443,6 @@ const DashboardWhinch = () => {
               >
                 <Box sx={{ borderBottom: "1px solid #ddd", padding: 2 }}>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <Autocomplete
-                        disablePortal
-                        id="combo-box-demo"
-                        options={approvers}
-                        getOptionLabel={(option) =>
-                          option.approver_email.toString()
-                        }
-                        onChange={(event, newValue) => {
-                          setSelectedApproverEmail(
-                            newValue ? newValue.approver_email : null
-                          );
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            label="Approver"
-                            variant="outlined"
-                            fullWidth
-                          />
-                        )}
-                      />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
-                      <TextField
-                        id="approver-name"
-                        label="Approver Name"
-                        value={approverName}
-                        variant="outlined"
-                        InputProps={{
-                          readOnly: true,
-                          style: {
-                            color: "red",
-                            fontWeight: "bold",
-                          },
-                        }}
-                        fullWidth
-                      />
-                    </Grid>
                     <Grid item xs={12} sm={6} md={2}>
                       <Autocomplete
                         disablePortal
@@ -689,6 +660,61 @@ const DashboardWhinch = () => {
                         onChange={(e) =>
                           setCustomerProjectManager(e.target.value)
                         }
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <Autocomplete
+                        disablePortal
+                        id="combo-box-demo"
+                        options={approvers}
+                        getOptionLabel={(option) =>
+                          option.approver_email.toString()
+                        }
+                        onChange={(event, newValue) => {
+                          setSelectedApproverEmail(
+                            newValue ? newValue.approver_email : null
+                          );
+                          setShowWarning(false); // Clear warning if user selects
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Approver"
+                            variant="outlined"
+                            fullWidth
+                            onBlur={() => {
+                              if (!selectedApproverEmail) {
+                                setShowWarning(true);
+                              }
+                            }}
+                          />
+                        )}
+                      />
+
+                      {showWarning && (
+                        <Typography
+                          variant="body2"
+                          color="error"
+                          sx={{ mt: 1 }}
+                        >
+                          Please select an approver
+                        </Typography>
+                      )}
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4}>
+                      <TextField
+                        id="approver-name"
+                        label="Approver Name"
+                        value={approverName}
+                        variant="outlined"
+                        InputProps={{
+                          readOnly: true,
+                          style: {
+                            color: "red",
+                            fontWeight: "bold",
+                          },
+                        }}
+                        fullWidth
                       />
                     </Grid>
                   </Grid>

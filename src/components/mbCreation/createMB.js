@@ -81,8 +81,17 @@ const CreateMRS = () => {
   };
 
   const handleSubmit = async () => {
-    const isConfirmed = window.confirm("Are you sure you want to submit?");
-    if (!isConfirmed) return;
+    const isConfirmed = window.confirm(
+      "Kindly select the approver from dropdown"
+    );
+    if (isConfirmed) {
+      const isConfirmedAgain = window.confirm(
+        "Are you sure you want to submit?"
+      );
+      if (!isConfirmedAgain) {
+        return;
+      }
+    }
     const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",

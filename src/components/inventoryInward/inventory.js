@@ -59,6 +59,8 @@ const InventoryInward = () => {
   const [deliveryChallanNumber, setdeliveryChallanNumber] = useState("");
   const [successPopupOpen, setSuccessPopupOpen] = useState(false);
   const [clientWarehouses, setClientWarehouses] = useState([]);
+  const [showReviewerError, setShowReviewerError] = useState(false);
+
   let inventoryId = null;
 
   dayjs.extend(utc);
@@ -284,8 +286,17 @@ const InventoryInward = () => {
   };
 
   const handleSubmit = async () => {
-    const isConfirmed = window.confirm("Are you sure you want to submit?");
-    if (!isConfirmed) return;
+    const isConfirmed = window.confirm(
+      "Kindly select the approver from dropdown"
+    );
+    if (isConfirmed) {
+      const isConfirmedAgain = window.confirm(
+        "Are you sure you want to submit?"
+      );
+      if (!isConfirmedAgain) {
+        return;
+      }
+    }
     const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
@@ -605,6 +616,7 @@ const InventoryInward = () => {
                     setSelectedReviewerEmail(
                       newValue ? newValue.reviewer_email : null
                     );
+                    setShowReviewerError(false); // Clear error when something is selected
                   }}
                   renderInput={(params) => (
                     <TextField
@@ -612,9 +624,20 @@ const InventoryInward = () => {
                       label="Reviewer Email"
                       variant="outlined"
                       fullWidth
+                      onBlur={() => {
+                        if (!selectedReviewerEmail) {
+                          setShowReviewerError(true);
+                        }
+                      }}
                     />
                   )}
                 />
+
+                {showReviewerError && (
+                  <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                    Reviewer email is mandatory
+                  </Typography>
+                )}
               </Grid>
 
               <Grid item xs={12} sm={6} md={4}>
