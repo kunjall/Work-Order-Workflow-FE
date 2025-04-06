@@ -93,19 +93,15 @@ const MmModal = ({
         username.username === rowData?.mm_approver3_email));
 
   const handleApproveButton = () => {
-    const isAcknowledgementStep = mmStatus
-      .toLowerCase()
-      .includes("acknowledgement");
-    const isRequester = username.name === rowData?.requested_by;
-    console.log(rowData.requested_by);
-    console.log(username);
-    console.log(username.name);
-    if ((isAcknowledgementStep && isRequester) || isActionAllowed) {
-      console.log("hellow");
+    if (
+      (mmStatus.includes("acknowledgement") &&
+        username.name === rowData.requested_by) ||
+      isActionAllowed
+    ) {
       handleApprove();
       onClose();
     } else {
-      alert("You are not authorized to perform this action.");
+      return;
     }
   };
 
