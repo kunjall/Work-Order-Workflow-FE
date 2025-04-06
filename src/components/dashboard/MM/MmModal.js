@@ -97,8 +97,11 @@ const MmModal = ({
       .toLowerCase()
       .includes("acknowledgement");
     const isRequester = username.name === rowData?.requested_by;
-
+    console.log(rowData.requested_by);
+    console.log(username);
+    console.log(username.name);
     if ((isAcknowledgementStep && isRequester) || isActionAllowed) {
+      console.log("hellow");
       handleApprove();
       onClose();
     } else {
