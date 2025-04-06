@@ -358,7 +358,7 @@ const MmModal = ({
         }}
       >
         {mmStatus.toLowerCase().includes("acknowledgement") &&
-          rowData.requested_by === username && (
+          rowData.requested_by === username.name && (
             <Button
               variant="contained"
               color="warning"
@@ -372,7 +372,7 @@ const MmModal = ({
             </Button>
           )}
         {mmStatus.toLowerCase().includes("acknowledgement") &&
-          rowData.requested_by === username && (
+          rowData.requested_by === username.name && (
             <Button
               variant="contained"
               color="error"
