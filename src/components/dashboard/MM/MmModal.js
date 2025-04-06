@@ -95,7 +95,7 @@ const MmModal = ({
   const handleApproveButton = () => {
     if (
       (mmStatus.includes("acknowledgement") &&
-        username === rowData.requested_by) ||
+        username.name === rowData.requested_by) ||
       isActionAllowed
     ) {
       handleApprove();
