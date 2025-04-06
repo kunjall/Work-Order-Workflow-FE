@@ -437,13 +437,13 @@ const Example = ({ refreshKey }) => {
       Cell: ({ cell }) => cell.getValue(),
     },
     {
-      accessorKey: "created_by",
+      accessorKey: "requested_by",
       header: "Created By",
       size: 150,
       filterFn: "contains",
     },
     {
-      accessorKey: "created_at",
+      accessorKey: "requested_at",
       header: "Created Dt",
       size: 150,
       Cell: ({ cell }) => cell.getValue(),
