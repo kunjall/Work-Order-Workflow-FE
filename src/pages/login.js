@@ -41,7 +41,8 @@ export default function Login() {
       userRoles.includes("expense") ||
       userRoles.includes("mwo") ||
       userRoles.includes("inv") ||
-      userRoles.includes("cwo")
+      userRoles.includes("cwo") ||
+      userRoles.includes("actions")
     ) {
       navigate("/actions");
     } else {
