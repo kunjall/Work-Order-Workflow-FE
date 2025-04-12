@@ -204,7 +204,7 @@ const Example = ({ refreshKey }) => {
           service_wo_qty: service.service_wo_qty,
           service_bal_qty: service.service_bal_qty,
           service_rate: service.service_rate,
-          material_price: service.service_price,
+          service_price: service.service_price,
         }));
         setAllMotherService(motherServiceArray);
       } catch (err) {
@@ -481,9 +481,9 @@ const Example = ({ refreshKey }) => {
         });
 
         services.forEach((srv) => {
+          console.log(srv);
           flattened.push({
             ...mwo,
-
             category: "Service",
             item_id: srv.service_id,
             item_desc: srv.service_desc,
@@ -515,12 +515,25 @@ const Example = ({ refreshKey }) => {
       }
     });
 
+    // 🔁 Replace any $ sign with INR
+    const converted = flattened.map((row) => {
+      const updatedRow = {};
+      Object.entries(row).forEach(([key, value]) => {
+        if (typeof value === "string" && value.includes("$")) {
+          updatedRow[key] = value.replace(/\$/g, ""); // just remove $
+        } else {
+          updatedRow[key] = value;
+        }
+      });
+      return updatedRow;
+    });
+
     const csvConfig = mkConfig({
       filename: `MWO_${username}`,
       useKeysAsHeaders: true,
     });
 
-    const csv = generateCsv(csvConfig)(flattened);
+    const csv = generateCsv(csvConfig)(converted);
     download(csvConfig)(csv);
   };
 

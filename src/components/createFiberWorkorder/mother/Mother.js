@@ -69,8 +69,7 @@ const DashboardWhinch = () => {
   const [approverName, setApproverName] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [showWarning, setShowWarning] = useState(false);
-
-  let mwoId = null;
+  const [mwoId, setMwoId] = useState("");
 
   useEffect(() => {
     if (!user) {
@@ -320,17 +319,29 @@ const DashboardWhinch = () => {
   }, [user, navigate]);
 
   const handleSubmit = async () => {
-    const isConfirmed = window.confirm(
-      "Kindly select the approver from dropdown"
-    );
-    if (isConfirmed) {
-      const isConfirmedAgain = window.confirm(
-        "Are you sure you want to submit?"
-      );
-      if (!isConfirmedAgain) {
-        return;
-      }
+    if (
+      !selectedApproverEmail ||
+      !gisCode ||
+      !routeLength ||
+      !activity ||
+      !type ||
+      !selectedDate ||
+      !homepassCount ||
+      !routeName ||
+      !selectedCity ||
+      !workOrderNumber ||
+      !customerProjectManager ||
+      !selectedCustomerId
+    ) {
+      window.alert("Please select all fields before proceeding.");
+      return;
     }
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+
+    if (!isConfirmed) {
+      return;
+    }
+
     const createdBy = user.name || "unknown";
     const createdAt = new Date()
       .toLocaleString("en-US", {
@@ -381,7 +392,7 @@ const DashboardWhinch = () => {
           },
         }
       );
-
+      setMwoId(response.data.workorderId);
       if (response.status === 201) {
         setSuccessPopupOpen(true);
         resetForm();
@@ -636,6 +647,7 @@ const DashboardWhinch = () => {
                           label="CUST Approval Date"
                           value={selectedDate}
                           onChange={(newValue) => setSelectedDate(newValue)}
+                          maxDate={dayjs()} // 👈 restrict to today or earlier
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -778,9 +790,18 @@ const DashboardWhinch = () => {
           <DialogTitle>Success</DialogTitle>
           <DialogContent>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <CheckCircleIcon style={{ color: "green" }} /> {}
+              <CheckCircleIcon style={{ color: "green" }} />
               <DialogContentText>
-                The work order has been successfully submitted.
+                <Typography variant="body1">
+                  MWO with number -{" "}
+                  <Typography
+                    variant="h4"
+                    sx={{ fontSize: "2.5rem", fontWeight: "bold" }}
+                  >
+                    {mwoId}
+                  </Typography>{" "}
+                  has been successfully submitted.
+                </Typography>
               </DialogContentText>
             </Box>
           </DialogContent>

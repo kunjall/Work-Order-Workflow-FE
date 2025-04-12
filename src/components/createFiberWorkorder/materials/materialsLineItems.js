@@ -203,7 +203,7 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
                 disabled
               />
             </Grid>
-            <Grid item xs={6} sm={3} md={2}>
+            <Grid item xs={6} sm={3} md={1}>
               <TextField
                 label="Price"
                 value={item.itemRate}
@@ -214,22 +214,30 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
                 disabled
               />
             </Grid>
-
             <Grid item xs={6} sm={3} md={1}>
               <TextField
                 label="QTY"
                 value={item.itemQTY}
                 onChange={(e) => handleQuantityChange(index, e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "-" || e.key === "e") {
+                    e.preventDefault(); // blocks negative and exponential notation
+                  }
+                }}
                 fullWidth
                 type="number"
                 inputProps={{ step: "0.01", min: "0" }}
               />
             </Grid>
 
-            <Grid item xs={6} sm={3} md={1.5}>
+            <Grid item xs={6} sm={3} md={2.5}>
               <TextField
                 label="Amount"
-                value={item.itemPrice}
+                value={
+                  item.itemPrice !== undefined && item.itemPrice !== null
+                    ? parseFloat(item.itemPrice).toFixed(2)
+                    : ""
+                }
                 fullWidth
                 disabled
               />

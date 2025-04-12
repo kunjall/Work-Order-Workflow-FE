@@ -847,6 +847,16 @@ const CreateMRS = () => {
                               )
                             );
                           }}
+                          onKeyDown={(e) => {
+                            if (
+                              e.key === "-" ||
+                              e.key === "e" ||
+                              e.key === "E"
+                            ) {
+                              e.preventDefault(); // Disallow negative and exponential input
+                            }
+                          }}
+                          inputProps={{ min: 0 }}
                           error={!!materialLineItems[index]?.error}
                           helperText={materialLineItems[index]?.error || ""}
                           variant="outlined"

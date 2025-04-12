@@ -19,8 +19,14 @@ import {
   InputLabel,
   FormControl,
   Divider,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  DialogContentText,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
@@ -39,7 +45,7 @@ const DashboardWhinch = () => {
   const [error, setError] = useState(null);
   const [cityOptions, setCityOptions] = useState([]);
   const [selectedManager, setSelectedManager] = useState("");
-
+  const [cwoId, setCwoId] = useState("");
   const [totalAmount, setTotalAmount] = useState("");
   const [vendorOptions, setVendorOptions] = useState([]);
   const [selectedVendorId, setSelectedVendorId] = useState(null);
@@ -77,8 +83,6 @@ const DashboardWhinch = () => {
         0
       )
     : 0;
-
-  let cwoId = null;
 
   const [vendorRouteAllocationError, setVendorRouteAllocationError] =
     useState("");
@@ -331,6 +335,11 @@ const DashboardWhinch = () => {
 
     setTotalAmount(total.toFixed(2));
   }, [serviceLineItems]);
+
+  const handlePopupClose = () => {
+    setModalOpen(false);
+    resetForm();
+  };
   useEffect(() => {
     const fetchVendors = async () => {
       try {
@@ -469,17 +478,29 @@ const DashboardWhinch = () => {
   }, [formData.execution_city, cityOptions]);
 
   const handleSubmit = async () => {
-    const isConfirmed = window.confirm(
-      "Kindly select the approver from dropdown"
-    );
-    if (isConfirmed) {
-      const isConfirmedAgain = window.confirm(
-        "Are you sure you want to submit?"
-      );
-      if (!isConfirmedAgain) {
-        return;
-      }
+    if (
+      !selectedApproverEmail ||
+      !selectedWorkOrder ||
+      !childWorkOrderNumber ||
+      !selectedManager ||
+      !vendorRouteAllocation
+    ) {
+      window.alert("Please select all fields before proceeding.");
+      return;
     }
+
+    let proceed = true;
+
+    if (!selectedVendorId) {
+      proceed = window.confirm(
+        "No vendor selected. Do you want to submit anyway?"
+      );
+      if (!proceed) return;
+    }
+
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+    if (!isConfirmed) return;
+
     if (!isConfirmed) return;
     const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
@@ -505,7 +526,7 @@ const DashboardWhinch = () => {
       alert(
         "Child Work Order number already exists. Please use a different number."
       );
-      return; // Stop submission if CWO exists
+      return;
     }
 
     const requestData = {
@@ -548,6 +569,8 @@ const DashboardWhinch = () => {
 
       if (response.status === 201) {
         setSuccess(true);
+        setModalOpen(true);
+        setCwoId(response.data.workorderId);
         alert(`Child workorder submitted - ${cwo_number}`);
         resetForm();
       }
@@ -1039,6 +1062,16 @@ const DashboardWhinch = () => {
                               )
                             );
                           }}
+                          onKeyDown={(e) => {
+                            if (
+                              e.key === "-" ||
+                              e.key === "e" ||
+                              e.key === "E"
+                            ) {
+                              e.preventDefault(); // Block negative and exponential input
+                            }
+                          }}
+                          inputProps={{ min: 0 }}
                           error={!!serviceLineItems[index]?.error}
                           helperText={serviceLineItems[index]?.error || ""}
                           variant="outlined"
@@ -1184,6 +1217,16 @@ const DashboardWhinch = () => {
                                 )
                               );
                             }}
+                            onKeyDown={(e) => {
+                              if (
+                                e.key === "-" ||
+                                e.key === "e" ||
+                                e.key === "E"
+                              ) {
+                                e.preventDefault(); // Block negative and exponential input
+                              }
+                            }}
+                            inputProps={{ min: 0 }}
                             error={!!materialLineItems[index]?.error}
                             helperText={materialLineItems[index]?.error || ""}
                             variant="outlined"
@@ -1191,6 +1234,7 @@ const DashboardWhinch = () => {
                             type="number"
                           />
                         </Grid>
+
                         <Grid item xs={12} sm={6} md={1.5}>
                           <TextField
                             label="CWO Amount"
@@ -1254,6 +1298,32 @@ const DashboardWhinch = () => {
             </Grid>
           )}
         </Box>
+        {}
+        <Dialog open={modalOpen} onClose={handlePopupClose}>
+          <DialogTitle>Success</DialogTitle>
+          <DialogContent>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <CheckCircleIcon style={{ color: "green" }} />
+              <DialogContentText>
+                <Typography variant="body1">
+                  CWO with number -{" "}
+                  <Typography
+                    variant="h4"
+                    sx={{ fontSize: "2.5rem", fontWeight: "bold" }}
+                  >
+                    {cwoId}
+                  </Typography>{" "}
+                  has been successfully submitted.
+                </Typography>
+              </DialogContentText>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handlePopupClose} color="primary">
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </ThemeProvider>
   );

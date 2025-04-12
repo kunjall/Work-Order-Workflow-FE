@@ -893,6 +893,16 @@ const CreateMRS = () => {
                                   )
                                 );
                               }}
+                              onKeyDown={(e) => {
+                                if (
+                                  e.key === "-" ||
+                                  e.key === "e" ||
+                                  e.key === "E"
+                                ) {
+                                  e.preventDefault(); // Block negative and exponential input
+                                }
+                              }}
+                              inputProps={{ min: 0 }}
                               error={!!materialLineItems[index]?.error}
                               helperText={materialLineItems[index]?.error || ""}
                               variant="outlined"
@@ -900,6 +910,7 @@ const CreateMRS = () => {
                               type="number"
                             />
                           </Grid>
+
                           <Grid item xs={12} sm={6} md={1.5}>
                             <TextField
                               label="Amount"
@@ -1002,6 +1013,16 @@ const CreateMRS = () => {
                                   )
                                 );
                               }}
+                              onKeyDown={(e) => {
+                                if (
+                                  e.key === "-" ||
+                                  e.key === "e" ||
+                                  e.key === "E"
+                                ) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              inputProps={{ min: 0 }}
                               error={!!serviceLineItems[index]?.error}
                               helperText={serviceLineItems[index]?.error || ""}
                               variant="outlined"
@@ -1009,6 +1030,7 @@ const CreateMRS = () => {
                               type="number"
                             />
                           </Grid>
+
                           <Grid item xs={12} sm={6} md={1.5}>
                             <TextField
                               label="Amount"

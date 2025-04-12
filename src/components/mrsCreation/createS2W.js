@@ -910,7 +910,7 @@ const CreateMRS = () => {
                               const error =
                                 mmQty >
                                 Number(material.material_cwo_qty) -
-                                  material.material_bal_qty
+                                  Number(material.material_bal_qty)
                                   ? "MM Qty cannot exceed provided Qty"
                                   : "";
 
@@ -930,6 +930,16 @@ const CreateMRS = () => {
                                 )
                               );
                             }}
+                            onKeyDown={(e) => {
+                              if (
+                                e.key === "-" ||
+                                e.key === "e" ||
+                                e.key === "E"
+                              ) {
+                                e.preventDefault(); // Prevent negative and exponential input
+                              }
+                            }}
+                            inputProps={{ min: 0 }}
                             error={!!materialLineItems[index]?.error}
                             helperText={materialLineItems[index]?.error || ""}
                             variant="outlined"
@@ -937,6 +947,7 @@ const CreateMRS = () => {
                             type="number"
                           />
                         </Grid>
+
                         <Grid item xs={12} sm={6} md={1.5}>
                           <TextField
                             label="Amount"

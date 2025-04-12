@@ -201,7 +201,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={2}>
+            <Grid item xs={12} sm={6} md={1}>
               <TextField
                 label="Price"
                 value={item.serviceRate}
@@ -219,13 +219,18 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
                 onChange={(e) =>
                   handleChange(index, "serviceQTY", e.target.value)
                 }
+                onKeyDown={(e) => {
+                  if (e.key === "-" || e.key === "e") {
+                    e.preventDefault(); // prevents negative values and exponential notation
+                  }
+                }}
                 fullWidth
                 type="number"
                 inputProps={{ step: "0.01", min: "0" }}
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={1.5}>
+            <Grid item xs={12} sm={6} md={2.5}>
               <TextField
                 label="Amount"
                 value={item.servicePrice}

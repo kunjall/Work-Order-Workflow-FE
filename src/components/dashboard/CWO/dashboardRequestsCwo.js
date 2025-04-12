@@ -553,7 +553,7 @@ const Example = ({ refreshKey }) => {
     });
 
     const csvConfig = mkConfig({
-      filename: `MWO_${username}`,
+      filename: `CWO_${username}`,
       useKeysAsHeaders: true,
     });
 

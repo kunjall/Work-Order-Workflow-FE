@@ -558,6 +558,7 @@ const InventoryInward = () => {
                     onChange={(newValue) =>
                       setDCDate(newValue ? dayjs(newValue) : null)
                     } // Convert to Dayjs
+                    maxDate={dayjs()}
                     renderInput={(params) => (
                       <TextField {...params} variant="outlined" fullWidth />
                     )}
@@ -599,6 +600,7 @@ const InventoryInward = () => {
                     label="MRS Date"
                     value={mrsDate || null} // Ensures no undefined value
                     onChange={(newValue) => setMRSDate(dayjs(newValue))} // Convert to Dayjs
+                    maxDate={dayjs()} // ⛔ Prevent future dates
                     renderInput={(params) => (
                       <TextField {...params} variant="outlined" fullWidth />
                     )}

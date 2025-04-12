@@ -105,6 +105,9 @@ const Navbar = () => {
     { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
     { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
   ];
+  const actionsMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
+  ];
 
   const expenseMenuItems = [
     { text: "Budget", icon: <MenuBookIcon />, path: "/budget" },
@@ -122,6 +125,8 @@ const Navbar = () => {
       if (r.includes("mb")) menuItems = [...menuItems, ...mbMenuItems];
       if (r.includes("inv")) menuItems = [...menuItems, ...invMenuItems];
       if (r.includes("mm")) menuItems = [...menuItems, ...mmMenuItems];
+      if (r.includes("actions"))
+        menuItems = [...menuItems, ...actionsMenuItems];
       if (r.includes("expense"))
         menuItems = [...menuItems, ...expenseMenuItems];
     });
