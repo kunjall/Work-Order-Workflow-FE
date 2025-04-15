@@ -286,16 +286,20 @@ const InventoryInward = () => {
   };
 
   const handleSubmit = async () => {
-    const isConfirmed = window.confirm(
-      "Kindly select the approver from dropdown"
-    );
-    if (isConfirmed) {
-      const isConfirmedAgain = window.confirm(
-        "Are you sure you want to submit?"
-      );
-      if (!isConfirmedAgain) {
-        return;
-      }
+    if (
+      !selectedReviewerEmail ||
+      !selectedCustomerId ||
+      !selectedClientWarehouseId ||
+      !selectedWarehouseId ||
+      !eWayBillNumber
+    ) {
+      window.alert("Please select all fields before proceeding.");
+      return;
+    }
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+
+    if (!isConfirmed) {
+      return;
     }
     const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {

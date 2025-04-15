@@ -90,8 +90,21 @@ const CreateMRS = () => {
   };
 
   const handleSubmit = async () => {
+    if (
+      !selectedApproverEmail ||
+      !selectedWarehouseId ||
+      !selectedWorkOrder ||
+      !selectedLocator ||
+      error
+    ) {
+      window.alert("Please select all fields before proceeding.");
+      return;
+    }
     const isConfirmed = window.confirm("Are you sure you want to submit?");
-    if (!isConfirmed) return;
+
+    if (!isConfirmed) {
+      return;
+    }
     const createdBy = user.name || "unknown";
     const createdAt = new Date().toLocaleString("en-US", {
       day: "2-digit",

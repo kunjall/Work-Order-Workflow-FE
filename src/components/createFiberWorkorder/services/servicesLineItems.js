@@ -205,10 +205,20 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
               <TextField
                 label="Price"
                 value={item.serviceRate}
-                onChange={(e) =>
-                  handleChange(index, "serviceRate", e.target.value)
-                }
+                onChange={(e) => {
+                  const val = e.target.value;
+
+                  // Reject if it contains 'e', 'E', or is negative
+                  if (/e/i.test(val) || parseFloat(val) < 0) return;
+
+                  handleChange(index, "serviceRate", val);
+                }}
                 fullWidth
+                type="number"
+                inputProps={{
+                  min: 0,
+                  step: "0.01",
+                }}
               />
             </Grid>
 

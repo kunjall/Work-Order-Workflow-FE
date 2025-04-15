@@ -118,16 +118,20 @@ const CreateMRS = () => {
   }, [formData]); // Dependency array
 
   const handleSubmit = async () => {
-    const isConfirmed = window.confirm(
-      "Kindly confirm that no prior MBs are pending for approval"
-    );
-    if (isConfirmed) {
-      const isConfirmedAgain = window.confirm(
-        "Are you sure you want to submit?"
-      );
-      if (!isConfirmedAgain) {
-        return;
-      }
+    if (
+      !selectedApproverEmail ||
+      !selectedWarehouseId ||
+      !selectedWorkOrder ||
+      !selectedLocator ||
+      error
+    ) {
+      window.alert("Please select all fields before proceeding.");
+      return;
+    }
+    const isConfirmed = window.confirm("Are you sure you want to submit?");
+
+    if (!isConfirmed) {
+      return;
     }
 
     const createdBy = user.name || "unknown";

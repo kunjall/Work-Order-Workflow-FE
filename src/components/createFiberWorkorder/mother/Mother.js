@@ -343,16 +343,16 @@ const DashboardWhinch = () => {
     }
 
     const createdBy = user.name || "unknown";
-    const createdAt = new Date()
-      .toLocaleString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-      })
-      .replace(",", "");
+    const createdAt = new Date().toLocaleString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "IST",
+    });
+
     setLoading(true);
 
     const requestData = {
@@ -576,14 +576,21 @@ const DashboardWhinch = () => {
                         id="route-length"
                         label="Route Length (m)"
                         variant="outlined"
-                        type="number"
+                        type="text" // Changed to text for better control
                         fullWidth
                         value={routeLength}
-                        onChange={(e) => setRouteLength(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          const isValid = /^\d*$/.test(value); // Allow only positive integers
+
+                          if (isValid || value === "") {
+                            setRouteLength(value);
+                          }
+                        }}
                         InputProps={{
                           inputProps: {
-                            min: 0,
-                            step: 1,
+                            inputMode: "numeric", // Brings up numeric keyboard on mobile
+                            pattern: "[0-9]*",
                           },
                         }}
                       />

@@ -464,6 +464,12 @@ const Example = ({ refreshKey }) => {
       showGlobalFilter: true,
       density: "compact",
       filterFn: "contains",
+      sorting: [
+        {
+          id: "inventory_id", // Specify the column to sort by
+          desc: true, // Sort in descending order
+        },
+      ],
     },
     paginationDisplayMode: "pages",
     positionToolbarAlertBanner: "bottom",

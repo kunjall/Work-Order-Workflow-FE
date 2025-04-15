@@ -891,29 +891,39 @@ const DashboardWhinch = () => {
                   value={vendorRouteAllocation}
                   onChange={(e) => {
                     const value = e.target.value;
-                    setvendorRouteAllocation(value);
 
-                    if (parseFloat(value) > parseFloat(formData.route_length)) {
-                      setVendorRouteAllocationError(
-                        "Vendor Route Allocation cannot exceed Route Length."
-                      );
-                    } else {
-                      setVendorRouteAllocationError("");
+                    // Regex to allow only positive integers and decimals (no "e", "-", etc.)
+                    const isValid = /^(\d+\.?\d*|\.\d+)?$/.test(value);
+
+                    if (isValid || value === "") {
+                      setvendorRouteAllocation(value);
+
+                      if (
+                        parseFloat(value) > parseFloat(formData.route_length)
+                      ) {
+                        setVendorRouteAllocationError(
+                          "Vendor Route Allocation cannot exceed Route Length."
+                        );
+                      } else {
+                        setVendorRouteAllocationError("");
+                      }
                     }
                   }}
                   error={Boolean(vendorRouteAllocationError)}
                   helperText={vendorRouteAllocationError}
                   variant="outlined"
-                  type="number"
+                  type="text" // Use text to better control unwanted characters like "e"
                   fullWidth
                   InputProps={{
                     inputProps: {
+                      inputMode: "decimal", // Brings up numeric keyboard on mobile
                       min: 0,
-                      step: 1,
+                      pattern: "^[0-9]*\\.?[0-9]*$", // Optional: HTML5 pattern for added safety
                     },
                   }}
                 />
               </Grid>
+
               <Grid item xs={12} sm={6} md={4}>
                 <Autocomplete
                   disablePortal
@@ -1005,6 +1015,7 @@ const DashboardWhinch = () => {
                         <TextField
                           label="Price"
                           value={service.service_rate || ""}
+                          type="number"
                           variant="outlined"
                           fullWidth
                           onChange={(e) => {
@@ -1016,6 +1027,21 @@ const DashboardWhinch = () => {
                                   : s
                               )
                             );
+                          }}
+                          inputProps={{
+                            min: 0,
+                            step: "0.01",
+                          }}
+                          onKeyDown={(e) => {
+                            if (
+                              e.key === "e" ||
+                              e.key === "E" ||
+                              e.key === "+" ||
+                              e.key === "-" ||
+                              e.key === ","
+                            ) {
+                              e.preventDefault();
+                            }
                           }}
                         />
                       </Grid>
