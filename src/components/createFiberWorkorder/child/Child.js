@@ -777,7 +777,7 @@ const DashboardWhinch = () => {
                   fullWidth
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid item xs={12} sm={6} md={6}>
                 <TextField
                   id="child-work-order-number"
                   label="Child W/O Number"
@@ -797,7 +797,7 @@ const DashboardWhinch = () => {
                   InputProps={{
                     startAdornment: (
                       <span style={{ fontWeight: "bold", marginRight: "4px" }}>
-                        {formData.mwo_number}-{" "}
+                        {formData.mwo_number}*{" "}
                       </span>
                     ),
                   }}

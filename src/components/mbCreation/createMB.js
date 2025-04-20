@@ -183,7 +183,7 @@ const CreateMRS = () => {
     const fetchApprovers = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=MB&city=${formData.execution_city}&reviewer_name=${formData.internal_manager}`,
+          `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=MB&city=${formData.execution_city}`,
           {
             headers: {
               Authorization: user.authToken,

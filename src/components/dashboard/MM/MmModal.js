@@ -80,7 +80,6 @@ const MmModal = ({
   };
 
   const statusStyles = getStatusStyles(mmStatus);
-
   const isActionAllowed =
     mmStatus.toLowerCase().includes("pending") &&
     rowData &&
@@ -94,8 +93,12 @@ const MmModal = ({
 
   const handleApproveButton = () => {
     if (
-      (mmStatus.includes("acknowledgement") &&
-        username.name === rowData.requested_by) ||
+      (mmStatus.toLowerCase().includes("acknowledgement") &&
+        username.name === rowData.requested_by &&
+        rowData.transaction_type.toLowerCase() === "w2s") ||
+      (mmStatus.toLowerCase().includes("acknowledgement") &&
+        username.role.includes("inv") &&
+        rowData.transaction_type.toLowerCase() === "s2w") ||
       isActionAllowed
     ) {
       handleApprove();
@@ -110,7 +113,6 @@ const MmModal = ({
     handleReject();
     onClose();
   };
-
   return (
     <Dialog open={open} onClose={onClose} maxWidth="ld" fullWidth>
       <DialogContent sx={{ padding: "24px", position: "relative" }}>
@@ -210,7 +212,7 @@ const MmModal = ({
               variant="h6"
               sx={{ fontWeight: "bold", marginBottom: "16px" }}
             >
-              Materials Inward
+              Materials Transaction {rowData.transaction_type}
             </Typography>
             {mmMaterial && mmMaterial.length > 0 ? (
               <TableContainer component={Paper}>
@@ -241,34 +243,39 @@ const MmModal = ({
                         <TableCell>{material.material_req_qty}</TableCell>
                         <TableCell>{material.material_bal_qty}</TableCell>
                         <TableCell>{material.locator_stock}</TableCell>
-                        {mmStatus === "Pending with material head" && (
-                          <TableCell>
-                            <TextField
-                              type="number"
-                              variant="outlined"
-                              size="small"
-                              sx={{ width: "100px" }}
-                              value={
-                                material.issued_qty !== null &&
-                                material.issued_qty !== undefined
-                                  ? material.issued_qty
-                                  : ""
-                              }
-                              onChange={(e) =>
-                                handleProvidedQtyChange(e, index)
-                              }
-                              fullWidth
-                              error={
-                                material.issued_qty > material.material_bal_qty
-                              }
-                              helperText={
-                                material.issued_qty > material.material_bal_qty
-                                  ? `Cannot exceed the balance quantity of ${material.material_bal_qty}`
-                                  : ""
-                              }
-                            />
-                          </TableCell>
-                        )}
+                        <TextField
+                          type="number"
+                          variant="outlined"
+                          size="small"
+                          sx={{ width: "100px" }}
+                          value={
+                            material.issued_qty !== null &&
+                            material.issued_qty !== undefined
+                              ? material.issued_qty
+                              : material.material_provided_qty
+                          }
+                          onChange={(e) => handleProvidedQtyChange(e, index)}
+                          fullWidth
+                          error={
+                            material.issued_qty > material.material_bal_qty
+                          }
+                          helperText={
+                            material.issued_qty > material.material_bal_qty
+                              ? `Cannot exceed the balance quantity of ${material.material_bal_qty}`
+                              : ""
+                          }
+                          inputProps={{
+                            step: "0.001",
+                            min: 0,
+                            inputMode: "decimal",
+                          }}
+                          onKeyDown={(e) => {
+                            if (["e", "E", "-", "+"].includes(e.key)) {
+                              e.preventDefault();
+                            }
+                          }}
+                        />
+
                         {mmStatus.includes("acknowledgement") && (
                           <TableCell>
                             {material.material_provided_qty}
@@ -354,32 +361,35 @@ const MmModal = ({
         }}
       >
         {mmStatus.toLowerCase().includes("acknowledgement") &&
-          rowData.requested_by === username.name && (
-            <Button
-              variant="contained"
-              color="warning"
-              onClick={handleApproveButton}
-              sx={{
-                fontWeight: "bold",
-                textTransform: "none",
-              }}
-            >
-              Recieved
-            </Button>
-          )}
-        {mmStatus.toLowerCase().includes("acknowledgement") &&
-          rowData.requested_by === username.name && (
-            <Button
-              variant="contained"
-              color="error"
-              onClick={handleRejectButton}
-              sx={{
-                fontWeight: "bold",
-                textTransform: "none",
-              }}
-            >
-              Not Recieved
-            </Button>
+          ((rowData.transaction_type.toLowerCase() === "w2s" &&
+            rowData.requested_by === username.name) ||
+            (rowData.transaction_type.toLowerCase() === "s2w" &&
+              username.role.includes("inv"))) && (
+            <>
+              <Button
+                variant="contained"
+                color="warning"
+                onClick={handleApproveButton}
+                sx={{
+                  fontWeight: "bold",
+                  textTransform: "none",
+                  mr: 1,
+                }}
+              >
+                Received
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleRejectButton}
+                sx={{
+                  fontWeight: "bold",
+                  textTransform: "none",
+                }}
+              >
+                Not Received
+              </Button>
+            </>
           )}
 
         <Button

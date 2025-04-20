@@ -46,12 +46,26 @@ const Example = ({ refreshKey }) => {
     setOpen(false);
   };
   const handleProvidedQtyChange = (e, index) => {
-    const newValue = e.target.value ? parseInt(e.target.value, 10) : 0;
+    const input = e.target.value;
 
     setError(null);
+
+    // Allow blank field
+    if (input === "") {
+      setMmMaterial((prev) =>
+        prev.map((material, i) =>
+          i === index ? { ...material, issued_qty: "" } : material
+        )
+      );
+      return;
+    }
+
+    const floatValue = parseFloat(input);
+    const roundedValue = Math.round(floatValue * 1000) / 1000;
+
     setMmMaterial((prev) =>
       prev.map((material, i) =>
-        i === index ? { ...material, issued_qty: newValue } : material
+        i === index ? { ...material, issued_qty: roundedValue } : material
       )
     );
   };
@@ -69,20 +83,24 @@ const Example = ({ refreshKey }) => {
             }
           );
 
-          const MmMaterialArray = response.data.map((material) => ({
-            record_id: material.record_id,
-            mm_id: material.mm_id,
-            cwo_id: material.cwo_id,
-            cwo_number: material.cwo_number,
-            material_id: material.material_id,
-            material_desc: material.material_desc,
-            material_uom: material.material_uom,
-            material_req_qty: material.material_req_qty,
-            material_bal_qty: material.material_cwo_bal_qty,
-            material_unit_price: material.material_unit_price,
-            material_price: material.material_price,
-            material_provided_qty: material.material_provided_qty,
-          }));
+          const MmMaterialArray = response.data
+            .filter((material) => material.material_req_qty > 0) // Only include materials with qty > 0
+            .map((material) => ({
+              record_id: material.record_id,
+              mm_id: material.mm_id,
+              cwo_id: material.cwo_id,
+              cwo_number: material.cwo_number,
+              material_id: material.material_id,
+              material_desc: material.material_desc,
+              material_uom: material.material_uom,
+              material_req_qty: material.material_req_qty,
+              material_bal_qty: material.material_cwo_bal_qty,
+              material_unit_price: material.material_unit_price,
+              material_price: material.material_price,
+              material_provided_qty: material.material_provided_qty,
+              issued_qty: material.material_provided_qty,
+            }));
+
           setMmMaterial(MmMaterialArray);
         } catch (err) {
           console.error("Error fetching child materials:", err);
@@ -93,41 +111,6 @@ const Example = ({ refreshKey }) => {
       fetchMmMaterial();
     }
   }, [selectedRow]);
-
-  useEffect(() => {
-    const fetchAllChildMaterial = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/mm/find-all-mm-material`,
-          {
-            headers: {
-              Authorization: user.authToken,
-            },
-          }
-        );
-
-        const mmMaterialArray = response.data.map((material) => ({
-          record_id: material.record_id,
-          mm_id: material.mm_id,
-          cwo_id: material.cwo_id,
-          cwo_number: material.cwo_number,
-          material_id: material.material_id,
-          material_desc: material.material_desc,
-          material_uom: material.material_uom,
-          material_req_qty: material.material_req_qty,
-          material_cwo_bal_qty: material.material_cwo_bal_qty,
-          material_unit_price: material.material_unit_price,
-          material_price: material.material_price,
-          material_provided_qty: material.material_provided_qty,
-        }));
-        setAllMmMaterial(mmMaterialArray);
-      } catch (err) {
-        console.error("Error fetching inventory materials:", err);
-        setError("Failed to load inventory materials");
-      }
-    };
-    fetchAllChildMaterial();
-  }, []);
 
   useEffect(() => {
     const fetchLocatorStock = async () => {
@@ -363,6 +346,7 @@ const Example = ({ refreshKey }) => {
       approver_comments: comment,
       warehouse_id: selectedRow.warehouse_id,
       locator_name: selectedRow.locator_name,
+      transaction_type: selectedRow.transaction_type,
       mmMaterial:
         mmStatusPass.toLowerCase() === "pending with material head" ||
         mmStatusPass.toLowerCase().includes("acknowledgement")
@@ -410,6 +394,12 @@ const Example = ({ refreshKey }) => {
           {"MM-" + row.original.mm_id} {}{" "}
         </span>
       ),
+    },
+    {
+      accessorKey: "transaction_type",
+      header: "Transaction Type",
+      size: 200,
+      filterFn: "contains",
     },
     {
       accessorKey: "cwo_number",
