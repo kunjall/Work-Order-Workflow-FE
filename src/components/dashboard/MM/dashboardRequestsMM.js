@@ -304,19 +304,29 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
+    if (!selectedApproverEmail) {
+      window.alert("Please select all fields before proceeding.");
+      return;
+    }
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
-    if (mmStatusPass.toLowerCase() === "pending with deployment head") {
-      mmStatus = "Pending with material incharge";
-    } else if (
-      mmStatusPass.toLowerCase() === "pending with material incharge"
-    ) {
-      mmStatus = "Pending with material head";
-    } else if (mmStatusPass.toLowerCase() === "pending with material head") {
-      mmStatus = "Waiting for acknowledgement";
-    } else if (mmStatusPass.toLowerCase() === "waiting for acknowledgement") {
-      mmStatus = "Received";
+    switch (mmStatusPass.toLowerCase()) {
+      case "pending with deployment head":
+        mmStatus = "Pending with material incharge";
+        break;
+      case "pending with material incharge":
+        mmStatus = "Pending with material head";
+        break;
+      case "pending with material head":
+        mmStatus = "Waiting for acknowledgement";
+        break;
+      case "waiting for acknowledgement":
+        mmStatus = "Received";
+        break;
+      default:
+        break;
     }
+
     const actionedBy = user.name || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
@@ -325,37 +335,39 @@ const Example = ({ refreshKey }) => {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
-      timeZone: "IST",
+      timeZone: "Asia/Kolkata", // Correct time zone
     });
 
+    // Prepare request object
     const requestData = {
       mm_id: selectedRow.mm_id,
       cwo_id: selectedRow.cwo_id,
       mm_status: mmStatus,
-      mm_approver2_email: selectedApproverEmail,
-      mm_approver2_name: approverName,
-      mm_approver3_email:
-        mmStatusPass.toLowerCase() === "pending with material incharge"
-          ? selectedApproverEmail || ""
-          : null,
-      mm_approver3_name: "Pending with material incharge"
-        ? approverName || ""
-        : null,
       actioned_at: actionedAt,
       actioned_by: actionedBy,
       approver_comments: comment,
       warehouse_id: selectedRow.warehouse_id,
       locator_name: selectedRow.locator_name,
       transaction_type: selectedRow.transaction_type,
-      mmMaterial:
-        mmStatusPass.toLowerCase() === "pending with material head" ||
-        mmStatusPass.toLowerCase().includes("acknowledgement")
-          ? mmMaterial || []
-          : undefined,
     };
 
-    if (requestData.mmMaterial === undefined) {
-      delete requestData.mmMaterial;
+    // Only update relevant approvers
+    if (mmStatusPass.toLowerCase() === "pending with deployment head") {
+      requestData.mm_approver2_email = selectedApproverEmail;
+      requestData.mm_approver2_name = approverName;
+    }
+
+    if (mmStatusPass.toLowerCase() === "pending with material incharge") {
+      requestData.mm_approver3_email = selectedApproverEmail;
+      requestData.mm_approver3_name = approverName;
+    }
+
+    // Only send mmMaterial when necessary
+    if (
+      mmStatusPass.toLowerCase() === "pending with material head" ||
+      mmStatusPass.toLowerCase().includes("acknowledgement")
+    ) {
+      requestData.mmMaterial = mmMaterial || [];
     }
 
     try {
