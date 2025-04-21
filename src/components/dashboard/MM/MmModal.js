@@ -212,8 +212,9 @@ const MmModal = ({
               variant="h6"
               sx={{ fontWeight: "bold", marginBottom: "16px" }}
             >
-              Materials Transaction {rowData.transaction_type}
+              Materials Transaction {rowData?.transaction_type ?? "-"}
             </Typography>
+
             {mmMaterial && mmMaterial.length > 0 ? (
               <TableContainer component={Paper}>
                 <Table stickyHeader>

@@ -540,7 +540,7 @@ const DashboardWhinch = () => {
       execution_city: formData.execution_city,
       state: formData.state,
       workorder_type: formData.workorder_type,
-      cwo_number: formData.mwo_number + "-" + childWorkOrderNumber,
+      cwo_number: formData.mwo_number + "*" + childWorkOrderNumber,
       total_material_cost: totalMaterialAmount,
       materialItems: materialLineItems,
       serviceItems: serviceLineItems,
