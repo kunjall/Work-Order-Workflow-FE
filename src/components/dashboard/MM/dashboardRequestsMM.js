@@ -304,7 +304,11 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
-    if (!selectedApproverEmail) {
+    if (
+      mmStatusPass.toLowerCase() !== "pending with material head" &&
+      mmStatusPass.toLowerCase() !== "waiting for acknowledgement" &&
+      !selectedApproverEmail
+    ) {
       window.alert("Please select all fields before proceeding.");
       return;
     }
