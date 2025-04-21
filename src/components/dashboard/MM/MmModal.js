@@ -231,6 +231,9 @@ const MmModal = ({
                         <TableCell>MRS QTY Approved</TableCell>
                       )}
                       {mmStatus.toLowerCase().includes("acknowledgement") && (
+                        <TableCell>MRS QTY Received</TableCell>
+                      )}
+                      {mmStatus.toLowerCase().includes("acknowledgement") && (
                         <TableCell>Issued QTY</TableCell>
                       )}
                     </TableRow>
@@ -244,39 +247,46 @@ const MmModal = ({
                         <TableCell>{material.material_req_qty}</TableCell>
                         <TableCell>{material.material_bal_qty}</TableCell>
                         <TableCell>{material.locator_stock}</TableCell>
-                        <TextField
-                          type="number"
-                          variant="outlined"
-                          size="small"
-                          sx={{ width: "100px" }}
-                          value={
-                            material.issued_qty !== null &&
-                            material.issued_qty !== undefined
-                              ? material.issued_qty
-                              : material.material_provided_qty
-                          }
-                          onChange={(e) => handleProvidedQtyChange(e, index)}
-                          fullWidth
-                          error={
-                            material.issued_qty > material.material_bal_qty
-                          }
-                          helperText={
-                            material.issued_qty > material.material_bal_qty
-                              ? `Cannot exceed the balance quantity of ${material.material_bal_qty}`
-                              : ""
-                          }
-                          inputProps={{
-                            step: "0.001",
-                            min: 0,
-                            inputMode: "decimal",
-                          }}
-                          onKeyDown={(e) => {
-                            if (["e", "E", "-", "+"].includes(e.key)) {
-                              e.preventDefault();
-                            }
-                          }}
-                        />
+                        {(mmStatus.toLowerCase() ===
+                          "pending with material head" ||
+                          mmStatus
+                            .toLowerCase()
+                            .includes("acknowledgement")) && (
+                          // Your JSX goes here
 
+                          <TextField
+                            type="number"
+                            variant="outlined"
+                            size="small"
+                            sx={{ width: "100px" }}
+                            value={
+                              material.issued_qty !== null &&
+                              material.issued_qty !== undefined
+                                ? material.issued_qty
+                                : material.material_provided_qty
+                            }
+                            onChange={(e) => handleProvidedQtyChange(e, index)}
+                            fullWidth
+                            error={
+                              material.issued_qty > material.material_bal_qty
+                            }
+                            helperText={
+                              material.issued_qty > material.material_bal_qty
+                                ? `Cannot exceed the balance quantity of ${material.material_bal_qty}`
+                                : ""
+                            }
+                            inputProps={{
+                              step: "0.001",
+                              min: 0,
+                              inputMode: "decimal",
+                            }}
+                            onKeyDown={(e) => {
+                              if (["e", "E", "-", "+"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+                          />
+                        )}
                         {mmStatus.includes("acknowledgement") && (
                           <TableCell>
                             {material.material_provided_qty}
