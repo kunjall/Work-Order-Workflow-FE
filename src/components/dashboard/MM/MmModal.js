@@ -268,11 +268,11 @@ const MmModal = ({
                             onChange={(e) => handleProvidedQtyChange(e, index)}
                             fullWidth
                             error={
-                              material.issued_qty > material.material_bal_qty
+                              material.issued_qty > material.material_req_qty
                             }
                             helperText={
-                              material.issued_qty > material.material_bal_qty
-                                ? `Cannot exceed the balance quantity of ${material.material_bal_qty}`
+                              material.issued_qty > material.material_req_qty
+                                ? `Cannot exceed the balance quantity of ${material.material_req_qty}`
                                 : ""
                             }
                             inputProps={{
