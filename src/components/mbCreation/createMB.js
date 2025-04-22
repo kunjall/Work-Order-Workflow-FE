@@ -341,7 +341,7 @@ const CreateMRS = () => {
         }))
       );
     }
-  }, [childMaterials, materialLineItems]);
+  }, [childMaterials]);
 
   useEffect(() => {
     if (serviceLineItems.length === 0) {
@@ -361,7 +361,7 @@ const CreateMRS = () => {
         }))
       );
     }
-  }, [childServices, serviceLineItems]);
+  }, [childServices]);
 
   useEffect(() => {
     if (locatorStock.length > 0 && materialLineItems.length > 0) {
