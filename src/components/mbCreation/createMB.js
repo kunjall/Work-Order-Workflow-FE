@@ -432,6 +432,7 @@ const CreateMRS = () => {
             }
           );
           setServiceLineItems(response.data);
+          console.log(response.data);
         } catch (err) {
           console.error("Failed to fetch child services:", err);
           setError("Failed to load child services");
@@ -448,6 +449,7 @@ const CreateMRS = () => {
             }
           );
           setMaterialLineItems(response.data);
+          console.log(response.data);
         } catch (err) {
           console.error("Failed to fetch child materials:", err);
           setError("Failed to load child materials");
@@ -458,9 +460,6 @@ const CreateMRS = () => {
       fetchChildMaterials();
     }
   }, [selectedWorkOrder]);
-
-  console.log(materialLineItems);
-  console.log(serviceLineItems);
 
   const resetForm = () => {
     setSelectedWorkOrder(null);
