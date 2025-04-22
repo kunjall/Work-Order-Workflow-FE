@@ -512,6 +512,14 @@ const CreateMRS = () => {
     }
   }, [user, navigate]);
 
+  useEffect(() => {
+    console.log("Service Line Items:", serviceLineItems);
+  }, [serviceLineItems]);
+
+  useEffect(() => {
+    console.log("Material Line Items:", materialLineItems);
+  }, [materialLineItems]);
+
   let theme = createTheme();
   theme = responsiveFontSizes(theme);
 
