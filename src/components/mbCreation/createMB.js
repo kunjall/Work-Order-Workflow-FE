@@ -438,7 +438,7 @@ const CreateMRS = () => {
         }
       };
 
-      const fetchMmMaterials = async () => {
+      const fetchChildMaterials = async () => {
         try {
           const response = await axios.get(
             `${process.env.REACT_APP_API_URL}/workorder/find-child-material`,
@@ -455,9 +455,12 @@ const CreateMRS = () => {
       };
 
       fetchChildServices();
-      fetchMmMaterials();
+      fetchChildMaterials();
     }
   }, [selectedWorkOrder]);
+
+  console.log(materialLineItems);
+  console.log(serviceLineItems);
 
   const resetForm = () => {
     setSelectedWorkOrder(null);
