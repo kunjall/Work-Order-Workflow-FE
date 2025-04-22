@@ -37,7 +37,6 @@ import html2canvas from "html2canvas";
 
 const DashboardWhinch = () => {
   const { user } = useContext(AuthContext);
-  console.log(user);
   const navigate = useNavigate();
 
   const [customerName, setCustomerName] = useState("");

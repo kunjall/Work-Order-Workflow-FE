@@ -432,7 +432,6 @@ const CreateMRS = () => {
             }
           );
           setServiceLineItems(response.data);
-          console.log(response.data);
         } catch (err) {
           console.error("Failed to fetch child services:", err);
           setError("Failed to load child services");
@@ -449,7 +448,6 @@ const CreateMRS = () => {
             }
           );
           setMaterialLineItems(response.data);
-          console.log(response.data);
         } catch (err) {
           console.error("Failed to fetch child materials:", err);
           setError("Failed to load child materials");
@@ -511,14 +509,6 @@ const CreateMRS = () => {
       navigate("/login");
     }
   }, [user, navigate]);
-
-  useEffect(() => {
-    console.log("Service Line Items:", serviceLineItems);
-  }, [serviceLineItems]);
-
-  useEffect(() => {
-    console.log("Material Line Items:", materialLineItems);
-  }, [materialLineItems]);
 
   let theme = createTheme();
   theme = responsiveFontSizes(theme);
