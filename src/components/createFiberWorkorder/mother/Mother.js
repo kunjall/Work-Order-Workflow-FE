@@ -576,12 +576,12 @@ const DashboardWhinch = () => {
                         id="route-length"
                         label="Route Length (m)"
                         variant="outlined"
-                        type="text" // Changed to text for better control
+                        type="text"
                         fullWidth
                         value={routeLength}
                         onChange={(e) => {
                           const value = e.target.value;
-                          const isValid = /^\d*$/.test(value); // Allow only positive integers
+                          const isValid = /^(\d+(\.\d{0,3})?)?$/.test(value);
 
                           if (isValid || value === "") {
                             setRouteLength(value);
@@ -589,8 +589,8 @@ const DashboardWhinch = () => {
                         }}
                         InputProps={{
                           inputProps: {
-                            inputMode: "numeric", // Brings up numeric keyboard on mobile
-                            pattern: "[0-9]*",
+                            inputMode: "decimal",
+                            pattern: "\\d+(\\.\\d{0,3})?",
                           },
                         }}
                       />
