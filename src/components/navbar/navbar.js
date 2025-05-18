@@ -53,8 +53,18 @@ const Navbar = () => {
     { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
 
     { text: "Create MWO", icon: <EngineeringIcon />, path: "/create-mwo" },
+    {
+      text: "CR MWO",
+      icon: <InventoryIcon />,
+      path: "/change-request-mwo",
+    },
     // { text: "Modify MWO", icon: <EngineeringIcon />, path: "/modify-mwo" },
     { text: "Create CWO", icon: <RouterIcon />, path: "/create-cwo" },
+    {
+      text: "CR CWO",
+      icon: <InventoryIcon />,
+      path: "/change-request-cwo",
+    },
     {
       text: "Inventory Inward",
       icon: <WarehouseIcon />,
@@ -73,6 +83,11 @@ const Navbar = () => {
     { text: "Create CWO", icon: <RouterIcon />, path: "/create-cwo" },
     { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
     { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+    {
+      text: "Change Request CWO",
+      icon: <InventoryIcon />,
+      path: "/change-request-cwo",
+    },
   ];
 
   const mwoMenuItems = [
@@ -80,6 +95,11 @@ const Navbar = () => {
     { text: "Create MWO", icon: <EngineeringIcon />, path: "/create-mwo" },
     { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
     { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+    {
+      text: "Change Request MWO",
+      icon: <InventoryIcon />,
+      path: "/change-request-mwo",
+    },
   ];
 
   const mbMenuItems = [

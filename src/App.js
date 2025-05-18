@@ -21,6 +21,8 @@ import MRS from "./pages/createMRS";
 import MB from "./components/mbCreation/createMB";
 import UserAccess from "./components/profile/userAccess";
 import Invoice from "./pages/createInvoice";
+import CrCWO from "./pages/changeRequest";
+import CrMWO from "./pages/changeRequestMwo";
 import { Repeat } from "@mui/icons-material";
 
 const App = () => {
@@ -76,6 +78,16 @@ const App = () => {
                   </WithAuth>
                 }
               />
+              <Route
+                path="/change-request-mwo"
+                element={
+                  <WithAuth role="admin">
+                    {}
+                    <CrMWO />
+                  </WithAuth>
+                }
+              />
+
               {/* <Route
                 path="/modify-mwo"
                 element={
@@ -91,6 +103,15 @@ const App = () => {
                   <WithAuth role="admin">
                     {}
                     <CreateChild />
+                  </WithAuth>
+                }
+              />
+              <Route
+                path="/change-request-cwo"
+                element={
+                  <WithAuth role="admin">
+                    {}
+                    <CrCWO />
                   </WithAuth>
                 }
               />

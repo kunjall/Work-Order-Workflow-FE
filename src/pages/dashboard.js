@@ -6,6 +6,8 @@ import DashboardRequestsMwo from "../components/dashboard/MWO/dashboardRequestsM
 import DashboardRequestsCwo from "../components/dashboard/CWO/dashboardRequestsCwo";
 import DashboardRequestsMM from "../components/dashboard/MM/dashboardRequestsMM";
 import DashboardRequestMB from "../components/dashboard/MB/dashboardRequestsMB";
+import DashboardRequestsCR from "../components/dashboard/CR/dashboardRequestsCR";
+import DashboardRequestsMwoCr from "../components/dashboard/MWO_CR/dashboardRequestsMwoCr";
 import CachedIcon from "@mui/icons-material/Cached";
 import { Box, lighten, Typography, Button, IconButton } from "@mui/material";
 
@@ -33,6 +35,10 @@ const Requests = () => {
         return <DashboardRequestsMM key={refreshKey} />;
       case "MB":
         return <DashboardRequestMB key={refreshKey} />;
+      case "CR":
+        return <DashboardRequestsCR key={refreshKey} />;
+      case "CR MWO":
+        return <DashboardRequestsMwoCr key={refreshKey} />;
       default:
         return null;
     }
@@ -144,6 +150,43 @@ const Requests = () => {
         >
           MB
         </Button>
+        <Button
+          onClick={() => setActiveTab("CR")}
+          sx={{
+            color: activeTab === "CR" ? "#ec7c30" : "black",
+            backgroundColor: activeTab === "CR" ? "black" : "#ec7c30",
+            height: "40px",
+            padding: "10px 20px",
+            borderRadius: "5px",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: "black",
+              color: "#ec7c30",
+              cursor: "pointer",
+            },
+          }}
+        >
+          CR CWO
+        </Button>
+        <Button
+          onClick={() => setActiveTab("CR MWO")}
+          sx={{
+            color: activeTab === "CR MWO" ? "#ec7c30" : "black",
+            backgroundColor: activeTab === "CR MWO" ? "black" : "#ec7c30",
+            height: "40px",
+            padding: "10px 20px",
+            borderRadius: "5px",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: "black",
+              color: "#ec7c30",
+              cursor: "pointer",
+            },
+          }}
+        >
+          CR MWO
+        </Button>
+
         {}
         <IconButton
           onClick={handleRefresh}
