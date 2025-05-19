@@ -322,7 +322,7 @@ const ChangeRequestMWO = () => {
         let crResponse;
         try {
           crResponse = await axios.get(
-            `${process.env.REACT_APP_API_URL}/change-request/mwo/find`,
+            `${process.env.REACT_APP_API_URL}/change-request/mwo/find-by-mwo-number`,
             {
               params: {
                 mwo_number: formData.mwo_number,
@@ -404,8 +404,8 @@ const ChangeRequestMWO = () => {
       }
     };
 
-    if (formData.execution_city) fetchApprovers();
-  }, [formData.execution_city, selectedWorkOrder, user.authToken]);
+    fetchApprovers();
+  }, [selectedWorkOrder, user.authToken]);
 
   useEffect(() => {
     if (selectedApproverEmail) {
