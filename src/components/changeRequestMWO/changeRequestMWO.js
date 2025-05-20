@@ -322,7 +322,7 @@ const ChangeRequestMWO = () => {
         let crResponse;
         try {
           crResponse = await axios.get(
-            `${process.env.REACT_APP_API_URL}/change-request/mwo/find-by-mwo-number`,
+            `${process.env.REACT_APP_API_URL}/change-request/mwo/find`,
             {
               params: {
                 mwo_number: formData.mwo_number,
@@ -348,14 +348,122 @@ const ChangeRequestMWO = () => {
         console.log("Pending CR exists:", pendingCrExists);
 
         // Check for associated CWOs and their quantities
+        let cwosResponse;
+        let cwoMaterialsMap = {};
+        let cwoServicesMap = {};
+        let cwoQuantitiesHigher = false;
+        let cwoQuantityMessage = "";
+
+        try {
+          // Fetch all CWOs associated with this MWO
+          cwosResponse = await axios.get(
+            `${process.env.REACT_APP_API_URL}/workorder/find-child-workorder-by-mwo`,
+            {
+              params: {
+                mwo_number: formData.mwo_number,
+              },
+              headers: {
+                Authorization: user.authToken,
+              },
+            }
+          );
+
+          const cwos = cwosResponse.data;
+          console.log("Associated CWOs:", cwos);
+
+          if (cwos && cwos.length > 0) {
+            // For each CWO, fetch materials and services
+            for (const cwo of cwos) {
+              // Fetch CWO materials
+              const cwoMaterialsResponse = await axios.get(
+                `${process.env.REACT_APP_API_URL}/workorder/find-child-material`,
+                {
+                  params: { cwo_id: cwo.cwo_id },
+                  headers: { Authorization: user.authToken },
+                }
+              );
+
+              // Fetch CWO services
+              const cwoServicesResponse = await axios.get(
+                `${process.env.REACT_APP_API_URL}/workorder/find-child-services`,
+                {
+                  params: {
+                    cwo_number: cwo.cwo_number,
+                    cwo_id: cwo.cwo_id,
+                  },
+                  headers: { Authorization: user.authToken },
+                }
+              );
+
+              // Process materials
+              const cwoMaterials = cwoMaterialsResponse.data;
+              if (cwoMaterials && cwoMaterials.length > 0) {
+                cwoMaterials.forEach((material) => {
+                  if (!cwoMaterialsMap[material.material_id]) {
+                    cwoMaterialsMap[material.material_id] = 0;
+                  }
+                  cwoMaterialsMap[material.material_id] += Number(
+                    material.material_wo_qty || 0
+                  );
+                });
+              }
+
+              // Process services
+              const cwoServices = cwoServicesResponse.data;
+              if (cwoServices && cwoServices.length > 0) {
+                cwoServices.forEach((service) => {
+                  if (!cwoServicesMap[service.service_id]) {
+                    cwoServicesMap[service.service_id] = 0;
+                  }
+                  cwoServicesMap[service.service_id] += Number(
+                    service.service_wo_qty || 0
+                  );
+                });
+              }
+            }
+
+            // Compare CWO quantities with MWO quantities
+            if (materialLineItems && materialLineItems.length > 0) {
+              for (const material of materialLineItems) {
+                const cwoQty = cwoMaterialsMap[material.material_id] || 0;
+                const mwoQty = Number(material.material_wo_qty || 0);
+
+                if (cwoQty > mwoQty) {
+                  cwoQuantitiesHigher = true;
+                  cwoQuantityMessage += `Material ${material.material_id}: MWO qty=${mwoQty}, Total CWO qty=${cwoQty}\n`;
+                }
+              }
+            }
+
+            if (serviceLineItems && serviceLineItems.length > 0) {
+              for (const service of serviceLineItems) {
+                const cwoQty = cwoServicesMap[service.service_id] || 0;
+                const mwoQty = Number(service.service_wo_qty || 0);
+
+                if (cwoQty > mwoQty) {
+                  cwoQuantitiesHigher = true;
+                  cwoQuantityMessage += `Service ${service.service_id}: MWO qty=${mwoQty}, Total CWO qty=${cwoQty}\n`;
+                }
+              }
+            }
+          }
+        } catch (cwoError) {
+          console.error("Error fetching CWO data:", cwoError);
+        }
 
         // Show popup if pending CR exists or CWO quantities are higher
-        if (pendingCrExists) {
+        if (pendingCrExists || cwoQuantitiesHigher) {
           console.log("Showing popup and resetting form");
 
           if (pendingCrExists) {
             setExistsMessage(
               "A pending change request already exists for this MWO. Please wait for it to be processed."
+            );
+          } else if (cwoQuantitiesHigher) {
+            setExistsMessage(
+              "Warning: Some CWOs have higher quantities than the MWO:\n" +
+                cwoQuantityMessage +
+                "\nThis may indicate that the CWOs are already filled for higher quantities than the MWO. Do you still want to proceed?"
             );
           }
 
@@ -404,8 +512,8 @@ const ChangeRequestMWO = () => {
       }
     };
 
-    fetchApprovers();
-  }, [selectedWorkOrder, user.authToken]);
+    if (formData.execution_city) fetchApprovers();
+  }, [formData.execution_city, selectedWorkOrder, user.authToken]);
 
   useEffect(() => {
     if (selectedApproverEmail) {
