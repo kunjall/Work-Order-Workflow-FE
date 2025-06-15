@@ -2,11 +2,14 @@ import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { CSVLink } from "react-csv";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
+import SendIcon from "@mui/icons-material/Send";
 import {
   createTheme,
   responsiveFontSizes,
   ThemeProvider,
 } from "@mui/material/styles";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import {
   Box,
   Grid,
@@ -18,11 +21,46 @@ import {
   CardContent,
   Button,
   IconButton,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import { AuthContext } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
+
+// Helper function to convert DD-MMM-YY to ISO format for DatePicker
+const formatDateStringToISO = (dateString) => {
+  if (!dateString || dateString.length !== 9) return null;
+
+  const day = dateString.substring(0, 2);
+  const month = dateString.substring(3, 6);
+  const year = dateString.substring(7, 9);
+
+  // Convert month abbreviation to month number
+  const monthMap = {
+    JAN: "01",
+    FEB: "02",
+    MAR: "03",
+    APR: "04",
+    MAY: "05",
+    JUN: "06",
+    JUL: "07",
+    AUG: "08",
+    SEP: "09",
+    OCT: "10",
+    NOV: "11",
+    DEC: "12",
+  };
+
+  const monthNum = monthMap[month];
+  if (!monthNum) return null;
+
+  // Assume 20xx for the year
+  return `20${year}-${monthNum}-${day}`;
+};
 
 const InvoiceForm = () => {
   const { user } = useContext(AuthContext);
@@ -35,9 +73,12 @@ const InvoiceForm = () => {
   const [formData, setFormData] = useState({});
   const [isSaved, setIsSaved] = useState(false);
   const [totalExpense, setTotalExpense] = useState(null);
+  const [selectedApproverEmail, setSelectedApproverEmail] = useState(null);
   const [allExpenseData, setAllExpenseData] = useState([]);
+  const [approvers, setApprovers] = useState([]);
+  const [approverName, setApproverName] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const addOverheadRow = (cwoIndex) => {
     setChildWorkorders((prev) => {
@@ -122,9 +163,19 @@ const InvoiceForm = () => {
     };
     fetchWorkOrders();
   }, [user, navigate, selectedWorkOrder]);
-  const handleSubmit = async (cwoId) => {
+  const handleSubmit = async () => {
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
+    const actionedBy = user.name || "unknown";
+    const actionedAt = new Date().toLocaleString("en-US", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "IST",
+    });
     try {
       if (
         !childWorkorders ||
@@ -140,7 +191,9 @@ const InvoiceForm = () => {
         .flatMap((cwo) =>
           cwo.overhead.map((entry) => ({
             cwo_id: cwo.cwo_id,
+            route_name: cwo.route_name,
             mwo_id: selectedWorkOrder.mwo_id,
+            expense_status: "Pending for approval",
             service: entry["Activity"], // Ensure correct field mapping
             vendor_name: entry["Vendor Name"], // Match expected key
             qty: entry["QTY"],
@@ -150,6 +203,10 @@ const InvoiceForm = () => {
             invoice_number: entry["Invoice Number"],
             invoice_date: entry["Invoice Date"], // Ensure invoice date is included
             remarks: entry["Remarks"],
+            created_by: actionedBy,
+            created_at: actionedAt,
+            expense_approver1_email: selectedApproverEmail,
+            expense_approver1_name: approverName,
           }))
         );
 
@@ -226,6 +283,45 @@ const InvoiceForm = () => {
       fetchCWO();
     }
   }, [selectedWorkOrder]);
+
+  useEffect(() => {
+    const fetchApprovers = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=EXP`,
+          {
+            headers: {
+              Authorization: user.authToken,
+            },
+          }
+        );
+        const reviewerArray = response.data.map((reviewer) => ({
+          id: reviewer.record_id,
+          type: reviewer.type,
+          reviewer_email: reviewer.approver_email,
+          city: reviewer.city,
+          reviewer_name: reviewer.approver_name,
+        }));
+        setApprovers(reviewerArray);
+      } catch (err) {
+        console.error("Error fetching reviewer:", err);
+        setError("Failed to load reviewer");
+      }
+    };
+
+    if (formData.execution_city) fetchApprovers();
+  }, [formData.execution_city, selectedWorkOrder, user.authToken]);
+
+  useEffect(() => {
+    if (selectedApproverEmail) {
+      const selectedReviewer = approvers.find(
+        (reviewer) => reviewer.reviewer_email === selectedApproverEmail
+      );
+      setApproverName(selectedReviewer ? selectedReviewer.reviewer_name : "");
+    } else {
+      setApproverName("");
+    }
+  }, [selectedApproverEmail, approvers]);
 
   const handleExport = async () => {
     setLoading(true);
@@ -343,38 +439,63 @@ const InvoiceForm = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ p: 3 }}>
-        <Grid item xs={12} sm={2} display="flex" gap={2} mb={2}>
-          <Typography variant="h5" gutterBottom>
-            Payment Budget
-          </Typography>
-
-          <Button
-            justifyContent="flex-end"
-            variant="contained"
-            onClick={handleExport}
-            sx={{
-              backgroundColor: "#007bff",
-              color: "white",
-
-              "&:hover": { backgroundColor: "#0056b3" },
-            }}
-            startIcon={<FileDownloadIcon />}
-            disabled={loading}
-          >
-            {loading ? "Fetching..." : "Export CSV"}
-          </Button>
-        </Grid>
-
-        <Paper elevation={3} sx={{ p: 3 }}>
-          <Grid container spacing={2}>
+      <Box sx={{ p: 4, backgroundColor: "#f8f9fa" }}>
+        <Paper
+          elevation={3}
+          sx={{ p: 3, mb: 4, borderRadius: "8px", backgroundColor: "#fff" }}
+        >
+          <Grid container spacing={2} alignItems="center" mb={3}>
+            <Grid item xs={12} sm={6}>
+              <Typography variant="h5" fontWeight="600" color="#333">
+                Payment Budget
+              </Typography>
+            </Grid>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              sx={{ display: "flex", justifyContent: "flex-end" }}
+            >
+              <Button
+                variant="contained"
+                onClick={handleExport}
+                sx={{
+                  backgroundColor: "#007bff",
+                  color: "white",
+                  padding: "10px 20px",
+                  borderRadius: "4px",
+                  fontWeight: "500",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#0056b3" },
+                }}
+                startIcon={<FileDownloadIcon />}
+                disabled={loading}
+              >
+                {loading ? "Fetching..." : "Export CSV"}
+              </Button>
+            </Grid>
+          </Grid>
+          <Grid container spacing={3} mb={3}>
             <Grid item xs={12} sm={2.5}>
               <Autocomplete
                 options={workOrders}
                 getOptionLabel={(option) => option.mwo_id?.toString() || ""}
                 onChange={handleWorkOrderSelect}
                 renderInput={(params) => (
-                  <TextField {...params} label="MWO" fullWidth />
+                  <TextField
+                    {...params}
+                    label="MWO"
+                    fullWidth
+                    sx={{
+                      backgroundColor: "#f9f9f9",
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "6px",
+                        "&:hover fieldset": {
+                          borderColor: "#007bff",
+                        },
+                      },
+                    }}
+                  />
                 )}
               />
             </Grid>
@@ -382,31 +503,57 @@ const InvoiceForm = () => {
               <TextField
                 label="Budgeted Material Cost"
                 value={formData.bal_material_cost?.replace("$", "₹") || "₹0"}
-                // value={formData.total_material_cost}
-                InputProps={{ readOnly: true }}
+                InputProps={{
+                  readOnly: true,
+                  style: { fontWeight: "500" },
+                }}
                 fullWidth
                 variant="outlined"
-                sx={{ "& .MuiInputBase-input": { color: "red" } }}
+                sx={{
+                  backgroundColor: "#f9f9f9",
+                  "& .MuiInputBase-input": { color: "#d32f2f" },
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "6px",
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={2}>
               <TextField
                 label="Budgeted Service Cost"
                 value={formData.bal_service_cost?.replace("$", "₹") || "₹0"}
-                InputProps={{ readOnly: true }}
+                InputProps={{
+                  readOnly: true,
+                  style: { fontWeight: "500" },
+                }}
                 fullWidth
                 variant="outlined"
-                sx={{ "& .MuiInputBase-input": { color: "red" } }}
+                sx={{
+                  backgroundColor: "#f9f9f9",
+                  "& .MuiInputBase-input": { color: "#d32f2f" },
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "6px",
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={2}>
               <TextField
                 label="Route Name"
                 value={formData.route_name || ""}
-                InputProps={{ readOnly: true }}
+                InputProps={{
+                  readOnly: true,
+                  style: { fontWeight: "500" },
+                }}
                 fullWidth
                 variant="outlined"
                 InputLabelProps={{ shrink: true }}
+                sx={{
+                  backgroundColor: "#f9f9f9",
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "6px",
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={2.5}>
@@ -417,23 +564,46 @@ const InvoiceForm = () => {
                 type="number"
                 fullWidth
                 variant="outlined"
-                sx={{ "& .MuiInputBase-input": { color: "red" } }}
+                sx={{
+                  backgroundColor: "#f9f9f9",
+                  "& .MuiInputBase-input": {
+                    color: "#d32f2f",
+                    fontWeight: "500",
+                  },
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "6px",
+                    "&:hover fieldset": {
+                      borderColor: "#007bff",
+                    },
+                  },
+                }}
                 disabled={isSaved || Boolean(formData.overhead_budget)}
                 InputProps={{
                   startAdornment:
                     isSaved || formData.overhead_budget ? (
-                      <span style={{ marginRight: "5px" }}>₹</span>
+                      <span style={{ marginRight: "5px", fontWeight: "bold" }}>
+                        ₹
+                      </span>
                     ) : null,
                 }}
               />
             </Grid>
-            <Grid item xs={12} sm={1} mt={1}>
+            <Grid
+              item
+              xs={12}
+              sm={1}
+              sx={{ display: "flex", alignItems: "center" }}
+            >
               <Button
                 variant="contained"
                 sx={{
                   backgroundColor: "#ec7c30",
                   color: "white",
-                  "&:hover": { backgroundColor: "black" },
+                  padding: "10px 15px",
+                  borderRadius: "6px",
+                  fontWeight: "500",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                  "&:hover": { backgroundColor: "#d65a00" },
                 }}
                 disabled={
                   !overheadBudget ||
@@ -448,159 +618,166 @@ const InvoiceForm = () => {
             </Grid>
           </Grid>
           {selectedWorkOrder && (
-            <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-              <Card sx={{ p: 3, boxShadow: 3 }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Work Order Details
-                  </Typography>
-                  <Grid container spacing={2} mt={1}>
-                    {childWorkorders.map((cwo, cwoIndex) => (
-                      <Grid container spacing={2} key={cwo.cwo_id} mt={1}>
-                        <Grid item xs={12} sm={2}>
-                          <TextField
-                            label="CWO"
-                            value={cwo.cwo_id}
-                            variant="outlined"
-                            fullWidth
-                            inputProps={{ readOnly: true }}
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={2}>
-                          <TextField
-                            label="Material MB Submitted"
-                            value={cwo.material_budget || "₹0"}
-                            variant="outlined"
-                            fullWidth
-                            inputProps={{ readOnly: true }}
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={2}>
-                          <TextField
-                            label="Service MB Submitted"
-                            value={cwo.service_budget || "₹0"}
-                            variant="outlined"
-                            fullWidth
-                            inputProps={{ readOnly: true }}
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={2}>
-                          <Button
-                            variant="contained"
-                            onClick={() => toggleOverheadInputs(cwo.cwo_id)}
+            <Paper
+              elevation={3}
+              sx={{
+                p: 3,
+                mt: 3,
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+              }}
+            >
+              <Typography
+                variant="h6"
+                fontWeight="600"
+                color="#333"
+                gutterBottom
+                sx={{ mb: 3, borderBottom: "1px solid #eee", pb: 1 }}
+              >
+                Work Order Details
+              </Typography>
+              <Grid container spacing={2} mt={1}>
+                {childWorkorders.map((cwo, cwoIndex) => (
+                  <Grid container spacing={2} key={cwo.cwo_id} mt={1}>
+                    <Grid item xs={12} sm={2}>
+                      <TextField
+                        label="CWO"
+                        value={cwo.cwo_id}
+                        variant="outlined"
+                        fullWidth
+                        inputProps={{ readOnly: true }}
+                        sx={{
+                          backgroundColor: "#f9f9f9",
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "6px",
+                          },
+                        }}
+                        InputProps={{
+                          style: { fontWeight: "500" },
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={2}>
+                      <TextField
+                        label="Material MB Submitted"
+                        value={cwo.material_budget || "₹0"}
+                        variant="outlined"
+                        fullWidth
+                        inputProps={{ readOnly: true }}
+                        sx={{
+                          backgroundColor: "#f9f9f9",
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "6px",
+                          },
+                          "& .MuiInputBase-input": {
+                            color: "#2e7d32",
+                            fontWeight: "500",
+                          },
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={2}>
+                      <TextField
+                        label="Service MB Submitted"
+                        value={cwo.service_budget || "₹0"}
+                        variant="outlined"
+                        fullWidth
+                        inputProps={{ readOnly: true }}
+                        sx={{
+                          backgroundColor: "#f9f9f9",
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "6px",
+                          },
+                          "& .MuiInputBase-input": {
+                            color: "#2e7d32",
+                            fontWeight: "500",
+                          },
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={2}>
+                      <TextField
+                        label="Route Name"
+                        value={cwo.route_name || "N/A"}
+                        variant="outlined"
+                        fullWidth
+                        inputProps={{ readOnly: true }}
+                        sx={{
+                          backgroundColor: "#f9f9f9",
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "6px",
+                          },
+                          "& .MuiInputBase-input": {
+                            color: "#2e7d32",
+                            fontWeight: "500",
+                          },
+                        }}
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={2}>
+                      <Button
+                        variant="contained"
+                        onClick={() => toggleOverheadInputs(cwo.cwo_id)}
+                        sx={{
+                          backgroundColor: "#ec7c30",
+                          color: "white",
+                          padding: "10px 15px",
+                          borderRadius: "6px",
+                          fontWeight: "500",
+                          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                          "&:hover": {
+                            backgroundColor: "#d65a00",
+                          },
+                        }}
+                        disabled={!formData.overhead_budget}
+                      >
+                        Enter Expenses
+                      </Button>
+                    </Grid>
+                    {expandedCwo[cwo.cwo_id] && (
+                      <Grid container spacing={2} mt={2} ml={2}>
+                        {cwo.overhead?.map((row, rowIndex) => (
+                          <Grid
+                            container
+                            spacing={2}
+                            key={row.id}
+                            alignItems="center"
                             sx={{
-                              backgroundColor: "#ec7c30",
-                              color: "white",
-                              "&:hover": {
-                                backgroundColor: "black",
+                              mb: 2,
+                              pb: 2,
+                              borderBottom: "1px solid #eaeaea",
+                              "&:last-child": {
+                                borderBottom: "none",
+                                mb: 0,
+                                pb: 0,
                               },
                             }}
-                            disabled={!formData.overhead_budget}
                           >
-                            Enter Expenses
-                          </Button>
-                        </Grid>
-                        {expandedCwo[cwo.cwo_id] && (
-                          <Grid container spacing={2} mt={2} ml={2}>
-                            {cwo.overhead?.map((row, rowIndex) => (
-                              <Grid
-                                container
-                                spacing={2}
-                                key={row.id}
-                                alignItems="center"
-                              >
-                                {[
-                                  "Vendor Name",
-                                  "Invoice Number",
-                                  "Invoice Date",
-                                  "Activity",
-                                  "QTY",
-                                  "UOM",
-                                  "Unit Price",
-                                  "Amount",
-                                  "Remarks",
-                                ].map((letter) => (
-                                  <Grid item xs={12} sm={2} key={letter}>
-                                    <TextField
-                                      label={`${letter}`}
+                            {[
+                              "Vendor Name",
+                              "Invoice Number",
+                              "Invoice Date",
+                              "Activity",
+                              "QTY",
+                              "UOM",
+                              "Unit Price",
+                              "Amount",
+                              "Remarks",
+                            ].map((letter) => (
+                              <Grid item xs={12} sm={2} key={letter}>
+                                {letter === "UOM" ? (
+                                  <FormControl
+                                    fullWidth
+                                    variant="outlined"
+                                    sx={{ backgroundColor: "#f9f9f9" }}
+                                  >
+                                    <InputLabel sx={{ fontWeight: "500" }}>
+                                      {letter}
+                                    </InputLabel>
+                                    <Select
                                       value={row[letter] || ""}
                                       onChange={(event) => {
-                                        let newValue = event.target.value;
-
-                                        if (letter === "Unit Price") {
-                                          newValue = newValue.replace(
-                                            /[^0-9]/g,
-                                            ""
-                                          );
-                                        }
-
-                                        if (letter === "Amount") {
-                                          newValue = newValue.replace(
-                                            /[^0-9]/g,
-                                            ""
-                                          );
-                                        }
-                                        if (letter === "Invoice Date") {
-                                          newValue = newValue.toUpperCase(); // Convert to uppercase for consistency
-                                          newValue = newValue.replace(
-                                            /[^0-9A-Z-]/g,
-                                            ""
-                                          ); // Allow only numbers, letters, and dashes
-
-                                          // Automatically insert dashes at correct positions
-                                          if (
-                                            newValue.length > 2 &&
-                                            newValue[2] !== "-"
-                                          ) {
-                                            newValue =
-                                              newValue.slice(0, 2) +
-                                              "-" +
-                                              newValue.slice(2);
-                                          }
-                                          if (
-                                            newValue.length > 6 &&
-                                            newValue[6] !== "-"
-                                          ) {
-                                            newValue =
-                                              newValue.slice(0, 6) +
-                                              "-" +
-                                              newValue.slice(6);
-                                          }
-
-                                          // Enforce max length of 9 characters (DD-MMM-YY)
-                                          if (newValue.length > 9) {
-                                            newValue = newValue.slice(0, 9);
-                                          }
-
-                                          // Validate if middle 3 characters are valid months
-                                          const validMonths = [
-                                            "JAN",
-                                            "FEB",
-                                            "MAR",
-                                            "APR",
-                                            "MAY",
-                                            "JUN",
-                                            "JUL",
-                                            "AUG",
-                                            "SEP",
-                                            "OCT",
-                                            "NOV",
-                                            "DEC",
-                                          ];
-
-                                          if (newValue.length >= 6) {
-                                            const monthPart = newValue.slice(
-                                              3,
-                                              6
-                                            ); // Extract MMM part
-                                            if (
-                                              !validMonths.includes(monthPart)
-                                            ) {
-                                              newValue = newValue.slice(0, 3); // Remove incorrect month input
-                                            }
-                                          }
-                                        }
-
+                                        const newValue = event.target.value;
                                         const updatedRows = [...cwo.overhead];
                                         updatedRows[rowIndex][letter] =
                                           newValue;
@@ -612,68 +789,295 @@ const InvoiceForm = () => {
                                           return updated;
                                         });
                                       }}
-                                      fullWidth
-                                      variant="outlined"
-                                      type={
-                                        letter === "Unit Price" ||
-                                        letter === "Amount"
-                                          ? "number"
-                                          : "text"
-                                      }
-                                    />
-                                  </Grid>
-                                ))}
-
-                                <Grid item xs={12} sm={1}>
-                                  <IconButton
-                                    color="error"
-                                    onClick={() =>
-                                      removeOverheadRow(cwoIndex, row.id)
-                                    }
+                                      label={letter}
+                                      sx={{
+                                        borderRadius: "6px",
+                                        "& .MuiOutlinedInput-notchedOutline": {
+                                          borderColor: "#ccc",
+                                        },
+                                        "&:hover .MuiOutlinedInput-notchedOutline":
+                                          {
+                                            borderColor: "#007bff",
+                                          },
+                                        "&.Mui-focused .MuiOutlinedInput-notchedOutline":
+                                          {
+                                            borderColor: "#007bff",
+                                          },
+                                      }}
+                                    >
+                                      <MenuItem value="">
+                                        <em>None</em>
+                                      </MenuItem>
+                                      <MenuItem value="EAC">EAC</MenuItem>
+                                      <MenuItem value="MTR">MTR</MenuItem>
+                                      <MenuItem value="KMS">KMS</MenuItem>
+                                      <MenuItem value="DAY">DAY</MenuItem>
+                                      <MenuItem value="PKT">PKT</MenuItem>
+                                      <MenuItem value="CuM">CuM</MenuItem>
+                                      <MenuItem value="LTR">LTR</MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                ) : letter === "Invoice Date" ? (
+                                  <LocalizationProvider
+                                    dateAdapter={AdapterDayjs}
                                   >
-                                    <RemoveCircleOutline color="error" />
-                                  </IconButton>
-                                </Grid>
+                                    <DatePicker
+                                      label="Invoice Date"
+                                      value={
+                                        row[letter]
+                                          ? dayjs(
+                                              formatDateStringToISO(row[letter])
+                                            )
+                                          : null
+                                      }
+                                      onChange={(newDate) => {
+                                        const updatedRows = [...cwo.overhead];
+
+                                        // Format date as DD-MMM-YY
+                                        const formattedDate = newDate
+                                          ? newDate
+                                              .format("DD-MMM-YY")
+                                              .toUpperCase()
+                                          : "";
+
+                                        updatedRows[rowIndex]["Invoice Date"] =
+                                          formattedDate;
+
+                                        setChildWorkorders((prev) => {
+                                          const updated = [...prev];
+                                          updated[cwoIndex].overhead =
+                                            updatedRows;
+                                          return updated;
+                                        });
+                                      }}
+                                      maxDate={dayjs()} // Prevent future dates
+                                      slotProps={{
+                                        textField: {
+                                          fullWidth: true,
+                                          variant: "outlined",
+                                          sx: {
+                                            backgroundColor: "#f9f9f9",
+                                            "& .MuiOutlinedInput-root": {
+                                              borderRadius: "6px",
+                                              "&:hover fieldset": {
+                                                borderColor: "#007bff",
+                                              },
+                                              "&.Mui-focused fieldset": {
+                                                borderColor: "#007bff",
+                                                borderWidth: "2px",
+                                              },
+                                            },
+                                            "& .MuiInputBase-input": {
+                                              fontWeight: "500",
+                                              padding: "12px 14px",
+                                            },
+                                            "& .MuiInputLabel-root": {
+                                              color: "#555",
+                                              fontWeight: "500",
+                                            },
+                                            "& .MuiInputLabel-root.Mui-focused":
+                                              {
+                                                color: "#007bff",
+                                              },
+                                          },
+                                        },
+                                      }}
+                                    />
+                                  </LocalizationProvider>
+                                ) : (
+                                  <TextField
+                                    label={`${letter}`}
+                                    value={row[letter] || ""}
+                                    sx={{
+                                      backgroundColor: "#f9f9f9",
+                                      "& .MuiOutlinedInput-root": {
+                                        borderRadius: "6px",
+                                        "&:hover fieldset": {
+                                          borderColor: "#007bff",
+                                        },
+                                        "&.Mui-focused fieldset": {
+                                          borderColor: "#007bff",
+                                          borderWidth: "2px",
+                                        },
+                                      },
+                                      "& .MuiInputBase-input": {
+                                        fontWeight: "500",
+                                        padding: "12px 14px",
+                                      },
+                                      "& .MuiInputLabel-root": {
+                                        color: "#555",
+                                        fontWeight: "500",
+                                      },
+                                      "& .MuiInputLabel-root.Mui-focused": {
+                                        color: "#007bff",
+                                      },
+                                    }}
+                                    onChange={(event) => {
+                                      let newValue = event.target.value;
+                                      const updatedRows = [...cwo.overhead];
+
+                                      if (letter === "Unit Price") {
+                                        newValue = newValue.replace(
+                                          /[^0-9]/g,
+                                          ""
+                                        );
+
+                                        // Calculate Amount when Unit Price changes
+                                        const qty =
+                                          updatedRows[rowIndex]["QTY"] || 0;
+                                        if (qty && newValue) {
+                                          updatedRows[rowIndex]["Amount"] = (
+                                            parseFloat(qty) *
+                                            parseFloat(newValue)
+                                          ).toString();
+                                        }
+                                      }
+
+                                      if (letter === "QTY") {
+                                        // Calculate Amount when QTY changes
+                                        const unitPrice =
+                                          updatedRows[rowIndex]["Unit Price"] ||
+                                          0;
+                                        if (unitPrice && newValue) {
+                                          updatedRows[rowIndex]["Amount"] = (
+                                            parseFloat(newValue) *
+                                            parseFloat(unitPrice)
+                                          ).toString();
+                                        }
+                                      }
+
+                                      if (letter === "Amount") {
+                                        newValue = newValue.replace(
+                                          /[^0-9]/g,
+                                          ""
+                                        );
+                                      }
+
+                                      updatedRows[rowIndex][letter] = newValue;
+
+                                      setChildWorkorders((prev) => {
+                                        const updated = [...prev];
+                                        updated[cwoIndex].overhead =
+                                          updatedRows;
+                                        return updated;
+                                      });
+                                    }}
+                                    fullWidth
+                                    variant="outlined"
+                                    type={
+                                      letter === "Unit Price" ||
+                                      letter === "Amount"
+                                        ? "number"
+                                        : "text"
+                                    }
+                                  />
+                                )}
                               </Grid>
                             ))}
-                            <Grid item xs={12}>
+
+                            <Grid item xs={12} sm={1}>
                               <IconButton
-                                color="primary"
-                                onClick={() => addOverheadRow(cwoIndex)}
+                                color="error"
+                                onClick={() =>
+                                  removeOverheadRow(cwoIndex, row.id)
+                                }
                               >
-                                <AddCircleOutline />
-                                <Typography>Add Line Item</Typography>
+                                <RemoveCircleOutline color="error" />
                               </IconButton>
                             </Grid>
                           </Grid>
-                        )}
+                        ))}
+                        <Grid item xs={12} sx={{ mt: 2, mb: 1 }}>
+                          <Paper
+                            elevation={0}
+                            sx={{
+                              p: 1.5,
+                              backgroundColor: "#f0f7ff",
+                              borderRadius: "6px",
+                              border: "1px dashed #007bff",
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              cursor: "pointer",
+                              transition: "all 0.2s ease",
+                              "&:hover": {
+                                backgroundColor: "#e1f0ff",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+                              },
+                            }}
+                            onClick={() => addOverheadRow(cwoIndex)}
+                          >
+                            <AddCircleOutline
+                              sx={{ color: "#007bff", mr: 1 }}
+                            />
+                            <Typography
+                              sx={{ color: "#007bff", fontWeight: "500" }}
+                            >
+                              Add New Expense Line Item
+                            </Typography>
+                          </Paper>
+                        </Grid>
                       </Grid>
-                    ))}
+                    )}
                   </Grid>
-                </CardContent>
-              </Card>
-              <Grid container spacing={2}>
-                <Grid item xs={6} sm={2} md={4} mt={2}>
+                ))}
+              </Grid>
+              <Grid container spacing={2} mt={3}>
+                <Grid item xs={6} sm={2} md={4}>
                   <TextField
                     label="Total Material Payment"
                     value={`₹${totalMaterialPayment.toLocaleString()}`}
                     variant="outlined"
                     fullWidth
                     inputProps={{ readOnly: true }}
-                    sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+                    InputProps={{
+                      style: { fontWeight: "600" },
+                    }}
+                    sx={{
+                      backgroundColor: "#e8f4f8",
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "6px",
+                        borderColor: "#007bff",
+                      },
+                      "& .MuiInputBase-input": {
+                        color: "#0277bd",
+                        fontSize: "1.05rem",
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "#0277bd",
+                        fontWeight: "500",
+                      },
+                    }}
                   />
                 </Grid>
-                <Grid item xs={6} sm={2} md={4} mt={2}>
+                <Grid item xs={6} sm={2} md={4}>
                   <TextField
                     label="Total Service Payment"
                     value={`₹${totalServicePayment.toLocaleString()}`}
                     variant="outlined"
                     fullWidth
                     inputProps={{ readOnly: true }}
-                    sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+                    InputProps={{
+                      style: { fontWeight: "600" },
+                    }}
+                    sx={{
+                      backgroundColor: "#e8f4f8",
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "6px",
+                        borderColor: "#007bff",
+                      },
+                      "& .MuiInputBase-input": {
+                        color: "#0277bd",
+                        fontSize: "1.05rem",
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "#0277bd",
+                        fontWeight: "500",
+                      },
+                    }}
                   />
                 </Grid>
-                <Grid item xs={6} sm={2} md={4} mt={2}>
+                <Grid item xs={6} sm={2} md={4}>
                   <TextField
                     label="Total Overhead Payment"
                     value={
@@ -684,31 +1088,104 @@ const InvoiceForm = () => {
                     variant="outlined"
                     fullWidth
                     inputProps={{ readOnly: true }}
-                    sx={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}
+                    InputProps={{
+                      style: { fontWeight: "600" },
+                    }}
+                    sx={{
+                      backgroundColor: "#e8f4f8",
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "6px",
+                        borderColor: "#007bff",
+                      },
+                      "& .MuiInputBase-input": {
+                        color: "#0277bd",
+                        fontSize: "1.05rem",
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "#0277bd",
+                        fontWeight: "500",
+                      },
+                    }}
                   />
                 </Grid>
               </Grid>
-              <Grid
-                item
-                xs={12}
-                sm={2}
-                display="flex"
-                justifyContent="flex-end"
-                mt={1}
-              >
-                <Button
-                  variant="contained"
-                  onClick={handleSubmit}
-                  sx={{
-                    backgroundColor: "#ec7c30",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "black",
-                    },
-                  }}
+
+              <Grid container spacing={2} mt={2}>
+                <Grid item xs={12} sm={5}>
+                  <Autocomplete
+                    value={
+                      selectedApproverEmail && approvers.length > 0
+                        ? approvers.find(
+                            (approver) =>
+                              approver.reviewer_email === selectedApproverEmail
+                          ) || null
+                        : null
+                    }
+                    options={[...approvers].sort(
+                      (a, b) =>
+                        b.reviewer_name?.localeCompare(a.reviewer_name || "") ||
+                        0
+                    )}
+                    getOptionLabel={(option) =>
+                      option.reviewer_email.toString() || ""
+                    }
+                    onChange={(event, newValue) => {
+                      setSelectedApproverEmail(
+                        newValue ? newValue.reviewer_email : null
+                      );
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Approver Email"
+                        variant="outlined"
+                        fullWidth
+                      />
+                    )}
+                    sx={{ backgroundColor: "#f9f9f9" }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={5}>
+                  <TextField
+                    id="approver-name"
+                    label="Approver Name"
+                    value={approverName}
+                    variant="outlined"
+                    InputProps={{
+                      readOnly: true,
+                      style: {
+                        color: "#dc004e",
+                        fontWeight: "bold",
+                      },
+                    }}
+                    fullWidth
+                    sx={{ backgroundColor: "#f9f9f9" }}
+                  />
+                </Grid>
+                <Grid
+                  item
+                  xs={12}
+                  sm={2}
+                  sx={{ display: "flex", alignItems: "center" }}
                 >
-                  Submit
-                </Button>
+                  <Button
+                    variant="contained"
+                    onClick={handleSubmit}
+                    fullWidth
+                    sx={{
+                      backgroundColor: "#ec7c30",
+                      color: "white",
+                      padding: "12px",
+                      fontWeight: "bold",
+                      "&:hover": {
+                        backgroundColor: "black",
+                      },
+                    }}
+                    startIcon={<SendIcon />}
+                  >
+                    Save Expenses
+                  </Button>
+                </Grid>
               </Grid>
             </Paper>
           )}

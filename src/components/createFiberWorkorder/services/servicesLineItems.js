@@ -140,8 +140,7 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
       )}
       {lineItems.map((item, index) => (
         <Box key={index}>
-          {index !== 0 && <Divider sx={{ my: 2 }} />} {}
-          <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+          <Grid container spacing={0.5} sx={{ marginBottom: 0.5 }}>
             <Grid
               item
               xs={10}
@@ -257,33 +256,37 @@ const AddServices = ({ services, onLineItemUpdate, onAmountUpdate }) => {
           </Grid>
         </Box>
       ))}
-      <Box mt={2}>
+      <Box mt={1}>
         <IconButton
           color="primary"
+          size="small"
           onClick={handleAddLineItem}
           disabled={isAddDisabled}
+          sx={{ padding: 0 }}
         >
-          <AddCircleOutline />
-          <Typography>Add Line Item</Typography>
+          <AddCircleOutline fontSize="small" />
+          <Typography variant="body2" sx={{ ml: 0.5 }}>
+            Add Line Item
+          </Typography>
         </IconButton>
       </Box>
       {}
       <Box
-        mt={2}
+        mt={1}
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: 2,
+          padding: "4px 8px",
           border: "1px solid #ccc",
-          borderRadius: "8px",
+          borderRadius: "6px",
           backgroundColor: "#f9f9f9",
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+        <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Total Services Cost:
         </Typography>
-        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1976d2" }}>
+        <Typography variant="body1" sx={{ fontWeight: 600, color: "#1976d2" }}>
           ₹{totalAmount}
         </Typography>
       </Box>

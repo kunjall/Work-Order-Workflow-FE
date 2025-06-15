@@ -8,6 +8,7 @@ import {
   Autocomplete,
   Divider,
   Alert,
+  Stack,
 } from "@mui/material";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
 
@@ -140,16 +141,24 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
   );
 
   return (
-    <Box sx={{ flex: 1, padding: 2 }}>
+    <Box sx={{ flex: 1, padding: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 1,
+        }}
+      ></Box>
+
       {error && (
-        <Alert severity="error" sx={{ marginBottom: 2 }}>
+        <Alert severity="error" sx={{ marginBottom: 1, fontSize: "0.75rem" }}>
           {error}
         </Alert>
       )}
       {lineItems.map((item, index) => (
         <Box key={index}>
-          {index !== 0 && <Divider sx={{ my: 2 }} />}
-          <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+          <Grid container spacing={0.5} sx={{ marginBottom: 0.5 }}>
             <Grid
               item
               xs={10}
@@ -252,32 +261,37 @@ const AddMaterials = ({ materialCodes, onUpdate, onAmountUpdate }) => {
         </Box>
       ))}
 
-      <Box mt={2}>
+      <Box mt={1}>
         <IconButton
           color="primary"
+          size="small"
           onClick={handleAddLineItem}
           disabled={isAddDisabled}
+          sx={{ padding: 0 }}
         >
-          <AddCircleOutline />
-          <Typography>Add Line Item</Typography>
+          <AddCircleOutline fontSize="small" />
+          <Typography variant="body2" sx={{ ml: 0.5 }}>
+            Add Line Item
+          </Typography>
         </IconButton>
       </Box>
+
       <Box
-        mt={2}
+        mt={1}
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: 2,
+          padding: "4px 8px",
           border: "1px solid #ccc",
-          borderRadius: "8px",
+          borderRadius: "6px",
           backgroundColor: "#f9f9f9",
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+        <Typography variant="body1" sx={{ fontWeight: 600 }}>
           Total Material Cost:
         </Typography>
-        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1976d2" }}>
+        <Typography variant="body1" sx={{ fontWeight: 600, color: "#1976d2" }}>
           ₹{totalAmount}
         </Typography>
       </Box>

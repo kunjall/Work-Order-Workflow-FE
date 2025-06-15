@@ -70,8 +70,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
     <Box sx={{ flex: 1, padding: 2 }}>
       {lineItems.map((item, index) => (
         <Box key={index}>
-          {index !== 0 && <Divider sx={{ my: 2 }} />} {}
-          <Grid container spacing={2} sx={{ marginBottom: 2 }}>
+          <Grid container spacing={0.5} sx={{ marginBottom: 0.5 }}>
             <Grid
               item
               xs={10}
@@ -148,7 +147,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
         </Box>
       ))}
 
-      <Box mt={2}>
+      <Box mt={0.5}>
         <IconButton color="primary" onClick={handleAddLineItem}>
           <AddCircleOutline />
           <Typography>Add Line Item</Typography>

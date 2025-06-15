@@ -495,7 +495,92 @@ const CreateMRS = () => {
     }
   }, [user, navigate]);
 
-  let theme = createTheme();
+  let theme = createTheme({
+    palette: {
+      primary: {
+        main: "#ec7c30",
+      },
+      secondary: {
+        main: "#2c3e50",
+      },
+    },
+    typography: {
+      fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+      h5: {
+        fontWeight: 600,
+      },
+      h6: {
+        fontWeight: 600,
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+            borderRadius: 4,
+            padding: "4px 12px",
+            boxShadow: "none",
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiFormControl: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+      },
+      MuiAutocomplete: {
+        defaultProps: {
+          size: "small",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.8rem",
+            transform: "translate(14px, 8px) scale(1)",
+            "&.MuiInputLabel-shrink": {
+              transform: "translate(14px, -6px) scale(0.75)",
+            },
+          },
+        },
+      },
+    },
+  });
   theme = responsiveFontSizes(theme);
 
   return (
@@ -506,7 +591,7 @@ const CreateMRS = () => {
         ) : (
           <Grid
             container
-            spacing={2}
+            spacing={0.5}
             sx={{
               marginLeft: 1,
               marginTop: 1,
@@ -759,9 +844,29 @@ const CreateMRS = () => {
               />
             </Grid>
             {selectedLocator && (
-              <Grid item xs={12}>
-                <Typography variant="h6">Materials</Typography>
-                <Grid container spacing={2} mt={1}>
+              <Grid
+                item
+                xs={12}
+                sx={{
+                  p: "4px 8px",
+                  mb: 0.5,
+                  borderRadius: "4px",
+                  border: "1px solid rgba(0, 0, 0, 0.08)",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mb: 0.25,
+                    color: "green",
+                    fontWeight: "bold",
+                    fontSize: "1rem",
+                  }}
+                >
+                  Materials
+                </Typography>{" "}
+                <Grid container spacing={0.5} mt={0.5}>
                   {materialLineItems.map((material, index) => (
                     <React.Fragment key={material.record_id}>
                       <Grid item xs={12} sm={6} md={2}>
@@ -830,7 +935,7 @@ const CreateMRS = () => {
                           fullWidth
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6} md={1.5}>
+                      <Grid item xs={12} sm={6} md={1}>
                         <TextField
                           label="MM Qty"
                           value={materialLineItems[index]?.mm_qty || ""}

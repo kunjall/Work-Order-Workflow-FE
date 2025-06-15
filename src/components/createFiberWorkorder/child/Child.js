@@ -24,6 +24,7 @@ import {
   DialogContent,
   DialogTitle,
   DialogContentText,
+  Paper,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -591,7 +592,92 @@ const DashboardWhinch = () => {
     window.location.href = "../../dashboard/dashboardAdmin.js";
   };
 
-  let theme = createTheme();
+  let theme = createTheme({
+    palette: {
+      primary: {
+        main: "#ec7c30",
+      },
+      secondary: {
+        main: "#2c3e50",
+      },
+    },
+    typography: {
+      fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+      h5: {
+        fontWeight: 600,
+      },
+      h6: {
+        fontWeight: 600,
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+            borderRadius: 4,
+            padding: "4px 12px",
+            boxShadow: "none",
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiFormControl: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+      },
+      MuiAutocomplete: {
+        defaultProps: {
+          size: "small",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.8rem",
+            transform: "translate(14px, 8px) scale(1)",
+            "&.MuiInputLabel-shrink": {
+              transform: "translate(14px, -6px) scale(0.75)",
+            },
+          },
+        },
+      },
+    },
+  });
   theme = responsiveFontSizes(theme);
 
   return (
@@ -601,26 +687,17 @@ const DashboardWhinch = () => {
           {error ? (
             <Typography color="error">{error}</Typography>
           ) : (
-            <Grid container spacing={2}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "100vw",
-                }}
-              >
+            <Grid container spacing={0.5}>
+              <Box sx={{ mb: 1, width: "100%" }}>
                 <Typography
-                  variant="h5"
+                  variant="h6"
                   sx={{
                     fontWeight: "bold",
                     color: "#2c3e50",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    textAlign: "center",
+                    mb: 0.5,
                   }}
                 >
-                  Child Workorder
+                  Child Workorder - Fiber Rollout
                 </Typography>
               </Box>
               {}
@@ -963,200 +1040,35 @@ const DashboardWhinch = () => {
                 />
               </Grid>
               <Grid item xs={12}>
-                <Divider />
-              </Grid>
-              <Grid item xs={12}>
-                <Typography variant="h6">Services</Typography>
-                <Grid container spacing={2} mt={1}>
-                  {motherServices.map((service, index) => (
-                    <React.Fragment key={service.record_id}>
-                      <Grid item xs={12} sm={6} md={1.5}>
-                        <TextField
-                          disabled
-                          label="Code"
-                          value={service.service_id || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={2}>
-                        <TextField
-                          disabled
-                          label="Description"
-                          value={service.service_desc || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={1}>
-                        <TextField
-                          disabled
-                          label="UOM"
-                          value={service.service_uom || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={1}>
-                        <TextField
-                          disabled
-                          label="MWO QTY"
-                          value={service.service_wo_qty || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={1}>
-                        <TextField
-                          label="Price"
-                          value={service.service_rate || ""}
-                          type="number"
-                          variant="outlined"
-                          fullWidth
-                          onChange={(e) => {
-                            const newRate = e.target.value;
-                            setMotherServices((prevServices) =>
-                              prevServices.map((s, idx) =>
-                                idx === index
-                                  ? { ...s, service_rate: newRate }
-                                  : s
-                              )
-                            );
-                          }}
-                          inputProps={{
-                            min: 0,
-                            step: "0.01",
-                          }}
-                          onKeyDown={(e) => {
-                            if (
-                              e.key === "e" ||
-                              e.key === "E" ||
-                              e.key === "+" ||
-                              e.key === "-" ||
-                              e.key === ","
-                            ) {
-                              e.preventDefault();
-                            }
-                          }}
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} sm={6} md={1}>
-                        <TextField
-                          label="Bal QTY"
-                          disabled
-                          value={service.service_bal_qty || ""}
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} sm={6} md={1.5}>
-                        <TextField
-                          label="CWO Qty"
-                          value={serviceLineItems[index]?.cwo_qty || ""}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            const cwoQty = Number(value);
-                            const balQty = Number(service.service_bal_qty);
-                            const error =
-                              cwoQty > balQty
-                                ? "CWO Qty cannot exceed Bal QTY"
-                                : "";
-
-                            setServiceLineItems((prevItems) =>
-                              prevItems.map((item, idx) =>
-                                idx === index
-                                  ? {
-                                      ...item,
-                                      cwo_qty: value,
-                                      error,
-                                      service_cwo_price: error
-                                        ? ""
-                                        : (
-                                            cwoQty *
-                                            Number(service.service_rate)
-                                          ).toFixed(2),
-                                    }
-                                  : item
-                              )
-                            );
-                          }}
-                          onKeyDown={(e) => {
-                            if (
-                              e.key === "-" ||
-                              e.key === "e" ||
-                              e.key === "E"
-                            ) {
-                              e.preventDefault(); // Block negative and exponential input
-                            }
-                          }}
-                          inputProps={{ min: 0 }}
-                          error={!!serviceLineItems[index]?.error}
-                          helperText={serviceLineItems[index]?.error || ""}
-                          variant="outlined"
-                          fullWidth
-                          type="number"
-                        />
-                      </Grid>
-
-                      <Grid item xs={12} sm={6} md={1.5}>
-                        <TextField
-                          label="CWO Amount"
-                          value={
-                            serviceLineItems[index]?.service_cwo_price || ""
-                          }
-                          InputProps={{ readOnly: true }}
-                          variant="outlined"
-                          fullWidth
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Divider />
-                      </Grid>
-                    </React.Fragment>
-                  ))}
-                </Grid>
-                <Box
-                  mt={2}
+                <Paper
+                  elevation={0}
                   sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: 2,
-                    border: "1px solid #ccc",
-                    borderRadius: "8px",
-                    backgroundColor: "#f9f9f9",
+                    p: "4px 8px",
+                    mb: 0.5,
+                    borderRadius: "4px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    backgroundColor: "#fff",
                   }}
                 >
-                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                    Total Service Cost:
-                  </Typography>
                   <Typography
-                    variant="h6"
-                    sx={{ fontWeight: "bold", color: "#1976d2" }}
+                    variant="subtitle2"
+                    sx={{
+                      mb: 0.25,
+                      color: "blue",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                    }}
                   >
-                    ₹{totalAmount}
+                    Services
                   </Typography>
-                </Box>
-              </Grid>
-
-              <Grid item xs={12}>
-                <Typography variant="h6">Materials</Typography>
-                <Grid container spacing={2} mt={1}>
-                  {Array.isArray(motherMaterials) &&
-                    motherMaterials.map((material, index) => (
-                      <React.Fragment key={material.record_id}>
+                  <Grid container spacing={0.5} mt={0.5}>
+                    {motherServices.map((service, index) => (
+                      <React.Fragment key={service.record_id}>
                         <Grid item xs={12} sm={6} md={1.5}>
                           <TextField
                             disabled
-                            label="ID"
-                            value={material.material_id || ""}
+                            label="Code"
+                            value={service.service_id || ""}
                             InputProps={{ readOnly: true }}
                             variant="outlined"
                             fullWidth
@@ -1166,7 +1078,7 @@ const DashboardWhinch = () => {
                           <TextField
                             disabled
                             label="Description"
-                            value={material.material_desc || ""}
+                            value={service.service_desc || ""}
                             InputProps={{ readOnly: true }}
                             variant="outlined"
                             fullWidth
@@ -1176,7 +1088,7 @@ const DashboardWhinch = () => {
                           <TextField
                             disabled
                             label="UOM"
-                            value={material.material_uom || ""}
+                            value={service.service_uom || ""}
                             InputProps={{ readOnly: true }}
                             variant="outlined"
                             fullWidth
@@ -1185,8 +1097,8 @@ const DashboardWhinch = () => {
                         <Grid item xs={12} sm={6} md={1}>
                           <TextField
                             disabled
-                            label="Quantity"
-                            value={material.material_wo_qty || ""}
+                            label="MWO QTY"
+                            value={service.service_wo_qty || ""}
                             InputProps={{ readOnly: true }}
                             variant="outlined"
                             fullWidth
@@ -1194,48 +1106,75 @@ const DashboardWhinch = () => {
                         </Grid>
                         <Grid item xs={12} sm={6} md={1}>
                           <TextField
-                            disabled
                             label="Price"
-                            value={material.material_rate || ""}
-                            InputProps={{ readOnly: true }}
+                            value={service.service_rate || ""}
+                            type="number"
                             variant="outlined"
                             fullWidth
+                            onChange={(e) => {
+                              const newRate = e.target.value;
+                              setMotherServices((prevServices) =>
+                                prevServices.map((s, idx) =>
+                                  idx === index
+                                    ? { ...s, service_rate: newRate }
+                                    : s
+                                )
+                              );
+                            }}
+                            inputProps={{
+                              min: 0,
+                              step: "0.01",
+                            }}
+                            onKeyDown={(e) => {
+                              if (
+                                e.key === "e" ||
+                                e.key === "E" ||
+                                e.key === "+" ||
+                                e.key === "-" ||
+                                e.key === ","
+                              ) {
+                                e.preventDefault();
+                              }
+                            }}
                           />
                         </Grid>
+
                         <Grid item xs={12} sm={6} md={1}>
                           <TextField
-                            disabled
                             label="Bal QTY"
-                            value={material.material_bal_qty || ""}
+                            disabled
+                            value={service.service_bal_qty || ""}
                             InputProps={{ readOnly: true }}
                             variant="outlined"
                             fullWidth
                           />
                         </Grid>
+
                         <Grid item xs={12} sm={6} md={1.5}>
                           <TextField
                             label="CWO Qty"
-                            value={materialLineItems[index]?.cwo_qty || ""}
+                            value={serviceLineItems[index]?.cwo_qty || ""}
                             onChange={(e) => {
                               const value = e.target.value;
                               const cwoQty = Number(value);
+                              const balQty = Number(service.service_bal_qty);
                               const error =
-                                cwoQty > Number(material.material_bal_qty)
-                                  ? "CWO Qty cannot exceed Bal Qty"
+                                cwoQty > balQty
+                                  ? "CWO Qty cannot exceed Bal QTY"
                                   : "";
 
-                              setMaterialLineItems((prevItems) =>
+                              setServiceLineItems((prevItems) =>
                                 prevItems.map((item, idx) =>
                                   idx === index
                                     ? {
                                         ...item,
                                         cwo_qty: value,
                                         error,
-                                        material_cwo_price: error
+                                        service_cwo_price: error
                                           ? ""
                                           : (
                                               cwoQty *
-                                              Number(material.material_rate)
+                                              Number(service.service_rate)
                                             ).toFixed(2),
                                       }
                                     : item
@@ -1252,8 +1191,8 @@ const DashboardWhinch = () => {
                               }
                             }}
                             inputProps={{ min: 0 }}
-                            error={!!materialLineItems[index]?.error}
-                            helperText={materialLineItems[index]?.error || ""}
+                            error={!!serviceLineItems[index]?.error}
+                            helperText={serviceLineItems[index]?.error || ""}
                             variant="outlined"
                             fullWidth
                             type="number"
@@ -1264,42 +1203,220 @@ const DashboardWhinch = () => {
                           <TextField
                             label="CWO Amount"
                             value={
-                              materialLineItems[index]?.material_cwo_price || ""
+                              serviceLineItems[index]?.service_cwo_price || ""
                             }
                             InputProps={{ readOnly: true }}
                             variant="outlined"
                             fullWidth
                           />
                         </Grid>
-
                         <Grid item xs={12}>
                           <Divider />
                         </Grid>
                       </React.Fragment>
                     ))}
-                </Grid>
-                <Box
-                  mt={2}
+                  </Grid>
+                  <Box
+                    mt={2}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "4px 8px",
+                      border: "1px solid #ccc",
+                      borderRadius: "6px",
+                      backgroundColor: "#f9f9f9",
+                    }}
+                  >
+                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                      Total Service Cost:
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: "bold", color: "#1976d2" }}
+                    >
+                      ₹{totalAmount}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Grid>
+
+              <Grid item xs={12}>
+                <Paper
+                  elevation={0}
                   sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: 2,
-                    border: "1px solid #ccc",
-                    borderRadius: "8px",
-                    backgroundColor: "#f9f9f9",
+                    p: "4px 8px",
+                    mb: 0.5,
+                    borderRadius: "4px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    backgroundColor: "#fff",
                   }}
                 >
-                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-                    Total Material Cost:
-                  </Typography>
                   <Typography
-                    variant="h6"
-                    sx={{ fontWeight: "bold", color: "#1976d2" }}
+                    variant="subtitle2"
+                    sx={{
+                      mb: 0.25,
+                      color: "green",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                    }}
                   >
-                    ₹{totalMaterialAmount}
+                    Materials
                   </Typography>
-                </Box>
+                  <Grid container spacing={0.5} mt={0.5}>
+                    {Array.isArray(motherMaterials) &&
+                      motherMaterials.map((material, index) => (
+                        <React.Fragment key={material.record_id}>
+                          <Grid item xs={12} sm={6} md={1.5}>
+                            <TextField
+                              disabled
+                              label="ID"
+                              value={material.material_id || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={2}>
+                            <TextField
+                              disabled
+                              label="Description"
+                              value={material.material_desc || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              disabled
+                              label="UOM"
+                              value={material.material_uom || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              disabled
+                              label="Quantity"
+                              value={material.material_wo_qty || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              disabled
+                              label="Price"
+                              value={material.material_rate || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              disabled
+                              label="Bal QTY"
+                              value={material.material_bal_qty || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={1.5}>
+                            <TextField
+                              label="CWO Qty"
+                              value={materialLineItems[index]?.cwo_qty || ""}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const cwoQty = Number(value);
+                                const error =
+                                  cwoQty > Number(material.material_bal_qty)
+                                    ? "CWO Qty cannot exceed Bal Qty"
+                                    : "";
+
+                                setMaterialLineItems((prevItems) =>
+                                  prevItems.map((item, idx) =>
+                                    idx === index
+                                      ? {
+                                          ...item,
+                                          cwo_qty: value,
+                                          error,
+                                          material_cwo_price: error
+                                            ? ""
+                                            : (
+                                                cwoQty *
+                                                Number(material.material_rate)
+                                              ).toFixed(2),
+                                        }
+                                      : item
+                                  )
+                                );
+                              }}
+                              onKeyDown={(e) => {
+                                if (
+                                  e.key === "-" ||
+                                  e.key === "e" ||
+                                  e.key === "E"
+                                ) {
+                                  e.preventDefault(); // Block negative and exponential input
+                                }
+                              }}
+                              inputProps={{ min: 0 }}
+                              error={!!materialLineItems[index]?.error}
+                              helperText={materialLineItems[index]?.error || ""}
+                              variant="outlined"
+                              fullWidth
+                              type="number"
+                            />
+                          </Grid>
+
+                          <Grid item xs={12} sm={6} md={1.5}>
+                            <TextField
+                              label="CWO Amount"
+                              value={
+                                materialLineItems[index]?.material_cwo_price ||
+                                ""
+                              }
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+
+                          <Grid item xs={12}>
+                            <Divider />
+                          </Grid>
+                        </React.Fragment>
+                      ))}
+                  </Grid>
+                  <Box
+                    mt={2}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "4px 8px",
+                      border: "1px solid #ccc",
+                      borderRadius: "6px",
+                      backgroundColor: "#f9f9f9",
+                    }}
+                  >
+                    <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                      Total Material Cost:
+                    </Typography>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: "bold", color: "#1976d2" }}
+                    >
+                      ₹{totalMaterialAmount}
+                    </Typography>
+                  </Box>
+                </Paper>
               </Grid>
               <Grid
                 item

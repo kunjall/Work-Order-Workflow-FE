@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,17 @@ import {
   TableRow,
   Paper,
   Autocomplete,
+  Divider,
+  Chip,
+  IconButton,
+  Tooltip,
+  Link,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import InfoIcon from "@mui/icons-material/Info";
+import AttachmentIcon from "@mui/icons-material/Attachment";
 
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
@@ -33,7 +43,16 @@ const formatDate = (isoDateString) => {
   }).format(date);
 };
 
-const MwoModal = ({
+// Helper function to format field names for display
+const formatFieldName = (key) => {
+  return key
+    .replace(/_/g, " ")
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};
+
+const MbModal = ({
   open,
   onClose,
   rowData,
@@ -51,13 +70,40 @@ const MwoModal = ({
 }) => {
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
-      return { backgroundColor: "#ec7c30", color: "white" };
+      return {
+        color: "#ec7c30",
+        backgroundColor: "rgba(236, 124, 48, 0.1)",
+        borderColor: "#ec7c30",
+      };
     } else if (status.toLowerCase().includes("rejected")) {
-      return { backgroundColor: "red", color: "white" };
+      return {
+        color: "#d32f2f",
+        backgroundColor: "rgba(211, 47, 47, 0.1)",
+        borderColor: "#d32f2f",
+      };
     } else if (status.toLowerCase().includes("approved")) {
-      return { backgroundColor: "green", color: "white" };
+      return {
+        color: "#2e7d32",
+        backgroundColor: "rgba(46, 125, 50, 0.1)",
+        borderColor: "#2e7d32",
+      };
     }
-    return { backgroundColor: "gray", color: "white" };
+    return {
+      color: "#757575",
+      backgroundColor: "rgba(117, 117, 117, 0.1)",
+      borderColor: "#757575",
+    };
+  };
+
+  const getStatusIcon = (status) => {
+    if (status.toLowerCase().includes("approved")) {
+      return <CheckCircleIcon fontSize="small" />;
+    } else if (status.toLowerCase().includes("rejected")) {
+      return <CancelIcon fontSize="small" />;
+    } else if (status.toLowerCase().includes("pending")) {
+      return <InfoIcon fontSize="small" />;
+    }
+    return null;
   };
 
   const statusStyles = getStatusStyles(mbStatus);
@@ -84,209 +130,673 @@ const MwoModal = ({
     handleReject();
     onClose();
   };
-  console.log(childService);
+
+  // List of important fields to display first
+  const priorityFields = [
+    "mb_id",
+    "mb_sheet_number",
+    "mb_date",
+    "mb_status",
+    "requested_by",
+    "requested_at",
+    "attachment_url",
+  ];
+
+  // Get all fields to display
+  const getFieldsToDisplay = () => {
+    if (!rowData) return [];
+
+    // Start with priority fields
+    const fields = [...priorityFields];
+
+    // Add remaining fields that aren't in the excluded list
+    Object.keys(rowData).forEach((key) => {
+      if (
+        !priorityFields.includes(key) &&
+        !["record_id", "__v", "_id"].includes(key)
+      ) {
+        fields.push(key);
+      }
+    });
+
+    return fields;
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogContent sx={{ padding: "24px", position: "relative" }}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            ...statusStyles,
-          }}
-        >
-          <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-            {mbStatus}
-          </Typography>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: "12px",
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+          overflow: "hidden",
+        },
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "16px 24px",
+          borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+          backgroundColor: "#f8f9fa",
+        }}
+      >
+        <Typography variant="h5" sx={{ fontWeight: 600, color: "#333" }}>
+          Measurement Book Details
+          {rowData?.mb_sheet_number && (
+            <Chip
+              label={`Sheet #${rowData.mb_sheet_number}`}
+              size="small"
+              sx={{
+                ml: 2,
+                backgroundColor: "rgba(25, 118, 210, 0.1)",
+                color: "#1976d2",
+                fontWeight: 600,
+                borderRadius: "4px",
+              }}
+            />
+          )}
+        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Chip
+            icon={getStatusIcon(mbStatus)}
+            label={mbStatus}
+            sx={{
+              fontWeight: "bold",
+              borderWidth: "1px",
+              borderStyle: "solid",
+              ...statusStyles,
+            }}
+            variant="outlined"
+          />
+          <IconButton onClick={onClose} size="small" sx={{ ml: 1 }}>
+            <CloseIcon />
+          </IconButton>
         </Box>
-        <Grid container spacing={3}>
-          <Grid item xs={6}>
-            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-              Details
-            </Typography>
-            <Grid container spacing={2}>
-              {rowData ? (
-                Object.keys(rowData).map((key) => (
-                  <Grid item xs={6} key={key}>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: "bold", textTransform: "capitalize" }}
-                    >
-                      {key.replace(/_/g, " ")}:
+      </Box>
+
+      <DialogContent sx={{ padding: "24px", position: "relative" }}>
+        <Grid container spacing={4}>
+          {/* Details Section */}
+          <Grid item xs={12} md={5}>
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Request Information
+              </Typography>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: "8px",
+                  border: "1px solid rgba(0, 0, 0, 0.08)",
+                  backgroundColor: "#fff",
+                  maxHeight: "500px",
+                  overflowY: "auto",
+                }}
+              >
+                {rowData ? (
+                  <Grid container spacing={2}>
+                    {getFieldsToDisplay().map((key) => (
+                      <Grid item xs={12} sm={6} key={key}>
+                        <Box sx={{ mb: 1.5 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontWeight: 600,
+                              color:
+                                key === "attachment_url" ? "#1976d2" : "#666",
+                              display: "block",
+                              mb: 0.5,
+                            }}
+                          >
+                            {formatFieldName(key)}
+                          </Typography>
+
+                          {key.toLowerCase() === "attachment_url" &&
+                          rowData[key] ? (
+                            <Link
+                              href={rowData[key]}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              sx={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                color: "#1976d2",
+                                textDecoration: "none",
+                                fontWeight: 500,
+                                backgroundColor: "rgba(25, 118, 210, 0.08)",
+                                padding: "4px 8px",
+                                borderRadius: "4px",
+                                "&:hover": {
+                                  backgroundColor: "rgba(25, 118, 210, 0.12)",
+                                  textDecoration: "underline",
+                                },
+                              }}
+                            >
+                              <AttachmentIcon
+                                sx={{ mr: 0.5, fontSize: "1rem" }}
+                              />
+                              View Attachment
+                            </Link>
+                          ) : (
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "#333",
+                                fontWeight:
+                                  key.includes("id") || key.includes("number")
+                                    ? 600
+                                    : 400,
+                                backgroundColor:
+                                  key.includes("id") || key.includes("number")
+                                    ? "rgba(236, 124, 48, 0.08)"
+                                    : "transparent",
+                                p:
+                                  key.includes("id") || key.includes("number")
+                                    ? 0.5
+                                    : 0,
+                                borderRadius:
+                                  key.includes("id") || key.includes("number")
+                                    ? 1
+                                    : 0,
+                                display:
+                                  key.includes("id") || key.includes("number")
+                                    ? "inline-block"
+                                    : "block",
+                              }}
+                            >
+                              {key.toLowerCase().includes("date") ||
+                              key.toLowerCase().includes("time") ||
+                              key.toLowerCase().includes("at")
+                                ? formatDate(rowData[key])
+                                : rowData[key] || "—"}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Grid>
+                    ))}
+                  </Grid>
+                ) : (
+                  <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+                    <Typography sx={{ color: "#666" }}>
+                      Loading MB details...
                     </Typography>
-                    {key.toLowerCase() === "attachment_url" && rowData[key] ? (
-                      <Typography variant="body1">
-                        <a
-                          href={rowData[key]}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            color: "#1976d2",
-                            textDecoration: "none",
-                            fontWeight: "bold",
+                  </Box>
+                )}
+              </Paper>
+            </Box>
+          </Grid>
+
+          {/* Materials and Services Section */}
+          <Grid item xs={12} md={7}>
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Materials
+              </Typography>
+              {childMaterial && childMaterial.length > 0 ? (
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    boxShadow: "none",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    borderRadius: "8px",
+                    mb: 3,
+                    maxHeight: 400,
+                    overflowY: "auto",
+                  }}
+                >
+                  <Table stickyHeader size="small">
+                    <TableHead>
+                      <TableRow
+                        sx={{ backgroundColor: "rgba(236, 124, 48, 0.08)" }}
+                      >
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Material ID
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Description
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          UOM
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          MB QTY
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {childMaterial.map((material, index) => (
+                        <TableRow
+                          key={material.record_id}
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "rgba(0, 0, 0, 0.02)",
+                            },
+                            "&:hover": {
+                              backgroundColor: "rgba(236, 124, 48, 0.04)",
+                            },
                           }}
                         >
-                          View Attachment
-                        </a>
-                      </Typography>
-                    ) : (
-                      <Typography variant="body1">
-                        {key.toLowerCase().includes("date") ||
-                        key.toLowerCase().includes("time")
-                          ? formatDate(rowData[key])
-                          : rowData[key] || "N/A"}
-                      </Typography>
-                    )}
-                  </Grid>
-                ))
+                          <TableCell sx={{ fontWeight: 500 }}>
+                            {material.material_id}
+                          </TableCell>
+                          <TableCell>{material.material_desc}</TableCell>
+                          <TableCell>{material.material_uom}</TableCell>
+                          <TableCell>{material.material_log_qty}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               ) : (
-                <Typography>Loading row data...</Typography>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    textAlign: "center",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    mb: 3,
+                    color: "#666",
+                  }}
+                >
+                  <Typography>
+                    No materials available for this measurement book.
+                  </Typography>
+                </Paper>
               )}
-            </Grid>
-          </Grid>
-          <Grid item xs={6}>
-            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-              Materials
-            </Typography>
-            {childMaterial && childMaterial.length > 0 ? (
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Material ID</TableCell>
-                      <TableCell>Description</TableCell>
-                      <TableCell>UOM</TableCell>
-                      <TableCell>MB QTY</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {childMaterial.map((material) => (
-                      <TableRow key={material.record_id}>
-                        <TableCell>{material.material_id}</TableCell>
-                        <TableCell>{material.material_desc}</TableCell>
-                        <TableCell>{material.material_uom}</TableCell>
-                        <TableCell>{material.material_log_qty}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <Typography>No materials available.</Typography>
-            )}
 
-            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-              Services
-            </Typography>
-            {childService && childService.length > 0 ? (
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Service ID</TableCell>
-                      <TableCell>Description</TableCell>
-                      <TableCell>UOM</TableCell>
-                      <TableCell>MB QTY</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {childService.map((service) => (
-                      <TableRow key={service.record_id}>
-                        <TableCell>{service.service_id}</TableCell>
-                        <TableCell>{service.service_desc}</TableCell>
-                        <TableCell>{service.service_uom}</TableCell>
-                        <TableCell>{service.service_log_qty}</TableCell>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Services
+              </Typography>
+              {childService && childService.length > 0 ? (
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    boxShadow: "none",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    borderRadius: "8px",
+                    mb: 3,
+                    maxHeight: 400,
+                    overflowY: "auto",
+                  }}
+                >
+                  <Table stickyHeader size="small">
+                    <TableHead>
+                      <TableRow
+                        sx={{ backgroundColor: "rgba(236, 124, 48, 0.08)" }}
+                      >
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Service ID
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Description
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          UOM
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          MB QTY
+                        </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <Typography>No services available.</Typography>
-            )}
+                    </TableHead>
+                    <TableBody>
+                      {childService.map((service, index) => (
+                        <TableRow
+                          key={service.record_id}
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "rgba(0, 0, 0, 0.02)",
+                            },
+                            "&:hover": {
+                              backgroundColor: "rgba(236, 124, 48, 0.04)",
+                            },
+                          }}
+                        >
+                          <TableCell sx={{ fontWeight: 500 }}>
+                            {service.service_id}
+                          </TableCell>
+                          <TableCell>{service.service_desc}</TableCell>
+                          <TableCell>{service.service_uom}</TableCell>
+                          <TableCell>{service.service_log_qty}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    textAlign: "center",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    mb: 3,
+                    color: "#666",
+                  }}
+                >
+                  <Typography>
+                    No services available for this measurement book.
+                  </Typography>
+                </Paper>
+              )}
 
-            {mbStatus.toLowerCase().includes("deployment head") && (
-              <Box sx={{ marginTop: "16px" }}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-demo"
-                  options={approvers}
-                  getOptionLabel={(option) => option.approver_email.toString()}
-                  onChange={(event, newValue) => {
-                    setSelectedApproverEmail(
-                      newValue ? newValue.approver_email : null
-                    );
-                    setApproverName(newValue ? newValue.approver_name : "");
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Material Head"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                />
-              </Box>
-            )}
-            {mbStatus.toLowerCase().includes("material head") && (
-              <Box sx={{ marginTop: "16px" }}>
-                <Autocomplete
-                  disablePortal
-                  id="combo-box-demo"
-                  options={approvers}
-                  getOptionLabel={(option) => option.approver2_email.toString()}
-                  onChange={(event, newValue) => {
-                    setSelectedApproverEmail(
-                      newValue ? newValue.approver2_email : null
-                    );
-                    setApproverName(newValue ? newValue.approver2_name : "");
-                  }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Billing Spoc"
-                      variant="outlined"
-                      fullWidth
-                    />
-                  )}
-                />
-              </Box>
-            )}
-            <Box sx={{ mt: 3 }}>
+              {/* Approver Selection Section */}
+              {mbStatus.toLowerCase().includes("deployment head") && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 2,
+                      color: "#333",
+                      display: "flex",
+                      alignItems: "center",
+                      "&:after": {
+                        content: '""',
+                        display: "block",
+                        height: "2px",
+                        background: "#ec7c30",
+                        flexGrow: 1,
+                        ml: 2,
+                      },
+                    }}
+                  >
+                    Select Material Head
+                  </Typography>
+                  <Autocomplete
+                    disablePortal
+                    id="material-head-select"
+                    options={approvers}
+                    getOptionLabel={(option) =>
+                      option.approver_email.toString()
+                    }
+                    onChange={(event, newValue) => {
+                      setSelectedApproverEmail(
+                        newValue ? newValue.approver_email : null
+                      );
+                      setApproverName(newValue ? newValue.approver_name : "");
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Material Head"
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                            "&:hover fieldset": {
+                              borderColor: "#ec7c30",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#ec7c30",
+                            },
+                          },
+                        }}
+                      />
+                    )}
+                    sx={{
+                      "& .MuiAutocomplete-inputRoot": {
+                        color: "#333",
+                      },
+                    }}
+                  />
+                </Box>
+              )}
+
+              {mbStatus.toLowerCase().includes("material head") && (
+                <Box sx={{ mb: 3 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 2,
+                      color: "#333",
+                      display: "flex",
+                      alignItems: "center",
+                      "&:after": {
+                        content: '""',
+                        display: "block",
+                        height: "2px",
+                        background: "#ec7c30",
+                        flexGrow: 1,
+                        ml: 2,
+                      },
+                    }}
+                  >
+                    Select Billing SPOC
+                  </Typography>
+                  <Autocomplete
+                    disablePortal
+                    id="billing-spoc-select"
+                    options={approvers}
+                    getOptionLabel={(option) =>
+                      option.approver2_email.toString()
+                    }
+                    onChange={(event, newValue) => {
+                      setSelectedApproverEmail(
+                        newValue ? newValue.approver2_email : null
+                      );
+                      setApproverName(newValue ? newValue.approver2_name : "");
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Billing SPOC"
+                        variant="outlined"
+                        fullWidth
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                            "&:hover fieldset": {
+                              borderColor: "#ec7c30",
+                            },
+                            "&.Mui-focused fieldset": {
+                              borderColor: "#ec7c30",
+                            },
+                          },
+                        }}
+                      />
+                    )}
+                    sx={{
+                      "& .MuiAutocomplete-inputRoot": {
+                        color: "#333",
+                      },
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+
+            {/* Comments Section */}
+            <Box sx={{ mt: 2 }}>
+              <Divider sx={{ mb: 3 }} />
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Comments
+              </Typography>
               <TextField
-                label="Add Comment"
+                label="Add your comments"
+                placeholder="Enter any notes or comments about this measurement book..."
                 fullWidth
                 multiline
                 rows={3}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                    "&:hover fieldset": {
+                      borderColor: "#ec7c30",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ec7c30",
+                    },
+                  },
+                }}
               />
             </Box>
           </Grid>
         </Grid>
       </DialogContent>
-      <DialogActions sx={{ justifyContent: "flex-end", padding: "16px 24px" }}>
-        <Button
-          variant="contained"
-          color="success"
-          onClick={handleApproveButton}
-          disabled={!isActionAllowed}
+
+      <DialogActions
+        sx={{
+          justifyContent: "flex-end",
+          padding: "16px 24px",
+          borderTop: "1px solid rgba(0, 0, 0, 0.12)",
+          backgroundColor: "#f8f9fa",
+        }}
+      >
+        <Tooltip
+          title={
+            !isActionAllowed
+              ? "You don't have permission to approve this measurement book"
+              : "Approve this measurement book"
+          }
         >
-          Approve
-        </Button>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={handleRejectButton}
-          disabled={!isActionAllowed}
+          <span>
+            <Button
+              variant="contained"
+              startIcon={<CheckCircleIcon />}
+              onClick={handleApproveButton}
+              disabled={!isActionAllowed}
+              sx={{
+                backgroundColor: "#2e7d32",
+                "&:hover": {
+                  backgroundColor: "#1b5e20",
+                },
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 600,
+                boxShadow: "0 2px 8px rgba(46, 125, 50, 0.2)",
+              }}
+            >
+              Approve
+            </Button>
+          </span>
+        </Tooltip>
+        <Tooltip
+          title={
+            !isActionAllowed
+              ? "You don't have permission to reject this measurement book"
+              : "Reject this measurement book"
+          }
         >
-          Reject
-        </Button>
-        <Button variant="outlined" onClick={onClose}>
+          <span>
+            <Button
+              variant="contained"
+              startIcon={<CancelIcon />}
+              onClick={handleRejectButton}
+              disabled={!isActionAllowed}
+              sx={{
+                backgroundColor: "#d32f2f",
+                "&:hover": {
+                  backgroundColor: "#b71c1c",
+                },
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 600,
+                boxShadow: "0 2px 8px rgba(211, 47, 47, 0.2)",
+                ml: 2,
+              }}
+            >
+              Reject
+            </Button>
+          </span>
+        </Tooltip>
+        <Button
+          variant="outlined"
+          onClick={onClose}
+          sx={{
+            borderColor: "#757575",
+            color: "#757575",
+            "&:hover": {
+              borderColor: "#424242",
+              backgroundColor: "rgba(0, 0, 0, 0.04)",
+            },
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: 600,
+            ml: 2,
+          }}
+        >
           Close
         </Button>
       </DialogActions>
@@ -294,4 +804,4 @@ const MwoModal = ({
   );
 };
 
-export default MwoModal;
+export default MbModal;

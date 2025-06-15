@@ -19,7 +19,18 @@ import {
   Paper,
   Chip,
   Autocomplete,
+  Divider,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import InfoIcon from "@mui/icons-material/Info";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
+import RemoveCircleIcon from "@mui/icons-material/RemoveCircle";
+import EditIcon from "@mui/icons-material/Edit";
+import DoneIcon from "@mui/icons-material/Done";
 
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
@@ -60,13 +71,53 @@ const CrModal = ({
 
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
-      return { backgroundColor: "#ec7c30", color: "white" };
+      return {
+        color: "#ec7c30",
+        backgroundColor: "rgba(236, 124, 48, 0.1)",
+        borderColor: "#ec7c30",
+      };
     } else if (status.toLowerCase().includes("rejected")) {
-      return { backgroundColor: "red", color: "white" };
+      return {
+        color: "#d32f2f",
+        backgroundColor: "rgba(211, 47, 47, 0.1)",
+        borderColor: "#d32f2f",
+      };
     } else if (status.toLowerCase().includes("approved")) {
-      return { backgroundColor: "green", color: "white" };
+      return {
+        color: "#2e7d32",
+        backgroundColor: "rgba(46, 125, 50, 0.1)",
+        borderColor: "#2e7d32",
+      };
     }
-    return { backgroundColor: "gray", color: "white" };
+    return {
+      color: "#757575",
+      backgroundColor: "rgba(117, 117, 117, 0.1)",
+      borderColor: "#757575",
+    };
+  };
+
+  const getStatusIcon = (status) => {
+    if (status.toLowerCase().includes("approved")) {
+      return <CheckCircleIcon fontSize="small" />;
+    } else if (status.toLowerCase().includes("rejected")) {
+      return <CancelIcon fontSize="small" />;
+    } else if (status.toLowerCase().includes("pending")) {
+      return <InfoIcon fontSize="small" />;
+    }
+    return null;
+  };
+
+  const getChangeStatusIcon = (status) => {
+    if (status === "Removed") {
+      return <RemoveCircleIcon fontSize="small" sx={{ mr: 0.5 }} />;
+    } else if (status === "Added") {
+      return <AddCircleIcon fontSize="small" sx={{ mr: 0.5 }} />;
+    } else if (status === "Modified") {
+      return <EditIcon fontSize="small" sx={{ mr: 0.5 }} />;
+    } else if (status === "Unchanged") {
+      return <DoneIcon fontSize="small" sx={{ mr: 0.5 }} />;
+    }
+    return null;
   };
 
   // Check if this is the first approver
@@ -102,256 +153,569 @@ const CrModal = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogContent sx={{ padding: "24px", position: "relative" }}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            ...statusStyles,
-          }}
-        >
-          <Typography variant="body1" sx={{ fontWeight: "bold" }}>
-            {crStatus}
-          </Typography>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      PaperProps={{
+        sx: {
+          borderRadius: "12px",
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+          overflow: "hidden",
+        },
+      }}
+    >
+      {/* Header */}
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "16px 24px",
+          borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
+          backgroundColor: "#f8f9fa",
+        }}
+      >
+        <Typography variant="h5" sx={{ fontWeight: 600, color: "#333" }}>
+          Change Request Details
+          {rowData?.cr_cwo_id && (
+            <Chip
+              label={`CR #${rowData.cr_cwo_id}`}
+              size="small"
+              sx={{
+                ml: 2,
+                backgroundColor: "rgba(25, 118, 210, 0.1)",
+                color: "#1976d2",
+                fontWeight: 600,
+                borderRadius: "4px",
+              }}
+            />
+          )}
+        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Chip
+            icon={getStatusIcon(crStatus)}
+            label={crStatus}
+            sx={{
+              fontWeight: "bold",
+              borderWidth: "1px",
+              borderStyle: "solid",
+              ...statusStyles,
+            }}
+            variant="outlined"
+          />
+          <IconButton onClick={onClose} size="small" sx={{ ml: 1 }}>
+            <CloseIcon />
+          </IconButton>
         </Box>
+      </Box>
+      <DialogContent sx={{ padding: "24px", position: "relative" }}>
         <Grid container spacing={3}>
-          <Grid item xs={6}>
-            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-              Change Request Details
-            </Typography>
-            <Grid container spacing={2}>
-              {rowData ? (
-                <>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      CR ID:
-                    </Typography>
-                    <Typography variant="body1">
-                      {rowData.cr_cwo_id || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      CWO Number:
-                    </Typography>
-                    <Typography variant="body1">
-                      {rowData.cwo_number || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      Customer Name:
-                    </Typography>
-                    <Typography variant="body1">
-                      {rowData.customer_name || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      Total Material Cost:
-                    </Typography>
-                    <Typography variant="body1">
-                      ₹{Number(rowData.total_material_cost || 0).toFixed(2)}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      Total Service Cost:
-                    </Typography>
-                    <Typography variant="body1">
-                      ₹{Number(rowData.total_service_cost || 0).toFixed(2)}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      Created By:
-                    </Typography>
-                    <Typography variant="body1">
-                      {rowData.created_by || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      Created At:
-                    </Typography>
-                    <Typography variant="body1">
-                      {rowData.created_at || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      Approver:
-                    </Typography>
-                    <Typography variant="body1">
-                      {rowData.cr_approver_name || "N/A"}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={6}>
-                    <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                      Approver Email:
-                    </Typography>
-                    <Typography variant="body1">
-                      {rowData.cr_approver_email || "N/A"}
-                    </Typography>
-                  </Grid>
-                  {rowData.actioned_by && (
+          <Grid item xs={12} md={5}>
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Request Information
+              </Typography>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: "8px",
+                  border: "1px solid rgba(0, 0, 0, 0.08)",
+                  backgroundColor: "#fff",
+                  maxHeight: "500px",
+                  overflowY: "auto",
+                }}
+              >
+                <Grid container spacing={2}>
+                  {rowData ? (
                     <>
                       <Grid item xs={6}>
                         <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          Actioned By:
+                          CR ID:
                         </Typography>
                         <Typography variant="body1">
-                          {rowData.actioned_by}
+                          {rowData.cr_cwo_id || "N/A"}
                         </Typography>
                       </Grid>
                       <Grid item xs={6}>
                         <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          Actioned At:
+                          CWO Number:
                         </Typography>
                         <Typography variant="body1">
-                          {rowData.actioned_at}
+                          {rowData.cwo_number || "N/A"}
                         </Typography>
                       </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                          Customer Name:
+                        </Typography>
+                        <Typography variant="body1">
+                          {rowData.customer_name || "N/A"}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                          Total Material Cost:
+                        </Typography>
+                        <Typography variant="body1">
+                          ₹{Number(rowData.total_material_cost || 0).toFixed(2)}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                          Total Service Cost:
+                        </Typography>
+                        <Typography variant="body1">
+                          ₹{Number(rowData.total_service_cost || 0).toFixed(2)}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                          Created By:
+                        </Typography>
+                        <Typography variant="body1">
+                          {rowData.created_by || "N/A"}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                          Created At:
+                        </Typography>
+                        <Typography variant="body1">
+                          {rowData.created_at || "N/A"}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                          Approver:
+                        </Typography>
+                        <Typography variant="body1">
+                          {rowData.cr_approver_name || "N/A"}
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={6}>
+                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                          Approver Email:
+                        </Typography>
+                        <Typography variant="body1">
+                          {rowData.cr_approver_email || "N/A"}
+                        </Typography>
+                      </Grid>
+                      {rowData.actioned_by && (
+                        <>
+                          <Grid item xs={6}>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: "bold" }}
+                            >
+                              Actioned By:
+                            </Typography>
+                            <Typography variant="body1">
+                              {rowData.actioned_by}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={6}>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: "bold" }}
+                            >
+                              Actioned At:
+                            </Typography>
+                            <Typography variant="body1">
+                              {rowData.actioned_at}
+                            </Typography>
+                          </Grid>
+                        </>
+                      )}
+                      {rowData.approver_comments && (
+                        <Grid item xs={12}>
+                          <Typography
+                            variant="body2"
+                            sx={{ fontWeight: "bold" }}
+                          >
+                            Approver Comments:
+                          </Typography>
+                          <Typography variant="body1">
+                            {rowData.approver_comments}
+                          </Typography>
+                        </Grid>
+                      )}
                     </>
+                  ) : (
+                    <Typography>Loading row data...</Typography>
                   )}
-                  {rowData.approver_comments && (
-                    <Grid item xs={12}>
-                      <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                        Approver Comments:
-                      </Typography>
-                      <Typography variant="body1">
-                        {rowData.approver_comments}
-                      </Typography>
-                    </Grid>
-                  )}
-                </>
-              ) : (
-                <Typography>Loading row data...</Typography>
-              )}
-            </Grid>
+                </Grid>
+              </Paper>
+            </Box>
           </Grid>
-          <Grid item xs={6}>
-            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2 }}>
-              Materials
-            </Typography>
-            {crMaterials && crMaterials.length > 0 ? (
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Material ID</TableCell>
-                      <TableCell>Description</TableCell>
-                      <TableCell>UOM</TableCell>
-                      <TableCell>Original Qty</TableCell>
-                      <TableCell>New Qty</TableCell>
-                      <TableCell>Status</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {crMaterials.map((material) => (
-                      <TableRow key={material.record_id}>
-                        <TableCell>{material.material_id}</TableCell>
-                        <TableCell>{material.material_desc}</TableCell>
-                        <TableCell>{material.material_uom}</TableCell>
-                        <TableCell>{material.material_old_qty}</TableCell>
-                        <TableCell>{material.material_cr_qty}</TableCell>
-                        <TableCell>
-                          {material.is_removed ? (
-                            <Chip label="Removed" color="error" size="small" />
-                          ) : material.is_added ? (
-                            <Chip label="Added" color="primary" size="small" />
-                          ) : Number(material.material_old_qty) !==
-                            Number(material.material_cr_qty) ? (
-                            <Chip
-                              label="Modified"
-                              color="warning"
-                              size="small"
-                            />
-                          ) : (
-                            <Chip
-                              label="Unchanged"
-                              color="success"
-                              size="small"
-                            />
-                          )}
+
+          <Grid item xs={12} md={7}>
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Materials Changes
+              </Typography>
+              {crMaterials && crMaterials.length > 0 ? (
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    boxShadow: "none",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    borderRadius: "8px",
+                    mb: 3,
+                    maxHeight: 400,
+                    overflowY: "auto",
+                  }}
+                >
+                  <Table stickyHeader size="small">
+                    <TableHead>
+                      <TableRow
+                        sx={{ backgroundColor: "rgba(236, 124, 48, 0.08)" }}
+                      >
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Material ID
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Description
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          UOM
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Original Qty
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          New Qty
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Status
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <Typography>No materials available.</Typography>
-            )}
-            <Typography variant="h6" sx={{ fontWeight: "bold", mb: 2, mt: 3 }}>
-              Services
-            </Typography>
-            {crServices && crServices.length > 0 ? (
-              <TableContainer component={Paper}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Service ID</TableCell>
-                      <TableCell>Description</TableCell>
-                      <TableCell>UOM</TableCell>
-                      <TableCell>Original Qty</TableCell>
-                      <TableCell>New Qty</TableCell>
-                      <TableCell>Status</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {crServices.map((service) => (
-                      <TableRow key={service.record_id}>
-                        <TableCell>{service.service_id}</TableCell>
-                        <TableCell>{service.service_desc}</TableCell>
-                        <TableCell>{service.service_uom}</TableCell>
-                        <TableCell>{service.service_old_qty}</TableCell>
-                        <TableCell>{service.service_cr_qty}</TableCell>
-                        <TableCell>
-                          {service.is_removed ? (
-                            <Chip label="Removed" color="error" size="small" />
-                          ) : service.is_added ? (
-                            <Chip label="Added" color="primary" size="small" />
-                          ) : Number(service.service_old_qty) !==
-                            Number(service.service_cr_qty) ? (
-                            <Chip
-                              label="Modified"
-                              color="warning"
-                              size="small"
-                            />
-                          ) : (
-                            <Chip
-                              label="Unchanged"
-                              color="success"
-                              size="small"
-                            />
-                          )}
+                    </TableHead>
+                    <TableBody>
+                      {crMaterials.map((material) => (
+                        <TableRow
+                          key={material.record_id}
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "rgba(0, 0, 0, 0.02)",
+                            },
+                            "&:hover": {
+                              backgroundColor: "rgba(236, 124, 48, 0.04)",
+                            },
+                          }}
+                        >
+                          <TableCell>{material.material_id}</TableCell>
+                          <TableCell>{material.material_desc}</TableCell>
+                          <TableCell>{material.material_uom}</TableCell>
+                          <TableCell>{material.material_old_qty}</TableCell>
+                          <TableCell>{material.material_cr_qty}</TableCell>
+                          <TableCell>
+                            {material.is_removed ? (
+                              <Chip
+                                icon={getChangeStatusIcon("Removed")}
+                                label="Removed"
+                                size="small"
+                                sx={{
+                                  color: "#d32f2f",
+                                  backgroundColor: "rgba(211, 47, 47, 0.1)",
+                                  borderColor: "#d32f2f",
+                                  fontWeight: "bold",
+                                  borderWidth: "1px",
+                                  borderStyle: "solid",
+                                }}
+                                variant="outlined"
+                              />
+                            ) : material.is_added ? (
+                              <Chip
+                                icon={getChangeStatusIcon("Added")}
+                                label="Added"
+                                size="small"
+                                sx={{
+                                  color: "#1976d2",
+                                  backgroundColor: "rgba(25, 118, 210, 0.1)",
+                                  borderColor: "#1976d2",
+                                  fontWeight: "bold",
+                                  borderWidth: "1px",
+                                  borderStyle: "solid",
+                                }}
+                                variant="outlined"
+                              />
+                            ) : Number(material.material_old_qty) !==
+                              Number(material.material_cr_qty) ? (
+                              <Chip
+                                icon={getChangeStatusIcon("Modified")}
+                                label="Modified"
+                                size="small"
+                                sx={{
+                                  color: "#ec7c30",
+                                  backgroundColor: "rgba(236, 124, 48, 0.1)",
+                                  borderColor: "#ec7c30",
+                                  fontWeight: "bold",
+                                  borderWidth: "1px",
+                                  borderStyle: "solid",
+                                }}
+                                variant="outlined"
+                              />
+                            ) : (
+                              <Chip
+                                icon={getChangeStatusIcon("Unchanged")}
+                                label="Unchanged"
+                                size="small"
+                                sx={{
+                                  color: "#2e7d32",
+                                  backgroundColor: "rgba(46, 125, 50, 0.1)",
+                                  borderColor: "#2e7d32",
+                                  fontWeight: "bold",
+                                  borderWidth: "1px",
+                                  borderStyle: "solid",
+                                }}
+                                variant="outlined"
+                              />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    textAlign: "center",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    mb: 3,
+                    color: "#666",
+                  }}
+                >
+                  <Typography>
+                    No material changes in this change request.
+                  </Typography>
+                </Paper>
+              )}
+            </Box>
+
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  mt: 3,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Services Changes
+              </Typography>
+              {crServices && crServices.length > 0 ? (
+                <TableContainer
+                  component={Paper}
+                  sx={{
+                    boxShadow: "none",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    borderRadius: "8px",
+                    mb: 3,
+                    maxHeight: 400,
+                    overflowY: "auto",
+                  }}
+                >
+                  <Table stickyHeader size="small">
+                    <TableHead>
+                      <TableRow
+                        sx={{ backgroundColor: "rgba(236, 124, 48, 0.08)" }}
+                      >
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Service ID
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Description
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          UOM
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Original Qty
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          New Qty
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Status
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            ) : (
-              <Typography>No services available.</Typography>
-            )}
+                    </TableHead>
+                    <TableBody>
+                      {crServices.map((service) => (
+                        <TableRow
+                          key={service.record_id}
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "rgba(0, 0, 0, 0.02)",
+                            },
+                            "&:hover": {
+                              backgroundColor: "rgba(236, 124, 48, 0.04)",
+                            },
+                          }}
+                        >
+                          <TableCell>{service.service_id}</TableCell>
+                          <TableCell>{service.service_desc}</TableCell>
+                          <TableCell>{service.service_uom}</TableCell>
+                          <TableCell>{service.service_old_qty}</TableCell>
+                          <TableCell>{service.service_cr_qty}</TableCell>
+                          <TableCell>
+                            {service.is_removed ? (
+                              <Chip
+                                icon={getChangeStatusIcon("Removed")}
+                                label="Removed"
+                                size="small"
+                                sx={{
+                                  color: "#d32f2f",
+                                  backgroundColor: "rgba(211, 47, 47, 0.1)",
+                                  borderColor: "#d32f2f",
+                                  fontWeight: "bold",
+                                  borderWidth: "1px",
+                                  borderStyle: "solid",
+                                }}
+                                variant="outlined"
+                              />
+                            ) : service.is_added ? (
+                              <Chip
+                                icon={getChangeStatusIcon("Added")}
+                                label="Added"
+                                size="small"
+                                sx={{
+                                  color: "#1976d2",
+                                  backgroundColor: "rgba(25, 118, 210, 0.1)",
+                                  borderColor: "#1976d2",
+                                  fontWeight: "bold",
+                                  borderWidth: "1px",
+                                  borderStyle: "solid",
+                                }}
+                                variant="outlined"
+                              />
+                            ) : Number(service.service_old_qty) !==
+                              Number(service.service_cr_qty) ? (
+                              <Chip
+                                icon={getChangeStatusIcon("Modified")}
+                                label="Modified"
+                                size="small"
+                                sx={{
+                                  color: "#ec7c30",
+                                  backgroundColor: "rgba(236, 124, 48, 0.1)",
+                                  borderColor: "#ec7c30",
+                                  fontWeight: "bold",
+                                  borderWidth: "1px",
+                                  borderStyle: "solid",
+                                }}
+                                variant="outlined"
+                              />
+                            ) : (
+                              <Chip
+                                icon={getChangeStatusIcon("Unchanged")}
+                                label="Unchanged"
+                                size="small"
+                                sx={{
+                                  color: "#2e7d32",
+                                  backgroundColor: "rgba(46, 125, 50, 0.1)",
+                                  borderColor: "#2e7d32",
+                                  fontWeight: "bold",
+                                  borderWidth: "1px",
+                                  borderStyle: "solid",
+                                }}
+                                variant="outlined"
+                              />
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              ) : (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    textAlign: "center",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    mb: 3,
+                    color: "#666",
+                  }}
+                >
+                  <Typography>
+                    No service changes in this change request.
+                  </Typography>
+                </Paper>
+              )}
+            </Box>
 
             {/* Second Approver Selection (only shown for first approver) */}
             {isFirstApprover && isActionAllowed && (
-              <Box sx={{ marginTop: "16px" }}>
-                <Autocomplete
+              <Box sx={{ mt: 4, mb: 2 }}>
+                <Typography
+                  variant="subtitle2"
                   sx={{
-                    "& .MuiAutocomplete-listbox .MuiAutocomplete-option": {
-                      color: "blue",
-                    }, // Dropdown options color
-                    "& .MuiOutlinedInput-root": { color: "blue" }, // Selected value color
+                    fontWeight: 600,
+                    mb: 1.5,
+                    color: "#333",
+                    display: "flex",
+                    alignItems: "center",
                   }}
+                >
+                  Select Next Approver
+                </Typography>
+                <Autocomplete
                   disablePortal
-                  id="combo-box-demo"
+                  id="second-approver-select"
                   options={[...approvers].sort(
                     (a, b) =>
                       b.approver2_name?.localeCompare(a.approver2_name || "") ||
@@ -372,37 +736,121 @@ const CrModal = ({
                     <TextField
                       {...params}
                       label="Second Approver"
+                      placeholder="Select second approver..."
                       variant="outlined"
                       fullWidth
                       sx={{
-                        "& .MuiInputBase-input": { color: "blue" }, // Ensures typed text stays blue
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                          backgroundColor: "rgba(0, 0, 0, 0.01)",
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "rgba(0, 0, 0, 0.12)",
+                        },
+                        "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#ec7c30 !important",
+                          borderWidth: "1px",
+                        },
                       }}
                     />
                   )}
+                  sx={{
+                    "& .MuiAutocomplete-endAdornment": {
+                      color: "#666",
+                    },
+                  }}
                 />
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: "block",
+                    mt: 1,
+                    color: "#666",
+                    fontStyle: "italic",
+                  }}
+                >
+                  Select the second approver who will review this change request
+                  after your approval.
+                </Typography>
               </Box>
             )}
 
             <Box sx={{ mt: 3 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  fontWeight: 600,
+                  mb: 1.5,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                Approval Comments
+              </Typography>
               <TextField
-                label="Add Comment"
+                label="Add your comments here"
+                placeholder="Enter your comments regarding this change request..."
                 fullWidth
                 multiline
                 rows={3}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 disabled={!isActionAllowed}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                    backgroundColor: isActionAllowed
+                      ? "rgba(0, 0, 0, 0.01)"
+                      : "rgba(0, 0, 0, 0.04)",
+                  },
+                  "& .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "rgba(0, 0, 0, 0.12)",
+                  },
+                  "& .Mui-focused .MuiOutlinedInput-notchedOutline": {
+                    borderColor: "#ec7c30 !important",
+                    borderWidth: "1px",
+                  },
+                }}
               />
+              {!isActionAllowed && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    display: "block",
+                    mt: 1,
+                    color: "#666",
+                    fontStyle: "italic",
+                  }}
+                >
+                  You don't have permission to add comments for this change
+                  request.
+                </Typography>
+              )}
             </Box>
           </Grid>
         </Grid>
       </DialogContent>
-      <DialogActions sx={{ justifyContent: "flex-end", padding: "16px 24px" }}>
+      <DialogActions
+        sx={{
+          justifyContent: "flex-end",
+          padding: "16px 24px",
+          borderTop: "1px solid rgba(0, 0, 0, 0.08)",
+        }}
+      >
         <Button
           variant="contained"
           color="success"
           onClick={handleApproveButton}
           disabled={!isActionAllowed}
+          startIcon={<CheckCircleIcon />}
+          sx={{
+            fontWeight: 600,
+            boxShadow: "0 2px 8px rgba(46, 125, 50, 0.2)",
+            "&:hover": {
+              boxShadow: "0 4px 12px rgba(46, 125, 50, 0.3)",
+            },
+          }}
         >
           Approve
         </Button>
@@ -411,10 +859,32 @@ const CrModal = ({
           color="error"
           onClick={handleRejectButton}
           disabled={!isActionAllowed}
+          startIcon={<CancelIcon />}
+          sx={{
+            fontWeight: 600,
+            boxShadow: "0 2px 8px rgba(211, 47, 47, 0.2)",
+            "&:hover": {
+              boxShadow: "0 4px 12px rgba(211, 47, 47, 0.3)",
+            },
+            ml: 2,
+          }}
         >
           Reject
         </Button>
-        <Button variant="outlined" onClick={onClose}>
+        <Button
+          variant="outlined"
+          onClick={onClose}
+          sx={{
+            ml: 2,
+            fontWeight: 600,
+            borderColor: "rgba(0, 0, 0, 0.23)",
+            color: "#555",
+            "&:hover": {
+              borderColor: "rgba(0, 0, 0, 0.5)",
+              backgroundColor: "rgba(0, 0, 0, 0.04)",
+            },
+          }}
+        >
           Close
         </Button>
       </DialogActions>

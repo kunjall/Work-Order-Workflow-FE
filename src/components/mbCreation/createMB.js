@@ -510,7 +510,92 @@ const CreateMRS = () => {
     }
   }, [user, navigate]);
 
-  let theme = createTheme();
+  let theme = createTheme({
+    palette: {
+      primary: {
+        main: "#ec7c30",
+      },
+      secondary: {
+        main: "#2c3e50",
+      },
+    },
+    typography: {
+      fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+      h5: {
+        fontWeight: 600,
+      },
+      h6: {
+        fontWeight: 600,
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+            borderRadius: 4,
+            padding: "4px 12px",
+            boxShadow: "none",
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiFormControl: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+      },
+      MuiAutocomplete: {
+        defaultProps: {
+          size: "small",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.8rem",
+            transform: "translate(14px, 8px) scale(1)",
+            "&.MuiInputLabel-shrink": {
+              transform: "translate(14px, -6px) scale(0.75)",
+            },
+          },
+        },
+      },
+    },
+  });
   theme = responsiveFontSizes(theme);
 
   return (
@@ -536,10 +621,10 @@ const CreateMRS = () => {
         ) : (
           <Grid
             container
-            spacing={2}
+            spacing={0.5}
             sx={{
               marginLeft: 1,
-              marginTop: 1,
+              marginTop: 0.5,
               maxWidth: "100%",
             }}
           >
@@ -549,14 +634,26 @@ const CreateMRS = () => {
               <>
                 <Grid
                   container
-                  spacing={2}
+                  spacing={0.5}
                   sx={{
                     marginLeft: 1,
-                    marginTop: 1,
+                    marginTop: 0.5,
                     maxWidth: "100%",
                   }}
                 >
-                  <Grid item xs={12} sm={12} md={6}>
+                  <Box sx={{ mb: 0.5, width: "100%" }}>
+                    <Typography
+                      variant="h6"
+                      sx={{
+                        fontWeight: "bold",
+                        color: "#2c3e50",
+                        mb: 0.5,
+                      }}
+                    >
+                      Measurement Book
+                    </Typography>
+                  </Box>
+                  <Grid item xs={12} sm={12} md={6} mt={-2}>
                     <FormControl>
                       <FormLabel id="demo-controlled-radio-buttons-group">
                         Requestor
@@ -607,7 +704,7 @@ const CreateMRS = () => {
                           />
                         </FormControl>
                       </Grid>
-                      <Grid item xs={12} sm={6} md={3}>
+                      <Grid item xs={12} sm={6} md={2.5} mt={1}>
                         <TextField
                           label="Vendor Name"
                           value={formData.vendor_name || ""}
@@ -620,7 +717,10 @@ const CreateMRS = () => {
                     </>
                   )}
                   {}
-                  <Grid item xs={12} sm={6} md={7}>
+                  <Grid item xs={12}>
+                    {/* Line break */}
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={2}>
                     <Autocomplete
                       value={selectedWorkOrder}
                       options={
@@ -628,21 +728,31 @@ const CreateMRS = () => {
                           ? internalWorkOrders
                           : externalWorkOrders
                       }
-                      getOptionLabel={(option) => option.cwo_number || ""}
+                      getOptionLabel={(option) => option.cwo_id || ""}
                       onChange={(event, newValue) => {
                         handleWorkOrderSelect(event, newValue);
                       }}
                       isOptionEqualToValue={(option, value) =>
-                        option.cwo_number === value?.cwo_number
+                        option.cwo_number === value?.cwo_id
                       }
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="CWO Number"
+                          label="CWO id"
                           variant="outlined"
                           fullWidth
                         />
                       )}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6} md={4}>
+                    <TextField
+                      label="CWO Number"
+                      value={formData.cwo_number || ""}
+                      InputProps={{ readOnly: true }}
+                      variant="outlined"
+                      disabled
+                      fullWidth
                     />
                   </Grid>
                   {}
@@ -657,7 +767,7 @@ const CreateMRS = () => {
                 fullWidth
               />
             </Grid> */}
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={3}>
                     <TextField
                       label="Route Name"
                       value={formData.route_name || ""}
@@ -667,7 +777,7 @@ const CreateMRS = () => {
                       fullWidth
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={2}>
+                  <Grid item xs={12} sm={6} md={1}>
                     <TextField
                       label="Execution City"
                       value={formData.execution_city || ""}
@@ -677,7 +787,7 @@ const CreateMRS = () => {
                       fullWidth
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={2}>
+                  <Grid item xs={12} sm={6} md={1.5}>
                     <TextField
                       label="Execution State"
                       value={formData.state || ""}
@@ -688,7 +798,7 @@ const CreateMRS = () => {
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6} md={3}>
+                  <Grid item xs={12} sm={6} md={1.5}>
                     <TextField
                       label="TPS PM"
                       value={formData.internal_manager || ""}
@@ -698,7 +808,7 @@ const CreateMRS = () => {
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={2.5}>
                     <Autocomplete
                       value={
                         selectedLocator
@@ -736,7 +846,7 @@ const CreateMRS = () => {
                         fullWidth
                       /> */}
                   {}
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={2}>
                     <Autocomplete
                       value={
                         selectedApproverEmail
@@ -767,7 +877,7 @@ const CreateMRS = () => {
                     />
                   </Grid>
 
-                  <Grid item xs={12} sm={6} md={3}>
+                  <Grid item xs={12} sm={6} md={2}>
                     <TextField
                       id="approver-name"
                       label="Deployment Head Name"
@@ -783,7 +893,7 @@ const CreateMRS = () => {
                       fullWidth
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
+                  <Grid item xs={12} sm={6} md={3.5}>
                     <TextField
                       label="Attachment Link"
                       value={attachmentLink}
@@ -795,9 +905,164 @@ const CreateMRS = () => {
                     />
                   </Grid>
 
-                  <Grid item xs={12}>
-                    <Typography variant="h6">Materials</Typography>
-                    <Grid container spacing={2} mt={1}>
+                  <Grid
+                    item
+                    xs={12}
+                    sx={{
+                      p: "4px 8px",
+                      mb: 0.5,
+                      borderRadius: "4px",
+                      border: "1px solid rgba(0, 0, 0, 0.08)",
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        mb: 0.25,
+                        color: "blue",
+                        fontWeight: "bold",
+                        fontSize: "1rem",
+                      }}
+                    >
+                      Services
+                    </Typography>{" "}
+                    <Grid container spacing={0.5} mt={0.5}>
+                      {serviceLineItems.map((service, index) => (
+                        <React.Fragment key={service.record_id}>
+                          <Grid item xs={12} sm={6} md={2}>
+                            <TextField
+                              label="Material Code"
+                              value={service.service_id || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={3.5}>
+                            <TextField
+                              label="Description"
+                              value={service.service_desc || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              label="MM QTY"
+                              value={service.service_bal_qty || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              label="UOM"
+                              value={service.service_uom || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              disabled
+                              label="Rate"
+                              value={service.service_rate || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12} sm={6} md={1.5}>
+                            <TextField
+                              label="MB Qty"
+                              value={serviceLineItems[index]?.mb_qty || ""}
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const mmQty = Number(value);
+                                const error =
+                                  mmQty > Number(service.service_bal_qty)
+                                    ? "MM Qty cannot exceed CWO Qty"
+                                    : "";
+
+                                setServiceLineItems((prevItems) =>
+                                  prevItems.map((item, idx) =>
+                                    idx === index
+                                      ? {
+                                          ...item,
+                                          mb_qty: value,
+                                          error,
+                                          service_mb_price: error
+                                            ? ""
+                                            : (
+                                                mmQty *
+                                                Number(service.service_rate)
+                                              ).toFixed(2),
+                                        }
+                                      : item
+                                  )
+                                );
+                              }}
+                              onKeyDown={(e) => {
+                                if (
+                                  e.key === "-" ||
+                                  e.key === "e" ||
+                                  e.key === "E"
+                                ) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              inputProps={{ min: 0 }}
+                              error={!!serviceLineItems[index]?.error}
+                              helperText={serviceLineItems[index]?.error || ""}
+                              variant="outlined"
+                              fullWidth
+                              type="number"
+                            />
+                          </Grid>
+
+                          <Grid item xs={12} sm={6} md={1.5}>
+                            <TextField
+                              label="Amount"
+                              value={
+                                serviceLineItems[index]?.service_mb_price || ""
+                              }
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+                          <Grid item xs={12}></Grid>
+                        </React.Fragment>
+                      ))}
+                    </Grid>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    sx={{
+                      p: "4px 8px",
+                      mb: 0.5,
+                      borderRadius: "4px",
+                      border: "1px solid rgba(0, 0, 0, 0.08)",
+                      backgroundColor: "#fff",
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        mb: 0.25,
+                        color: "green",
+                        fontWeight: "bold",
+                        fontSize: "1rem",
+                      }}
+                    >
+                      Materials
+                    </Typography>
+                    <Grid container spacing={0.5} mt={0.5}>
                       {materialLineItems.map((material, index) => (
                         <React.Fragment key={material.record_id}>
                           <Grid item xs={12} sm={6} md={2}>
@@ -809,7 +1074,7 @@ const CreateMRS = () => {
                               fullWidth
                             />
                           </Grid>
-                          <Grid item xs={12} sm={6} md={2}>
+                          <Grid item xs={12} sm={6} md={3.5}>
                             <TextField
                               label="Description"
                               value={material.material_desc || ""}
@@ -927,128 +1192,7 @@ const CreateMRS = () => {
                             />
                           </Grid>
 
-                          <Grid item xs={12}>
-                            <Divider />
-                          </Grid>
-                        </React.Fragment>
-                      ))}
-                    </Grid>
-                  </Grid>
-
-                  <Grid item xs={12}>
-                    <Typography variant="h6">Services</Typography>
-                    <Grid container spacing={2} mt={1}>
-                      {serviceLineItems.map((service, index) => (
-                        <React.Fragment key={service.record_id}>
-                          <Grid item xs={12} sm={6} md={2}>
-                            <TextField
-                              label="Material Code"
-                              value={service.service_id || ""}
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6} md={2}>
-                            <TextField
-                              label="Description"
-                              value={service.service_desc || ""}
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6} md={1}>
-                            <TextField
-                              label="MM QTY"
-                              value={service.service_bal_qty || ""}
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6} md={1}>
-                            <TextField
-                              label="UOM"
-                              value={service.service_uom || ""}
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6} md={1}>
-                            <TextField
-                              disabled
-                              label="Rate"
-                              value={service.service_rate || ""}
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-                          <Grid item xs={12} sm={6} md={1.5}>
-                            <TextField
-                              label="MB Qty"
-                              value={serviceLineItems[index]?.mb_qty || ""}
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                const mmQty = Number(value);
-                                const error =
-                                  mmQty > Number(service.service_bal_qty)
-                                    ? "MM Qty cannot exceed CWO Qty"
-                                    : "";
-
-                                setServiceLineItems((prevItems) =>
-                                  prevItems.map((item, idx) =>
-                                    idx === index
-                                      ? {
-                                          ...item,
-                                          mb_qty: value,
-                                          error,
-                                          service_mb_price: error
-                                            ? ""
-                                            : (
-                                                mmQty *
-                                                Number(service.service_rate)
-                                              ).toFixed(2),
-                                        }
-                                      : item
-                                  )
-                                );
-                              }}
-                              onKeyDown={(e) => {
-                                if (
-                                  e.key === "-" ||
-                                  e.key === "e" ||
-                                  e.key === "E"
-                                ) {
-                                  e.preventDefault();
-                                }
-                              }}
-                              inputProps={{ min: 0 }}
-                              error={!!serviceLineItems[index]?.error}
-                              helperText={serviceLineItems[index]?.error || ""}
-                              variant="outlined"
-                              fullWidth
-                              type="number"
-                            />
-                          </Grid>
-
-                          <Grid item xs={12} sm={6} md={1.5}>
-                            <TextField
-                              label="Amount"
-                              value={
-                                serviceLineItems[index]?.service_mb_price || ""
-                              }
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-
-                          <Grid item xs={12}>
-                            <Divider />
-                          </Grid>
+                          <Grid item xs={12}></Grid>
                         </React.Fragment>
                       ))}
                     </Grid>

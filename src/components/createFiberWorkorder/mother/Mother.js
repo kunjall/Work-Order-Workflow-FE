@@ -29,6 +29,10 @@ import {
   CircularProgress,
   Divider,
   Container,
+  Paper,
+  Card,
+  CardContent,
+  Chip,
 } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -410,7 +414,92 @@ const DashboardWhinch = () => {
     resetForm();
   };
 
-  let theme = createTheme();
+  let theme = createTheme({
+    palette: {
+      primary: {
+        main: "#ec7c30",
+      },
+      secondary: {
+        main: "#2c3e50",
+      },
+    },
+    typography: {
+      fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+      h5: {
+        fontWeight: 600,
+      },
+      h6: {
+        fontWeight: 600,
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+            borderRadius: 4,
+            padding: "4px 12px",
+            boxShadow: "none",
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiFormControl: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+      },
+      MuiAutocomplete: {
+        defaultProps: {
+          size: "small",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.8rem",
+            transform: "translate(14px, 8px) scale(1)",
+            "&.MuiInputLabel-shrink": {
+              transform: "translate(14px, -6px) scale(0.75)",
+            },
+          },
+        },
+      },
+    },
+  });
   theme = responsiveFontSizes(theme);
 
   return (
@@ -420,41 +509,45 @@ const DashboardWhinch = () => {
           {error ? (
             <Typography color="error">{error}</Typography>
           ) : (
-            <Grid container spacing={2}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "100vw",
-                }}
-              >
+            <Grid container spacing={0.5}>
+              <Box sx={{ mb: 1, width: "100%" }}>
                 <Typography
-                  variant="h5"
+                  variant="h6"
                   sx={{
                     fontWeight: "bold",
                     color: "#2c3e50",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    textAlign: "center",
+                    mb: 0.5,
                   }}
                 >
-                  Mother Workorder
+                  Mother Workorder - Fiber Rollout
                 </Typography>
               </Box>
               {}
-              <Grid
-                item
-                xs={12}
-                sx={{
-                  top: 0,
-                  backgroundColor: "white",
-                  zIndex: 10,
-                }}
-              >
-                <Box sx={{ borderBottom: "1px solid #ddd", padding: 2 }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={2}>
+              <Grid item xs={12}>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: "4px 8px",
+                    mb: 0.5,
+                    borderRadius: "4px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      mb: 0.25,
+                      color: "#2c3e50",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                    }}
+                  >
+                    Customer Information
+                  </Typography>
+                  <Grid container spacing={0.5}>
+                    {/* Row 1 */}
+                    <Grid item xs={12} md={3}>
                       <Autocomplete
                         disablePortal
                         id="combo-box-demo"
@@ -466,17 +559,14 @@ const DashboardWhinch = () => {
                         renderInput={(params) => (
                           <TextField
                             {...params}
-                            label="Select Customer ID"
+                            label="Customer ID"
                             variant="outlined"
                             fullWidth
-                            InputProps={{
-                              ...params.InputProps,
-                            }}
                           />
                         )}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="customer-name"
                         label="Customer Name"
@@ -488,7 +578,7 @@ const DashboardWhinch = () => {
                         fullWidth
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="customer-state"
                         label="Customer State"
@@ -500,7 +590,7 @@ const DashboardWhinch = () => {
                         fullWidth
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={6}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="work-order-number"
                         label="Customer W/O Number"
@@ -510,7 +600,9 @@ const DashboardWhinch = () => {
                         onChange={(e) => setWorkOrderNumber(e.target.value)}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
+
+                    {/* Row 2 */}
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="gis-code"
                         label="GIS Code"
@@ -522,8 +614,7 @@ const DashboardWhinch = () => {
                         }
                       />
                     </Grid>
-                     ⁠
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={12} md={3}>
                       <FormControl variant="outlined" fullWidth>
                         <InputLabel id="execution-city-label">
                           Execution City
@@ -546,7 +637,7 @@ const DashboardWhinch = () => {
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="state"
                         label="State"
@@ -559,7 +650,7 @@ const DashboardWhinch = () => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={6.5}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="route-name"
                         label="Route Name"
@@ -571,7 +662,9 @@ const DashboardWhinch = () => {
                         }
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+
+                    {/* Row 3 */}
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="route-length"
                         label="Route Length (m)"
@@ -595,7 +688,7 @@ const DashboardWhinch = () => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="homepass-count"
                         label="Homepass Count"
@@ -612,7 +705,7 @@ const DashboardWhinch = () => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
+                    <Grid item xs={12} md={3}>
                       <FormControl variant="outlined" fullWidth>
                         <InputLabel id="dropdown-label">Activity</InputLabel>
                         <Select
@@ -631,7 +724,7 @@ const DashboardWhinch = () => {
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={1}>
+                    <Grid item xs={12} md={3}>
                       <FormControl variant="outlined" fullWidth>
                         <InputLabel id="dropdown-label">Type</InputLabel>
                         <Select
@@ -648,13 +741,15 @@ const DashboardWhinch = () => {
                         </Select>
                       </FormControl>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+
+                    {/* Row 4 */}
+                    <Grid item xs={12} md={3}>
                       <LocalizationProvider dateAdapter={AdapterDayjs}>
                         <DatePicker
                           label="CUST Approval Date"
                           value={selectedDate}
                           onChange={(newValue) => setSelectedDate(newValue)}
-                          maxDate={dayjs()} // 👈 restrict to today or earlier
+                          maxDate={dayjs()}
                           renderInput={(params) => (
                             <TextField
                               {...params}
@@ -669,7 +764,7 @@ const DashboardWhinch = () => {
                         />
                       </LocalizationProvider>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={2}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="customer-project-manager"
                         label="Customer Project Manager"
@@ -681,7 +776,7 @@ const DashboardWhinch = () => {
                         }
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
+                    <Grid item xs={12} md={3}>
                       <Autocomplete
                         disablePortal
                         id="combo-box-demo"
@@ -693,7 +788,7 @@ const DashboardWhinch = () => {
                           setSelectedApproverEmail(
                             newValue ? newValue.approver_email : null
                           );
-                          setShowWarning(false); // Clear warning if user selects
+                          setShowWarning(false);
                         }}
                         renderInput={(params) => (
                           <TextField
@@ -709,7 +804,6 @@ const DashboardWhinch = () => {
                           />
                         )}
                       />
-
                       {showWarning && (
                         <Typography
                           variant="body2"
@@ -720,7 +814,7 @@ const DashboardWhinch = () => {
                         </Typography>
                       )}
                     </Grid>
-                    <Grid item xs={12} sm={6} md={4}>
+                    <Grid item xs={12} md={3}>
                       <TextField
                         id="approver-name"
                         label="Approver Name"
@@ -737,83 +831,180 @@ const DashboardWhinch = () => {
                       />
                     </Grid>
                   </Grid>
-                </Box>
+                </Paper>
               </Grid>
 
               {}
               <Grid item xs={12}>
-                <Box sx={{ flex: 1, padding: 2 }}>
-                  <Typography variant="h6">Services</Typography>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: "4px 8px",
+                    mb: 0.5,
+                    borderRadius: "4px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      mb: 0.25,
+                      color: "blue",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                    }}
+                  >
+                    Services
+                  </Typography>
                   <AddServices
                     services={services}
                     onLineItemUpdate={handleServiceLineItemsUpdate}
                     onAmountUpdate={handleTotalAmountChange}
                   />
-                </Box>
-                <Divider
-                  flexItem
-                  sx={{ display: { xs: "none", md: "flex" } }}
-                />
-                <Box sx={{ flex: 1, padding: 2 }}>
-                  <Typography variant="h6">Materials</Typography>
+                </Paper>
+
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: "4px 8px",
+                    mb: 0.5,
+                    borderRadius: "4px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      mb: 0.25,
+                      color: "green",
+                      fontWeight: "bold",
+                      fontSize: "1rem",
+                    }}
+                  >
+                    Materials
+                  </Typography>
                   <AddMaterials
                     materialCodes={materialCodes}
                     onUpdate={handleLineItemsUpdate}
                     onAmountUpdate={handleTotalMaterialAmountChange}
                   />
-                </Box>
+                </Paper>
               </Grid>
 
-              <Grid
-                item
-                xs={12}
-                sx={{ display: "flex", justifyContent: "center" }}
-              >
-                <Button
-                  variant="contained"
+              <Grid item xs={12}>
+                <Box
                   sx={{
-                    backgroundColor: "#ec7c30",
-                    color: "white",
-                    "&:hover": {
-                      backgroundColor: "black",
-                    },
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    mt: 0.5,
+                    mb: 0.5,
                   }}
-                  onClick={handleSubmit}
-                  disabled={loading}
                 >
-                  {loading ? (
-                    <CircularProgress size={24} color="inherit" />
-                  ) : (
-                    "Submit"
-                  )}
-                </Button>
+                  <Button
+                    variant="contained"
+                    startIcon={
+                      loading ? (
+                        <CircularProgress size={16} color="inherit" />
+                      ) : null
+                    }
+                    sx={{
+                      backgroundColor: "#ec7c30",
+                      color: "white",
+                      fontWeight: "bold",
+                      px: 2,
+                      py: 0.5,
+                      height: 28,
+                      fontSize: "0.75rem",
+                      "&:hover": {
+                        backgroundColor: "#d86b20",
+                      },
+                    }}
+                    onClick={handleSubmit}
+                    disabled={loading}
+                  >
+                    {loading ? "Processing..." : "Submit"}
+                  </Button>
+                </Box>
               </Grid>
             </Grid>
           )}
         </Box>
 
         {}
-        <Dialog open={successPopupOpen} onClose={handlePopupClose}>
-          <DialogTitle>Success</DialogTitle>
-          <DialogContent>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <CheckCircleIcon style={{ color: "green" }} />
-              <DialogContentText>
-                <Typography variant="body1">
-                  MWO with number -{" "}
-                  <Typography
-                    variant="h4"
-                    sx={{ fontSize: "2.5rem", fontWeight: "bold" }}
-                  >
-                    {mwoId}
-                  </Typography>{" "}
-                  has been successfully submitted.
-                </Typography>
-              </DialogContentText>
+        <Dialog
+          open={successPopupOpen}
+          onClose={handlePopupClose}
+          PaperProps={{
+            sx: {
+              borderRadius: "12px",
+              maxWidth: "500px",
+              width: "100%",
+            },
+          }}
+        >
+          <DialogTitle
+            sx={{
+              bgcolor: "#f8f9fa",
+              borderBottom: "1px solid #eaeaea",
+              py: 2,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <CheckCircleIcon
+              sx={{ color: "#4caf50", mr: 1.5, fontSize: "1.8rem" }}
+            />
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", color: "#2c3e50" }}
+            >
+              Workorder Created Successfully
+            </Typography>
+          </DialogTitle>
+          <DialogContent sx={{ py: 3 }}>
+            <Box sx={{ textAlign: "center", py: 2 }}>
+              <Typography variant="body1" sx={{ mb: 2, color: "#2c3e50" }}>
+                Mother Workorder has been created with number:
+              </Typography>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: "2.5rem",
+                  fontWeight: "bold",
+                  color: "#ec7c30",
+                  mb: 2,
+                  p: 2,
+                  border: "2px dashed #ec7c30",
+                  borderRadius: "8px",
+                  display: "inline-block",
+                }}
+              >
+                {mwoId}
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 2, color: "#666" }}>
+                The workorder has been submitted and is pending approval.
+              </Typography>
             </Box>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handlePopupClose} color="primary">
+          <DialogActions
+            sx={{
+              borderTop: "1px solid #eaeaea",
+              px: 3,
+              py: 2,
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              onClick={handlePopupClose}
+              variant="contained"
+              color="primary"
+              sx={{
+                minWidth: "120px",
+                fontWeight: "bold",
+              }}
+            >
               Close
             </Button>
           </DialogActions>

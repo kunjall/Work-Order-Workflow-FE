@@ -56,6 +56,8 @@ const ChangeRequestMWO = () => {
   const [allServices, setAllServices] = useState([]);
   const [newMaterialQty, setNewMaterialQty] = useState("");
   const [newServiceQty, setNewServiceQty] = useState("");
+  const [materialError, setMaterialError] = useState("");
+  const [serviceError, setServiceError] = useState("");
 
   // New state variables for arrays
   const [crMwoMaterials, setCrMwoMaterials] = useState([]);
@@ -797,7 +799,7 @@ const ChangeRequestMWO = () => {
     if (!selectedMaterialId || !selectedWorkOrder || !newMaterialQty) return;
 
     const selectedMaterial = allMaterials.find(
-      (material) => material.material_id === selectedMaterialId
+      (material) => material.item_id === selectedMaterialId
     );
 
     if (!selectedMaterial) return;
@@ -806,13 +808,16 @@ const ChangeRequestMWO = () => {
     const materialExists =
       Array.isArray(materialLineItems) &&
       materialLineItems.some(
-        (material) => material.material_id === selectedMaterial.material_id
+        (material) => material.material_id === selectedMaterial.item_id
       );
 
     if (materialExists) {
-      alert("This material is already in the list.");
+      setMaterialError("This material already exists");
       return;
     }
+
+    // Clear any previous error
+    setMaterialError("");
 
     const qty = Number(newMaterialQty);
     const rate = Number(selectedMaterial.material_rate || 0);
@@ -820,11 +825,11 @@ const ChangeRequestMWO = () => {
 
     // Create a new material entry
     const newMaterial = {
-      record_id: `${formData.mwo_number}-${selectedMaterial.material_id}`,
-      material_id: selectedMaterial.material_id,
-      material_desc: selectedMaterial.material_desc,
-      material_uom: selectedMaterial.material_uom,
-      material_rate: selectedMaterial.material_rate,
+      record_id: `${formData.mwo_number}-${selectedMaterial.item_id}`,
+      material_id: selectedMaterial.item_id,
+      material_desc: selectedMaterial.item_name,
+      material_uom: selectedMaterial.item_uom,
+      material_rate: selectedMaterial.item_rate,
       material_wo_qty: "0", // Default to 0 for new materials
       material_price: price,
     };
@@ -872,9 +877,12 @@ const ChangeRequestMWO = () => {
       );
 
     if (serviceExists) {
-      alert("This service is already in the list.");
+      setServiceError("This service already exists");
       return;
     }
+
+    // Clear any previous error
+    setServiceError("");
 
     const qty = Number(newServiceQty);
     const rate = Number(selectedService.service_rate || 0);
@@ -919,36 +927,84 @@ const ChangeRequestMWO = () => {
   let theme = createTheme({
     palette: {
       primary: {
-        main: "#1976d2",
+        main: "#ec7c30",
       },
       secondary: {
-        main: "#dc004e",
+        main: "#2c3e50",
       },
     },
     typography: {
       fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
-      h4: {
+      h5: {
         fontWeight: 600,
       },
       h6: {
-        fontWeight: 500,
+        fontWeight: 600,
       },
     },
     components: {
-      MuiCard: {
-        styleOverrides: {
-          root: {
-            boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
-            borderRadius: "8px",
-          },
-        },
-      },
       MuiButton: {
         styleOverrides: {
           root: {
-            borderRadius: "4px",
             textTransform: "none",
-            fontWeight: 500,
+            borderRadius: 4,
+            padding: "4px 12px",
+            boxShadow: "none",
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiFormControl: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+      },
+      MuiAutocomplete: {
+        defaultProps: {
+          size: "small",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.8rem",
+            transform: "translate(14px, 8px) scale(1)",
+            "&.MuiInputLabel-shrink": {
+              transform: "translate(14px, -6px) scale(0.75)",
+            },
           },
         },
       },
@@ -964,8 +1020,15 @@ const ChangeRequestMWO = () => {
       <Box sx={{ overflowX: "hidden", padding: 2 }}>
         {/* Heading */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Change Request MWO
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: "bold",
+              color: "#2c3e50",
+              mb: 0.5,
+            }}
+          >
+            Change Request - MWO
           </Typography>
         </Box>
         {exists ? (
@@ -1010,11 +1073,11 @@ const ChangeRequestMWO = () => {
         ) : (
           <div>
             <div>
-              <Card sx={{ mb: 3 }}>
+              <Card sx={{ mb: 2 }}>
                 <CardContent>
                   <Grid
                     container
-                    spacing={2}
+                    spacing={0.5}
                     sx={{
                       maxWidth: "100%",
                     }}
@@ -1023,7 +1086,7 @@ const ChangeRequestMWO = () => {
                       <Typography color="error">{error}</Typography>
                     ) : (
                       <>
-                        <Grid item xs={12} sm={6} md={7}>
+                        <Grid item xs={12} sm={6} md={2}>
                           <Autocomplete
                             value={selectedWorkOrder}
                             options={[...workorders].sort(
@@ -1045,13 +1108,24 @@ const ChangeRequestMWO = () => {
                             renderInput={(params) => (
                               <TextField
                                 {...params}
-                                label="MWO Number"
+                                label="MWO Id"
                                 variant="outlined"
                                 fullWidth
                               />
                             )}
                           />
                         </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                          <TextField
+                            label="Route Name"
+                            value={formData.route_name || ""}
+                            InputProps={{ readOnly: true }}
+                            disabled
+                            variant="outlined"
+                            fullWidth
+                          />
+                        </Grid>
+
                         <Grid item xs={12} sm={6} md={7}>
                           <TextField
                             label="MWO Number"
@@ -1143,454 +1217,33 @@ const ChangeRequestMWO = () => {
                 </CardContent>
               </Card>
 
-              {/* Materials Section */}
-              <Card sx={{ mb: 3 }}>
-                <CardHeader
-                  title="Materials"
-                  sx={{ bgcolor: "#f5f5f5", py: 1 }}
-                />
-                <CardContent>
-                  <Grid container spacing={2} mt={1}>
-                    {Array.isArray(materialLineItems) &&
-                      materialLineItems.map((material, index) => (
-                        <React.Fragment key={material.record_id || index}>
-                          {/* ID */}
-                          <Grid item xs={12} sm={6} md={1.5}>
-                            <TextField
-                              disabled
-                              label="ID"
-                              value={material.material_id || ""}
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-
-                          {/* Description */}
-                          <Grid item xs={12} sm={6} md={2}>
-                            <TextField
-                              disabled
-                              label="Description"
-                              value={material.material_desc || ""}
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-
-                          {/* UOM */}
-                          <Grid item xs={12} sm={6} md={1}>
-                            <TextField
-                              disabled
-                              label="UOM"
-                              value={material.material_uom || ""}
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-
-                          {/* Original Quantity */}
-                          <Grid item xs={12} sm={6} md={1}>
-                            <TextField
-                              disabled
-                              label="Original Qty"
-                              value={
-                                crMwoMaterials[index]?.old_qty !== undefined
-                                  ? crMwoMaterials[index].old_qty
-                                  : material.material_wo_qty || ""
-                              }
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-
-                          {/* Editable Quantity */}
-                          <Grid item xs={12} sm={6} md={1}>
-                            <TextField
-                              label="New Quantity"
-                              type="number"
-                              inputProps={{ min: 0 }}
-                              value={
-                                crMwoMaterials[index]?.cr_qty !== undefined
-                                  ? crMwoMaterials[index].cr_qty
-                                  : material.material_wo_qty || ""
-                              }
-                              onChange={(e) => {
-                                const value = e.target.value;
-                                const crQty = Number(value);
-
-                                setCrMwoMaterials((prevItems) =>
-                                  prevItems.map((item, idx) =>
-                                    idx === index
-                                      ? {
-                                          ...item,
-                                          cr_qty: value,
-                                          material_cr_price: (
-                                            crQty *
-                                            Number(material.material_rate)
-                                          ).toFixed(2),
-                                        }
-                                      : item
-                                  )
-                                );
-                              }}
-                              onKeyDown={(e) => {
-                                if (["e", "E", "-"].includes(e.key)) {
-                                  e.preventDefault();
-                                }
-                              }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-
-                          {/* Price */}
-                          <Grid item xs={12} sm={6} md={1}>
-                            <TextField
-                              disabled
-                              label="Price"
-                              value={material.material_rate || ""}
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-
-                          {/* CWO Amount – dynamic based on edit */}
-                          <Grid item xs={12} sm={6} md={1.5}>
-                            <TextField
-                              label="MWO Amount"
-                              value={
-                                crMwoMaterials[index]?.material_cr_price || // Access from crMwoMaterials
-                                materialLineItems[index]?.material_price || // Fallback to original from materialLineItems
-                                ""
-                              }
-                              InputProps={{ readOnly: true }}
-                              variant="outlined"
-                              fullWidth
-                            />
-                          </Grid>
-
-                          {/* Remove checkbox or delete button */}
-                          <Grid item xs={12} sm={6} md={1}>
-                            {crMwoMaterials[index]?.is_added ? (
-                              <Button
-                                variant="outlined"
-                                color="error"
-                                size="small"
-                                onClick={() => {
-                                  // Remove from both arrays
-                                  setMaterialLineItems((prevItems) =>
-                                    prevItems.filter((_, idx) => idx !== index)
-                                  );
-                                  setCrMwoMaterials((prevItems) =>
-                                    prevItems.filter((_, idx) => idx !== index)
-                                  );
-                                }}
-                              >
-                                Delete
-                              </Button>
-                            ) : (
-                              <FormControlLabel
-                                control={
-                                  <Checkbox
-                                    checked={
-                                      crMwoMaterials[index]?.is_removed ||
-                                      materialLineItems[index]?.is_removed ||
-                                      false
-                                    }
-                                    onChange={(e) => {
-                                      const isChecked = e.target.checked;
-                                      setMaterialLineItems((prevItems) =>
-                                        prevItems.map((item, idx) =>
-                                          idx === index
-                                            ? { ...item, is_removed: isChecked }
-                                            : item
-                                        )
-                                      );
-
-                                      // Also update crMwoMaterials
-                                      setCrMwoMaterials((prevItems) =>
-                                        prevItems.map((item, idx) =>
-                                          idx === index
-                                            ? { ...item, is_removed: isChecked }
-                                            : item
-                                        )
-                                      );
-                                    }}
-                                    color="secondary"
-                                  />
-                                }
-                                label="Remove"
-                              />
-                            )}
-                          </Grid>
-
-                          <Grid item xs={12}>
-                            <Divider />
-                          </Grid>
-                        </React.Fragment>
-                      ))}
-
-                    <Grid item xs={12} sx={{ mt: 2 }}>
-                      <Typography variant="h6" color="primary">
-                        Total Material Amount: {totalMaterialAmount.toFixed(2)}
-                      </Typography>
-                    </Grid>
-
-                    {/* Add New Material */}
-                    <Grid item xs={12}>
-                      <Typography variant="h6">Add New Material</Typography>
-                      <Grid container spacing={2} mt={1}>
-                        <Grid item xs={12} sm={6} md={4}>
-                          <Autocomplete
-                            disablePortal
-                            id="material-id"
-                            options={
-                              Array.isArray(allMaterials) &&
-                              allMaterials.length > 0
-                                ? [...allMaterials]
-                                    .filter(
-                                      (material) =>
-                                        !Array.isArray(materialLineItems) ||
-                                        !materialLineItems.some(
-                                          (lineItem) =>
-                                            lineItem.material_id ===
-                                            material.material_id
-                                        )
-                                    )
-                                    .sort(
-                                      (a, b) =>
-                                        b.item_id?.localeCompare(
-                                          a.item_id || ""
-                                        ) || 0
-                                    )
-                                : [] // If motherMaterials is empty or not an array, use an empty array
-                            }
-                            getOptionLabel={(option) =>
-                              option && option.item_id
-                                ? `${option.item_id} - ${option.item_name}`
-                                : ""
-                            }
-                            value={
-                              Array.isArray(allMaterials) &&
-                              allMaterials.length > 0
-                                ? allMaterials.find(
-                                    (material) =>
-                                      material.material_id ===
-                                      selectedMaterialId
-                                  ) || null // Return null if not found
-                                : null
-                            }
-                            onChange={(event, newValue) => {
-                              if (newValue) {
-                                const selectedMaterial = newValue;
-                                setSelectedMaterialId(
-                                  selectedMaterial.material_id
-                                );
-                                const qty = Number(
-                                  selectedMaterial.material_wo_qty || 0
-                                );
-                                const rate = Number(
-                                  selectedMaterial.material_rate || 0
-                                );
-
-                                // First, get the current material ID to add
-                                const materialIdToAdd =
-                                  selectedMaterial.material_id;
-
-                                // Add to materialLineItems - ensure prevItems is an array
-                                setMaterialLineItems((prevItems) => [
-                                  ...(Array.isArray(prevItems)
-                                    ? prevItems
-                                    : []),
-                                  {
-                                    material_id: selectedMaterial.item_id,
-                                    material_desc: selectedMaterial.item_name,
-                                    material_uom: selectedMaterial.item_uom,
-                                    material_rate: selectedMaterial.item_rate,
-                                    material_price: (qty * rate).toFixed(2), // original price
-                                    material_cwo_price: (qty * rate).toFixed(2), // set cwo price
-                                    error: "",
-                                    isRemove: false, // Initialize with remove unchecked
-                                  },
-                                ]);
-
-                                // Add to crMwoMaterials while preserving existing items
-                                setCrMwoMaterials((prevItems) => {
-                                  // Create a new item for the added material
-                                  const newItem = {
-                                    material_id: selectedMaterial.item_id,
-                                    cr_qty: newMaterialQty || "0",
-                                    old_qty: "0", // Set to 0 for new items
-                                    material_cr_price: (qty * rate).toFixed(2),
-                                    is_added: true, // Mark as added
-                                    material_desc: selectedMaterial.item_name,
-                                    uom: selectedMaterial.item_uom,
-                                    price: selectedMaterial.item_rate,
-                                  };
-
-                                  // Return the previous items plus the new one
-                                  return [
-                                    ...(Array.isArray(prevItems)
-                                      ? prevItems
-                                      : []),
-                                    newItem,
-                                  ];
-                                });
-                              } else {
-                                setSelectedMaterialId(""); // Clear selection when user deletes
-                              }
-                            }}
-                            onInputChange={(event, newInputValue) => {
-                              if (!newInputValue) {
-                                setSelectedMaterialId(""); // Clear the selected material when input is cleared
-                              }
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                label="Material ID"
-                                variant="outlined"
-                                fullWidth
-                              />
-                            )}
-                            clearOnEscape
-                            isOptionEqualToValue={(option, value) =>
-                              option.material_id === value.material_id
-                            }
-                          />
-                        </Grid>
-
-                        <Grid item xs={12} sm={6} md={2}>
-                          <TextField
-                            label="New Quantity"
-                            type="number"
-                            value={newMaterialQty}
-                            onChange={(e) => setNewMaterialQty(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (["e", "E", "-"].includes(e.key)) {
-                                e.preventDefault();
-                              }
-                            }}
-                            variant="outlined"
-                            fullWidth
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={6} md={2}>
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={handleAddMaterial}
-                            disabled={!selectedMaterialId || !newMaterialQty}
-                            fullWidth
-                          >
-                            Add Material
-                          </Button>
-                        </Grid>
-
-                        {/* Display selected material details */}
-                        {selectedMaterialId && (
-                          <Grid item xs={12}>
-                            <Grid container spacing={2} mt={1}>
-                              <Grid item xs={12} sm={6} md={2}>
-                                <TextField
-                                  label="ID"
-                                  value={
-                                    allMaterials.find(
-                                      (material) =>
-                                        material.material_id ===
-                                        selectedMaterialId
-                                    )?.item_id || ""
-                                  }
-                                  InputProps={{ readOnly: true }}
-                                  variant="outlined"
-                                  fullWidth
-                                />
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={3}>
-                                <TextField
-                                  label="Description"
-                                  value={
-                                    allMaterials.find(
-                                      (material) =>
-                                        material.material_id ===
-                                        selectedMaterialId
-                                    )?.item_name || "No Description" // Default if not found
-                                  }
-                                  InputProps={{ readOnly: true }}
-                                  variant="outlined"
-                                  fullWidth
-                                />
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={2}>
-                                <TextField
-                                  label="UOM"
-                                  value={
-                                    allMaterials.find(
-                                      (material) =>
-                                        material.material_id ===
-                                        selectedMaterialId
-                                    )?.item_uom || "" // Default if not found
-                                  }
-                                  InputProps={{ readOnly: true }}
-                                  variant="outlined"
-                                  fullWidth
-                                />
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={2}>
-                                <TextField
-                                  label="Rate"
-                                  value={
-                                    allMaterials.find(
-                                      (material) =>
-                                        material.material_id ===
-                                        selectedMaterialId
-                                    )?.item_rate || "Not Available" // Default if not found
-                                  }
-                                  InputProps={{ readOnly: true }}
-                                  variant="outlined"
-                                  fullWidth
-                                />
-                              </Grid>
-                              <Grid item xs={12} sm={6} md={2}>
-                                <TextField
-                                  label="Available Quantity"
-                                  value={
-                                    allMaterials.find(
-                                      (material) =>
-                                        material.material_id ===
-                                        selectedMaterialId
-                                    )?.material_wo_qty || "0" // Default if not found
-                                  }
-                                  InputProps={{ readOnly: true }}
-                                  variant="outlined"
-                                  fullWidth
-                                />
-                              </Grid>
-                            </Grid>
-                          </Grid>
-                        )}
-                      </Grid>
-                    </Grid>
-                  </Grid>
-                </CardContent>
-              </Card>
-
               {/* Services Section */}
-              <Card sx={{ mb: 3 }}>
-                <CardHeader
-                  title="Services"
-                  sx={{ bgcolor: "#f5f5f5", py: 1 }}
-                />
+              <Card
+                sx={{
+                  p: "4px 8px",
+                  mb: 0.5,
+                  borderRadius: "4px",
+                  border: "1px solid rgba(0, 0, 0, 0.08)",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mb: 0.25,
+                    color: "blue",
+                    fontWeight: "bold",
+                    fontSize: "1rem",
+                  }}
+                >
+                  Services
+                </Typography>
                 <CardContent>
-                  <Grid container spacing={2} mt={1}>
+                  <Grid container spacing={0.5} mt={0.5}>
                     {Array.isArray(serviceLineItems) &&
                       serviceLineItems.map((service, index) => (
                         <React.Fragment key={service.record_id || index}>
-                          <Grid item xs={12} sm={6} md={1.5}>
+                          <Grid item xs={12} sm={6} md={2}>
                             <TextField
                               label="Service Code"
                               value={service.service_id || ""}
@@ -1600,7 +1253,7 @@ const ChangeRequestMWO = () => {
                             />
                           </Grid>
 
-                          <Grid item xs={12} sm={6} md={2}>
+                          <Grid item xs={12} sm={6} md={3}>
                             <TextField
                               label="Description"
                               value={service.service_desc || ""}
@@ -1762,23 +1415,46 @@ const ChangeRequestMWO = () => {
                               />
                             )}
                           </Grid>
-
-                          <Grid item xs={12}>
-                            <Divider />
-                          </Grid>
                         </React.Fragment>
                       ))}
-
-                    <Grid item xs={12} sx={{ mt: 2 }}>
-                      <Typography variant="h6" color="primary">
-                        Total Service Amount: {totalServiceAmount.toFixed(2)}
+                    <Box
+                      mt={1}
+                      sx={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "4px 8px",
+                        border: "1px solid #ccc",
+                        borderRadius: "6px",
+                        backgroundColor: "#f9f9f9",
+                      }}
+                    >
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        Total Service Cost:
                       </Typography>
-                    </Grid>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontWeight: 600, color: "#1976d2" }}
+                      >
+                        ₹{totalServiceAmount.toFixed(2)}
+                      </Typography>
+                    </Box>
 
                     {/* Add new service section */}
                     <Grid item xs={12}>
-                      <Typography variant="h6">Add New Service</Typography>
-                      <Grid container spacing={2} mt={1}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          mt: 0.5,
+                          color: "blue",
+                          fontWeight: "bold",
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        Add New Service
+                      </Typography>{" "}
+                      <Grid container spacing={0.5} mt={0.5}>
                         <Grid item xs={12} sm={6} md={4}>
                           <Autocomplete
                             disablePortal
@@ -1937,8 +1613,517 @@ const ChangeRequestMWO = () => {
                             Add Service
                           </Button>
                         </Grid>
+                        {serviceError && (
+                          <Grid item xs={12}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "error.main",
+                                backgroundColor: "#ffebee",
+                                p: 1,
+                                borderRadius: 1,
+                                mt: 1,
+                                fontWeight: "medium",
+                              }}
+                            >
+                              {serviceError}
+                            </Typography>
+                          </Grid>
+                        )}
 
                         {/* Display selected service details */}
+                      </Grid>
+                    </Grid>
+                  </Grid>
+                </CardContent>
+              </Card>
+
+              {/* Materials Section */}
+              <Card
+                sx={{
+                  p: "4px 8px",
+                  mb: 0.5,
+                  borderRadius: "4px",
+                  border: "1px solid rgba(0, 0, 0, 0.08)",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mb: 0.25,
+                    color: "green",
+                    fontWeight: "bold",
+                    fontSize: "1rem",
+                  }}
+                >
+                  Materials
+                </Typography>
+                <CardContent>
+                  <Grid container spacing={0.5} mt={0}>
+                    {Array.isArray(materialLineItems) &&
+                      materialLineItems.map((material, index) => (
+                        <React.Fragment key={material.record_id || index}>
+                          {/* ID */}
+                          <Grid item xs={12} sm={6} md={2}>
+                            <TextField
+                              disabled
+                              label="ID"
+                              value={material.material_id || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+
+                          {/* Description */}
+                          <Grid item xs={12} sm={6} md={3}>
+                            <TextField
+                              disabled
+                              label="Description"
+                              value={material.material_desc || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+
+                          {/* UOM */}
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              disabled
+                              label="UOM"
+                              value={material.material_uom || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+
+                          {/* Original Quantity */}
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              disabled
+                              label="Original Qty"
+                              value={
+                                crMwoMaterials[index]?.old_qty !== undefined
+                                  ? crMwoMaterials[index].old_qty
+                                  : material.material_wo_qty || ""
+                              }
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+
+                          {/* Editable Quantity */}
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              label="New Quantity"
+                              type="number"
+                              inputProps={{ min: 0 }}
+                              value={
+                                crMwoMaterials[index]?.cr_qty !== undefined
+                                  ? crMwoMaterials[index].cr_qty
+                                  : material.material_wo_qty || ""
+                              }
+                              onChange={(e) => {
+                                const value = e.target.value;
+                                const crQty = Number(value);
+
+                                setCrMwoMaterials((prevItems) =>
+                                  prevItems.map((item, idx) =>
+                                    idx === index
+                                      ? {
+                                          ...item,
+                                          cr_qty: value,
+                                          material_cr_price: (
+                                            crQty *
+                                            Number(material.material_rate)
+                                          ).toFixed(2),
+                                        }
+                                      : item
+                                  )
+                                );
+                              }}
+                              onKeyDown={(e) => {
+                                if (["e", "E", "-"].includes(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+
+                          {/* Price */}
+                          <Grid item xs={12} sm={6} md={1}>
+                            <TextField
+                              disabled
+                              label="Price"
+                              value={material.material_rate || ""}
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+
+                          {/* CWO Amount – dynamic based on edit */}
+                          <Grid item xs={12} sm={6} md={1.5}>
+                            <TextField
+                              label="MWO Amount"
+                              value={
+                                crMwoMaterials[index]?.material_cr_price || // Access from crMwoMaterials
+                                materialLineItems[index]?.material_price || // Fallback to original from materialLineItems
+                                ""
+                              }
+                              InputProps={{ readOnly: true }}
+                              variant="outlined"
+                              fullWidth
+                            />
+                          </Grid>
+
+                          {/* Remove checkbox or delete button */}
+                          <Grid item xs={12} sm={6} md={1}>
+                            {crMwoMaterials[index]?.is_added ? (
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                size="small"
+                                onClick={() => {
+                                  // Remove from both arrays
+                                  setMaterialLineItems((prevItems) =>
+                                    prevItems.filter((_, idx) => idx !== index)
+                                  );
+                                  setCrMwoMaterials((prevItems) =>
+                                    prevItems.filter((_, idx) => idx !== index)
+                                  );
+                                }}
+                              >
+                                Delete
+                              </Button>
+                            ) : (
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={
+                                      crMwoMaterials[index]?.is_removed ||
+                                      materialLineItems[index]?.is_removed ||
+                                      false
+                                    }
+                                    onChange={(e) => {
+                                      const isChecked = e.target.checked;
+                                      setMaterialLineItems((prevItems) =>
+                                        prevItems.map((item, idx) =>
+                                          idx === index
+                                            ? { ...item, is_removed: isChecked }
+                                            : item
+                                        )
+                                      );
+
+                                      // Also update crMwoMaterials
+                                      setCrMwoMaterials((prevItems) =>
+                                        prevItems.map((item, idx) =>
+                                          idx === index
+                                            ? { ...item, is_removed: isChecked }
+                                            : item
+                                        )
+                                      );
+                                    }}
+                                    color="secondary"
+                                  />
+                                }
+                                label="Remove"
+                              />
+                            )}
+                          </Grid>
+                        </React.Fragment>
+                      ))}
+
+                    <Box
+                      mt={1}
+                      sx={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "4px 8px",
+                        border: "1px solid #ccc",
+                        borderRadius: "6px",
+                        backgroundColor: "#f9f9f9",
+                      }}
+                    >
+                      <Typography variant="body1" sx={{ fontWeight: 600 }}>
+                        Total Material Cost:
+                      </Typography>
+                      <Typography
+                        variant="body1"
+                        sx={{ fontWeight: 600, color: "#1976d2" }}
+                      >
+                        ₹{totalMaterialAmount.toFixed(2)}
+                      </Typography>
+                    </Box>
+
+                    {/* Add New Material */}
+                    <Grid item xs={12}>
+                      <Typography
+                        variant="subtitle2"
+                        sx={{
+                          mt: 0.5,
+                          color: "green",
+                          fontWeight: "bold",
+                          fontSize: "0.9rem",
+                        }}
+                      >
+                        Add New Material
+                      </Typography>{" "}
+                      <Grid container spacing={0.5} mt={0.5}>
+                        <Grid item xs={12} sm={6} md={4}>
+                          <Autocomplete
+                            disablePortal
+                            id="material-id"
+                            options={
+                              Array.isArray(allMaterials) &&
+                              allMaterials.length > 0
+                                ? [...allMaterials]
+                                    .filter(
+                                      (material) =>
+                                        !Array.isArray(materialLineItems) ||
+                                        !materialLineItems.some(
+                                          (lineItem) =>
+                                            lineItem.material_id ===
+                                            material.item_id
+                                        )
+                                    )
+                                    .sort(
+                                      (a, b) =>
+                                        b.item_id?.localeCompare(
+                                          a.item_id || ""
+                                        ) || 0
+                                    )
+                                : [] // If motherMaterials is empty or not an array, use an empty array
+                            }
+                            getOptionLabel={(option) =>
+                              option && option.item_id
+                                ? `${option.item_id} - ${option.item_name}`
+                                : ""
+                            }
+                            value={
+                              Array.isArray(allMaterials) &&
+                              allMaterials.length > 0
+                                ? allMaterials.find(
+                                    (material) =>
+                                      material.material_id ===
+                                      selectedMaterialId
+                                  ) || null // Return null if not found
+                                : null
+                            }
+                            onChange={(event, newValue) => {
+                              if (newValue) {
+                                const selectedMaterial = newValue;
+                                setSelectedMaterialId(
+                                  selectedMaterial.material_id
+                                );
+                                const qty = Number(
+                                  selectedMaterial.material_wo_qty || 0
+                                );
+                                const rate = Number(
+                                  selectedMaterial.material_rate || 0
+                                );
+
+                                // First, get the current material ID to add
+                                const materialIdToAdd =
+                                  selectedMaterial.material_id;
+
+                                // Add to materialLineItems - ensure prevItems is an array
+                                setMaterialLineItems((prevItems) => [
+                                  ...(Array.isArray(prevItems)
+                                    ? prevItems
+                                    : []),
+                                  {
+                                    material_id: selectedMaterial.item_id,
+                                    material_desc: selectedMaterial.item_name,
+                                    material_uom: selectedMaterial.item_uom,
+                                    material_rate: selectedMaterial.item_rate,
+                                    material_price: (qty * rate).toFixed(2), // original price
+                                    material_cwo_price: (qty * rate).toFixed(2), // set cwo price
+                                    error: "",
+                                    isRemove: false, // Initialize with remove unchecked
+                                  },
+                                ]);
+
+                                // Add to crMwoMaterials while preserving existing items
+                                setCrMwoMaterials((prevItems) => {
+                                  // Create a new item for the added material
+                                  const newItem = {
+                                    material_id: selectedMaterial.item_id,
+                                    cr_qty: newMaterialQty || "0",
+                                    old_qty: "0", // Set to 0 for new items
+                                    material_cr_price: (qty * rate).toFixed(2),
+                                    is_added: true, // Mark as added
+                                    material_desc: selectedMaterial.item_name,
+                                    uom: selectedMaterial.item_uom,
+                                    price: selectedMaterial.item_rate,
+                                  };
+
+                                  // Return the previous items plus the new one
+                                  return [
+                                    ...(Array.isArray(prevItems)
+                                      ? prevItems
+                                      : []),
+                                    newItem,
+                                  ];
+                                });
+                              } else {
+                                setSelectedMaterialId(""); // Clear selection when user deletes
+                              }
+                            }}
+                            onInputChange={(event, newInputValue) => {
+                              if (!newInputValue) {
+                                setSelectedMaterialId(""); // Clear the selected material when input is cleared
+                              }
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Material ID"
+                                variant="outlined"
+                                fullWidth
+                              />
+                            )}
+                            clearOnEscape
+                            isOptionEqualToValue={(option, value) =>
+                              option.material_id === value.material_id
+                            }
+                          />
+                        </Grid>
+
+                        <Grid item xs={12} sm={6} md={2}>
+                          <TextField
+                            label="New Quantity"
+                            type="number"
+                            value={newMaterialQty}
+                            onChange={(e) => setNewMaterialQty(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (["e", "E", "-"].includes(e.key)) {
+                                e.preventDefault();
+                              }
+                            }}
+                            variant="outlined"
+                            fullWidth
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={2}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleAddMaterial}
+                            disabled={!selectedMaterialId || !newMaterialQty}
+                            fullWidth
+                          >
+                            Add Material
+                          </Button>
+                        </Grid>
+                        {materialError && (
+                          <Grid item xs={12}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                color: "error.main",
+                                backgroundColor: "#ffebee",
+                                p: 1,
+                                borderRadius: 1,
+                                mt: 1,
+                                fontWeight: "medium",
+                              }}
+                            >
+                              {materialError}
+                            </Typography>
+                          </Grid>
+                        )}
+
+                        {/* Display selected material details */}
+                        {selectedMaterialId && (
+                          <Grid item xs={12}>
+                            <Grid container spacing={2} mt={1}>
+                              <Grid item xs={12} sm={6} md={2}>
+                                <TextField
+                                  label="ID"
+                                  value={
+                                    allMaterials.find(
+                                      (material) =>
+                                        material.material_id ===
+                                        selectedMaterialId
+                                    )?.item_id || ""
+                                  }
+                                  InputProps={{ readOnly: true }}
+                                  variant="outlined"
+                                  fullWidth
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={3}>
+                                <TextField
+                                  label="Description"
+                                  value={
+                                    allMaterials.find(
+                                      (material) =>
+                                        material.material_id ===
+                                        selectedMaterialId
+                                    )?.item_name || "No Description" // Default if not found
+                                  }
+                                  InputProps={{ readOnly: true }}
+                                  variant="outlined"
+                                  fullWidth
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={2}>
+                                <TextField
+                                  label="UOM"
+                                  value={
+                                    allMaterials.find(
+                                      (material) =>
+                                        material.material_id ===
+                                        selectedMaterialId
+                                    )?.item_uom || "" // Default if not found
+                                  }
+                                  InputProps={{ readOnly: true }}
+                                  variant="outlined"
+                                  fullWidth
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={2}>
+                                <TextField
+                                  label="Rate"
+                                  value={
+                                    allMaterials.find(
+                                      (material) =>
+                                        material.material_id ===
+                                        selectedMaterialId
+                                    )?.item_rate || "Not Available" // Default if not found
+                                  }
+                                  InputProps={{ readOnly: true }}
+                                  variant="outlined"
+                                  fullWidth
+                                />
+                              </Grid>
+                              <Grid item xs={12} sm={6} md={2}>
+                                <TextField
+                                  label="Available Quantity"
+                                  value={
+                                    allMaterials.find(
+                                      (material) =>
+                                        material.material_id ===
+                                        selectedMaterialId
+                                    )?.material_wo_qty || "0" // Default if not found
+                                  }
+                                  InputProps={{ readOnly: true }}
+                                  variant="outlined"
+                                  fullWidth
+                                />
+                              </Grid>
+                            </Grid>
+                          </Grid>
+                        )}
                       </Grid>
                     </Grid>
                   </Grid>

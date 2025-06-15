@@ -23,6 +23,7 @@ import UserAccess from "./components/profile/userAccess";
 import Invoice from "./pages/createInvoice";
 import CrCWO from "./pages/changeRequest";
 import CrMWO from "./pages/changeRequestMwo";
+import Masters from "./pages/masters";
 import { Repeat } from "@mui/icons-material";
 
 const App = () => {
@@ -164,6 +165,7 @@ const App = () => {
                   </WithAuth>
                 }
               />
+
               {/* <Route
                 path="/repository"
                 element={
@@ -177,6 +179,14 @@ const App = () => {
                 element={
                   <WithAuth role="admin">
                     <Invoice />
+                  </WithAuth>
+                }
+              />
+              <Route
+                path="/update-masters"
+                element={
+                  <WithAuth role="admin">
+                    <Masters />
                   </WithAuth>
                 }
               />

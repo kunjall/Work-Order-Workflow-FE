@@ -8,6 +8,7 @@ import DashboardRequestsMM from "../components/dashboard/MM/dashboardRequestsMM"
 import DashboardRequestMB from "../components/dashboard/MB/dashboardRequestsMB";
 import DashboardRequestsCR from "../components/dashboard/CR/dashboardRequestsCR";
 import DashboardRequestsMwoCr from "../components/dashboard/MWO_CR/dashboardRequestsMwoCr";
+import DashboardRequestsInvoice from "../components/dashboard/Invoice/dashboardRequestsInvoice";
 import CachedIcon from "@mui/icons-material/Cached";
 import { Box, lighten, Typography, Button, IconButton } from "@mui/material";
 
@@ -39,6 +40,8 @@ const Requests = () => {
         return <DashboardRequestsCR key={refreshKey} />;
       case "CR MWO":
         return <DashboardRequestsMwoCr key={refreshKey} />;
+      case "Invoice":
+        return <DashboardRequestsInvoice key={refreshKey} />;
       default:
         return null;
     }
@@ -185,6 +188,24 @@ const Requests = () => {
           }}
         >
           CR MWO
+        </Button>
+        <Button
+          onClick={() => setActiveTab("Invoice")}
+          sx={{
+            color: activeTab === "Invoice" ? "#ec7c30" : "black",
+            backgroundColor: activeTab === "Invoice" ? "black" : "#ec7c30",
+            height: "40px",
+            padding: "10px 20px",
+            borderRadius: "5px",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: "black",
+              color: "#ec7c30",
+              cursor: "pointer",
+            },
+          }}
+        >
+          Invoice
         </Button>
 
         {}

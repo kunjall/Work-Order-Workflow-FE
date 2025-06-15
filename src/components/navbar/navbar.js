@@ -76,11 +76,18 @@ const Navbar = () => {
     { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
     { text: "Budget", icon: <MenuBookIcon />, path: "/budget" },
     { text: "Access", icon: <VpnKeyIcon />, path: "/user-access" },
+    { text: "Masters", icon: <VpnKeyIcon />, path: "/update-masters" },
   ];
 
   const cwoMenuItems = [
     { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
     { text: "Create CWO", icon: <RouterIcon />, path: "/create-cwo" },
+    { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
+    { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+  ];
+
+  const crcMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
     { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
     { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
     {
@@ -93,6 +100,16 @@ const Navbar = () => {
   const mwoMenuItems = [
     { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
     { text: "Create MWO", icon: <EngineeringIcon />, path: "/create-mwo" },
+    { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
+    { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+    {
+      text: "Change Request MWO",
+      icon: <InventoryIcon />,
+      path: "/change-request-mwo",
+    },
+  ];
+  const crmMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
     { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
     { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
     {
@@ -141,6 +158,8 @@ const Navbar = () => {
     roles.forEach((r) => {
       if (r.includes("admin")) menuItems = [...menuItems, ...adminMenuItems];
       if (r.includes("cwo")) menuItems = [...menuItems, ...cwoMenuItems];
+      if (r.includes("crc")) menuItems = [...menuItems, ...crcMenuItems];
+      if (r.includes("crm")) menuItems = [...menuItems, ...crmMenuItems];
       if (r.includes("mwo")) menuItems = [...menuItems, ...mwoMenuItems];
       if (r.includes("mb")) menuItems = [...menuItems, ...mbMenuItems];
       if (r.includes("inv")) menuItems = [...menuItems, ...invMenuItems];
@@ -175,8 +194,15 @@ const Navbar = () => {
           )}
 
           {}
-          <Box sx={{ flexGrow: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center" }}>
             <img src={WOW} alt="logo" style={{ height: "30px" }} />
+          </Box>
+
+          {/* Center text */}
+          <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}>
+            <Typography variant="h6" sx={{ fontWeight: "bold", color: "#fff" }}>
+              The Pinnacle Search
+            </Typography>
           </Box>
 
           {}

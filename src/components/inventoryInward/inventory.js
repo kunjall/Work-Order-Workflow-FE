@@ -374,7 +374,92 @@ const InventoryInward = () => {
     resetForm();
   };
 
-  let theme = createTheme();
+  let theme = createTheme({
+    palette: {
+      primary: {
+        main: "#ec7c30",
+      },
+      secondary: {
+        main: "#2c3e50",
+      },
+    },
+    typography: {
+      fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
+      h5: {
+        fontWeight: 600,
+      },
+      h6: {
+        fontWeight: 600,
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none",
+            borderRadius: 4,
+            padding: "4px 12px",
+            boxShadow: "none",
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiFormControl: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiSelect: {
+        defaultProps: {
+          size: "small",
+          margin: "dense",
+        },
+      },
+      MuiAutocomplete: {
+        defaultProps: {
+          size: "small",
+        },
+        styleOverrides: {
+          root: {
+            "& .MuiInputBase-root": {
+              height: 32,
+            },
+          },
+        },
+      },
+      MuiInputLabel: {
+        styleOverrides: {
+          root: {
+            fontSize: "0.8rem",
+            transform: "translate(14px, 8px) scale(1)",
+            "&.MuiInputLabel-shrink": {
+              transform: "translate(14px, -6px) scale(0.75)",
+            },
+          },
+        },
+      },
+    },
+  });
   theme = responsiveFontSizes(theme);
 
   return (
@@ -384,23 +469,14 @@ const InventoryInward = () => {
           {error ? (
             <Typography color="error">{error}</Typography>
           ) : (
-            <Grid container spacing={2}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "100vw",
-                }}
-              >
+            <Grid container spacing={0.5}>
+              <Box sx={{ mb: 0.5, width: "100%" }}>
                 <Typography
-                  variant="h5"
+                  variant="h6"
                   sx={{
                     fontWeight: "bold",
                     color: "#2c3e50",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    textAlign: "center",
+                    mb: 0.5,
                   }}
                 >
                   Inventory Inward
@@ -425,7 +501,7 @@ const InventoryInward = () => {
                   )}
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              <Grid item xs={12} sm={6} md={2.5}>
                 <TextField
                   id="customer-name"
                   label="Customer Name"
@@ -469,7 +545,7 @@ const InventoryInward = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Client Warehouse ID"
+                      label="Customer Warehouse ID"
                       variant="outlined"
                       fullWidth
                     />
@@ -570,7 +646,7 @@ const InventoryInward = () => {
                   />
                 </LocalizationProvider>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   id="eway-bill-number"
                   label="EWay Bill Number"
@@ -612,7 +688,7 @@ const InventoryInward = () => {
                   />
                 </LocalizationProvider>
               </Grid>
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid item xs={12} sm={6} md={2}>
                 <Autocomplete
                   disablePortal
                   id="combo-box-demo"
@@ -646,7 +722,7 @@ const InventoryInward = () => {
                 )}
               </Grid>
 
-              <Grid item xs={12} sm={6} md={4}>
+              <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   id="reviewer-name"
                   label="Reviewer Name"
@@ -664,16 +740,20 @@ const InventoryInward = () => {
               </Grid>
 
               <Grid item xs={11.5}>
-                <Divider
-                  sx={{
-                    borderColor: "#ec7c30",
-                    borderWidth: "1px",
-                  }}
-                />{" "}
                 {}
               </Grid>
-              <Box sx={{ flex: 1, padding: 2 }}>
-                <Typography variant="h6">Materials</Typography>
+              <Box sx={{ flex: 1, mt: 1 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mb: 0.25,
+                    color: "green",
+                    fontWeight: "bold",
+                    fontSize: "1rem",
+                  }}
+                >
+                  Materials
+                </Typography>
                 <AddMaterials
                   materialCodes={materialCodes}
                   onUpdate={handleLineItemsUpdate}
@@ -682,6 +762,7 @@ const InventoryInward = () => {
               <Grid
                 item
                 xs={12}
+                mt={-5}
                 sx={{ display: "flex", justifyContent: "center" }}
               >
                 <Button
