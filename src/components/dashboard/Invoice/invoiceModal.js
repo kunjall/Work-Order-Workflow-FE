@@ -186,7 +186,7 @@ const InvoiceModal = ({
                     {[
                       "expense_id",
                       "vendor_name",
-                      "roue_name",
+                      "route_name",
                       "service",
                       "cwo_id",
                       "mwo_id",
@@ -343,6 +343,23 @@ const InvoiceModal = ({
                     </Typography>
                     <Typography sx={{ fontWeight: "600", color: "#333" }}>
                       {rowData.expense_id || "N/A"}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      padding: "12px",
+                      backgroundColor: "#f0f7ff",
+                      borderRadius: "6px",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: "500", color: "#555" }}>
+                      Route Name:
+                    </Typography>
+                    <Typography sx={{ fontWeight: "600", color: "#333" }}>
+                      {rowData.route_name || "N/A"}
                     </Typography>
                   </Box>
                   <Box
