@@ -668,6 +668,7 @@ const ChangeRequestCWO = () => {
             params: {
               company: user.company,
               internal_manager: user.name,
+              role: user.role,
             },
             headers: { Authorization: user.authToken },
           }

@@ -519,7 +519,7 @@ const DashboardWhinch = () => {
                     mb: 0.5,
                   }}
                 >
-                  Mother Workorder - Fiber Rollout
+                  Mother Workorder
                 </Typography>
               </Box>
               {}

@@ -43,17 +43,19 @@ const StockTable = () => {
 
   const exportData = [];
   Object.keys(stockData).forEach((warehouse) => {
-    stockData[warehouse].forEach((item) => {
-      exportData.push({
-        Warehouse: warehouse,
-        MaterialID: item.material_id,
-        MaterialDescription: item.material_desc,
-        Stock: item.material_stock,
-        UOM: item.material_uom,
-        Company: item.company,
-        Rate: item.material_rate,
+    stockData[warehouse]
+      .filter((item) => Number(item.material_stock) > 0)
+      .forEach((item) => {
+        exportData.push({
+          Warehouse: warehouse,
+          MaterialID: item.material_id,
+          MaterialDescription: item.material_desc,
+          Stock: item.material_stock,
+          UOM: item.material_uom,
+          Company: item.company,
+          Rate: item.material_rate,
+        });
       });
-    });
   });
 
   return (
@@ -118,16 +120,18 @@ const StockTable = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {stockData[warehouse].map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.material_id}</TableCell>
-                        <TableCell>{item.material_desc}</TableCell>
-                        <TableCell>{item.material_stock}</TableCell>
-                        <TableCell>{item.material_uom}</TableCell>
-                        <TableCell>{item.company}</TableCell>
-                        <TableCell>{item.material_rate}</TableCell>
-                      </TableRow>
-                    ))}
+                    {stockData[warehouse]
+                      .filter((item) => Number(item.material_stock) > 0)
+                      .map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>{item.material_id}</TableCell>
+                          <TableCell>{item.material_desc}</TableCell>
+                          <TableCell>{item.material_stock}</TableCell>
+                          <TableCell>{item.material_uom}</TableCell>
+                          <TableCell>{item.company}</TableCell>
+                          <TableCell>{item.material_rate}</TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>

@@ -478,7 +478,7 @@ const InvoiceForm = () => {
           <Grid container spacing={3} mb={3}>
             <Grid item xs={12} sm={2.5}>
               <Autocomplete
-                options={workOrders}
+                options={[...workOrders].sort((a, b) => b.mwo_id - a.mwo_id)}
                 getOptionLabel={(option) => option.mwo_id?.toString() || ""}
                 onChange={handleWorkOrderSelect}
                 renderInput={(params) => (
@@ -791,18 +791,28 @@ const InvoiceForm = () => {
                                       }}
                                       label={letter}
                                       sx={{
-                                        borderRadius: "6px",
-                                        "& .MuiOutlinedInput-notchedOutline": {
-                                          borderColor: "#ccc",
+                                        backgroundColor: "#f9f9f9",
+                                        "& .MuiOutlinedInput-root": {
+                                          borderRadius: "6px",
+                                          "&:hover fieldset": {
+                                            borderColor: "#007bff",
+                                          },
+                                          "&.Mui-focused fieldset": {
+                                            borderColor: "#007bff",
+                                            borderWidth: "2px",
+                                          },
                                         },
-                                        "&:hover .MuiOutlinedInput-notchedOutline":
-                                          {
-                                            borderColor: "#007bff",
-                                          },
-                                        "&.Mui-focused .MuiOutlinedInput-notchedOutline":
-                                          {
-                                            borderColor: "#007bff",
-                                          },
+                                        "& .MuiInputBase-input": {
+                                          fontWeight: "500",
+                                          padding: "12px 14px",
+                                        },
+                                        "& .MuiInputLabel-root": {
+                                          color: "#555",
+                                          fontWeight: "500",
+                                        },
+                                        "& .MuiInputLabel-root.Mui-focused": {
+                                          color: "#007bff",
+                                        },
                                       }}
                                     >
                                       <MenuItem value="">
@@ -932,9 +942,23 @@ const InvoiceForm = () => {
                                           ).toString();
                                         }
                                       }
+                                      if (letter === "Amount") {
+                                        return;
+
+                                        // Calculate Amount when Unit Price changes
+                                      }
 
                                       if (letter === "QTY") {
-                                        // Calculate Amount when QTY changes
+                                        newValue = newValue.replace(
+                                          /[^0-9.]/g,
+                                          ""
+                                        );
+                                        if (
+                                          (newValue.match(/\./g) || []).length >
+                                          1
+                                        )
+                                          return;
+
                                         const unitPrice =
                                           updatedRows[rowIndex]["Unit Price"] ||
                                           0;
@@ -942,15 +966,8 @@ const InvoiceForm = () => {
                                           updatedRows[rowIndex]["Amount"] = (
                                             parseFloat(newValue) *
                                             parseFloat(unitPrice)
-                                          ).toString();
+                                          ).toFixed(2);
                                         }
-                                      }
-
-                                      if (letter === "Amount") {
-                                        newValue = newValue.replace(
-                                          /[^0-9]/g,
-                                          ""
-                                        );
                                       }
 
                                       updatedRows[rowIndex][letter] = newValue;

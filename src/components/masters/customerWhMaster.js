@@ -58,8 +58,8 @@ const CustomerWhMaster = () => {
       );
       setClientWarehouses(response.data);
     } catch (err) {
-      console.error("Error fetching client warehouses:", err);
-      setError("Failed to load client warehouses");
+      console.error("Error fetching customer warehouses:", err);
+      setError("Failed to load customer warehouses");
     } finally {
       setLoading(false);
     }
@@ -119,17 +119,17 @@ const CustomerWhMaster = () => {
       );
       setSnackbar({
         open: true,
-        message: "Client warehouse created successfully",
+        message: "Customer warehouse created successfully",
         severity: "success",
       });
       handleCloseDialog();
       fetchClientWarehouses();
     } catch (err) {
-      console.error("Error creating client warehouse:", err);
+      console.error("Error creating customer warehouse:", err);
       setSnackbar({
         open: true,
         message:
-          err.response?.data?.message || "Failed to create client warehouse",
+          err.response?.data?.message || "Failed to create customer warehouse",
         severity: "error",
       });
     }
@@ -147,17 +147,17 @@ const CustomerWhMaster = () => {
       );
       setSnackbar({
         open: true,
-        message: "Client warehouse updated successfully",
+        message: "Customer warehouse updated successfully",
         severity: "success",
       });
       handleCloseDialog();
       fetchClientWarehouses();
     } catch (err) {
-      console.error("Error updating client warehouse:", err);
+      console.error("Error updating customer warehouse:", err);
       setSnackbar({
         open: true,
         message:
-          err.response?.data?.message || "Failed to update client warehouse",
+          err.response?.data?.message || "Failed to update customer warehouse",
         severity: "error",
       });
     }
@@ -166,7 +166,7 @@ const CustomerWhMaster = () => {
   // Delete a client warehouse
   const handleDeleteClientWarehouse = async (warehouseId) => {
     if (
-      window.confirm("Are you sure you want to delete this client warehouse?")
+      window.confirm("Are you sure you want to delete this customer warehouse?")
     ) {
       try {
         await axios.delete(
@@ -177,16 +177,17 @@ const CustomerWhMaster = () => {
         );
         setSnackbar({
           open: true,
-          message: "Client warehouse deleted successfully",
+          message: "Customer warehouse deleted successfully",
           severity: "success",
         });
         fetchClientWarehouses();
       } catch (err) {
-        console.error("Error deleting client warehouse:", err);
+        console.error("Error deleting customer warehouse:", err);
         setSnackbar({
           open: true,
           message:
-            err.response?.data?.message || "Failed to delete client warehouse",
+            err.response?.data?.message ||
+            "Failed to delete customer warehouse",
           severity: "error",
         });
       }
@@ -264,7 +265,7 @@ const CustomerWhMaster = () => {
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h5" component="h1" gutterBottom>
-          Client Warehouse Master
+          Customer Warehouse Master
         </Typography>
         <Box>
           <Button
@@ -282,7 +283,7 @@ const CustomerWhMaster = () => {
             startIcon={<AddIcon />}
             onClick={handleOpenCreateDialog}
           >
-            Add Client Warehouse
+            Add Customer Warehouse
           </Button>
         </Box>
       </Box>
@@ -356,8 +357,8 @@ const CustomerWhMaster = () => {
       >
         <DialogTitle>
           {dialogMode === "create"
-            ? "Add New Client Warehouse"
-            : "Edit Client Warehouse"}
+            ? "Add New Customer Warehouse"
+            : "Edit Customer Warehouse"}
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>

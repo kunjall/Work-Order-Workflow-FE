@@ -223,7 +223,7 @@ const VendorMaster = () => {
     const headers = [
       "Vendor ID",
       "Vendor Name",
-      "Location",
+      "Address",
       "GST Number",
       "PAN Number",
     ].join(",");
@@ -335,7 +335,7 @@ const VendorMaster = () => {
                   Vendor Name
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
-                  Location
+                  Address
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
                   GST Number

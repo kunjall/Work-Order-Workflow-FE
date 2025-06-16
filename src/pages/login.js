@@ -35,6 +35,7 @@ export default function Login() {
     const userRoles = user.role ? user.role.split(";") : [];
 
     if (
+      userRoles.includes("admin1") ||
       userRoles.includes("admin") ||
       userRoles.includes("mm") ||
       userRoles.includes("mb") ||

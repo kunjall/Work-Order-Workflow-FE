@@ -278,6 +278,18 @@ const Example = ({ refreshKey }) => {
       size: 200,
       filterFn: "contains",
     },
+    {
+      accessorKey: "created_by",
+      header: "Created By",
+      size: 200,
+      filterFn: "contains",
+    },
+    {
+      accessorKey: "created_at",
+      header: "Created At",
+      size: 200,
+      filterFn: "contains",
+    },
   ]);
 
   const table = useMaterialReactTable({
@@ -303,7 +315,7 @@ const Example = ({ refreshKey }) => {
       filterFn: "contains",
       sorting: [
         {
-          id: "inventory_id", // Specify the column to sort by
+          id: "expense_id", // Specify the column to sort by
           desc: true, // Sort in descending order
         },
       ],

@@ -697,13 +697,13 @@ const DashboardWhinch = () => {
                     mb: 0.5,
                   }}
                 >
-                  Child Workorder - Fiber Rollout
+                  Child Workorder
                 </Typography>
               </Box>
               {}
               <Grid item xs={12} sm={6} md={2}>
                 <Autocomplete
-                  options={workOrders}
+                  options={[...workOrders].sort((a, b) => b.mwo_id - a.mwo_id)} // Descending by mwo_id
                   getOptionLabel={(option) => "MWO-" + option.mwo_id.toString()}
                   onChange={handleWorkOrderSelect}
                   isOptionEqualToValue={(option, value) =>

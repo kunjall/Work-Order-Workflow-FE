@@ -205,7 +205,7 @@ const Requests = () => {
             },
           }}
         >
-          Invoice
+          Expense
         </Button>
 
         {}

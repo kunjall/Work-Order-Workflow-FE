@@ -106,6 +106,25 @@ const CreateMRS = () => {
       timeZone: "IST",
     });
 
+    // Ensure all mb_qty values are set to "0" if they're empty or null
+    const processedMaterialItems = materialLineItems.map((item) => ({
+      ...item,
+      mb_qty:
+        item.mb_qty === "" || item.mb_qty === null || item.mb_qty === undefined
+          ? "0"
+          : item.mb_qty,
+      material_mb_price: item.material_mb_price || "0",
+    }));
+
+    const processedServiceItems = serviceLineItems.map((item) => ({
+      ...item,
+      mb_qty:
+        item.mb_qty === "" || item.mb_qty === null || item.mb_qty === undefined
+          ? "0"
+          : item.mb_qty,
+      service_mb_price: item.service_mb_price || "0",
+    }));
+
     const requestData = {
       vendor_id: formData.vendor_id,
       tps_pm: formData.internal_manager,
@@ -126,8 +145,8 @@ const CreateMRS = () => {
       mb_approver1_email: selectedApproverEmail,
       mb_approver1_name: approverName,
       attachment_url: attachmentLink,
-      materialItems: materialLineItems,
-      serviceItems: serviceLineItems,
+      materialItems: processedMaterialItems,
+      serviceItems: processedServiceItems,
     };
 
     try {
@@ -982,7 +1001,8 @@ const CreateMRS = () => {
                               value={serviceLineItems[index]?.mb_qty || ""}
                               onChange={(e) => {
                                 const value = e.target.value;
-                                const mmQty = Number(value);
+                                // If value is empty, default to 0
+                                const mmQty = value === "" ? 0 : Number(value);
                                 const error =
                                   mmQty > Number(service.service_bal_qty)
                                     ? "MM Qty cannot exceed CWO Qty"
@@ -993,7 +1013,7 @@ const CreateMRS = () => {
                                     idx === index
                                       ? {
                                           ...item,
-                                          mb_qty: value,
+                                          mb_qty: value === "" ? "0" : value,
                                           error,
                                           service_mb_price: error
                                             ? ""
@@ -1137,7 +1157,8 @@ const CreateMRS = () => {
                               value={materialLineItems[index]?.mb_qty || ""}
                               onChange={(e) => {
                                 const value = e.target.value;
-                                const mbQty = Number(value);
+                                // If value is empty, default to 0
+                                const mbQty = value === "" ? 0 : Number(value);
                                 const error =
                                   mbQty > Number(material.locator_stock)
                                     ? "MB Qty cannot exceed Locator Qty"
@@ -1148,7 +1169,7 @@ const CreateMRS = () => {
                                     idx === index
                                       ? {
                                           ...item,
-                                          mb_qty: value,
+                                          mb_qty: value === "" ? "0" : value,
                                           error,
                                           material_mb_price: error
                                             ? ""

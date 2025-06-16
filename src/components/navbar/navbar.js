@@ -49,7 +49,7 @@ const Navbar = () => {
     textDecoration: location.pathname === path ? "underline" : "none",
   });
 
-  const adminMenuItems = [
+  const admin1MenuItems = [
     { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
 
     { text: "Create MWO", icon: <EngineeringIcon />, path: "/create-mwo" },
@@ -77,6 +77,35 @@ const Navbar = () => {
     { text: "Budget", icon: <MenuBookIcon />, path: "/budget" },
     { text: "Access", icon: <VpnKeyIcon />, path: "/user-access" },
     { text: "Masters", icon: <VpnKeyIcon />, path: "/update-masters" },
+  ];
+
+  const adminMenuItems = [
+    { text: "Actions", icon: <PendingActionsIcon />, path: "/actions" },
+
+    { text: "Create MWO", icon: <EngineeringIcon />, path: "/create-mwo" },
+    {
+      text: "CR MWO",
+      icon: <InventoryIcon />,
+      path: "/change-request-mwo",
+    },
+    // { text: "Modify MWO", icon: <EngineeringIcon />, path: "/modify-mwo" },
+    { text: "Create CWO", icon: <RouterIcon />, path: "/create-cwo" },
+    {
+      text: "CR CWO",
+      icon: <InventoryIcon />,
+      path: "/change-request-cwo",
+    },
+    {
+      text: "Inventory Inward",
+      icon: <WarehouseIcon />,
+      path: "/inventory-inward",
+    },
+    { text: "Mat Mov", icon: <LocalShippingIcon />, path: "/MRS" },
+    { text: "MB", icon: <StraightenIcon />, path: "/MB" },
+    { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
+    { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
+    { text: "Budget", icon: <MenuBookIcon />, path: "/budget" },
+    { text: "Access", icon: <VpnKeyIcon />, path: "/user-access" },
   ];
 
   const cwoMenuItems = [
@@ -156,6 +185,7 @@ const Navbar = () => {
     const roles = user.role.trim().toLowerCase().split(" "); // Split roles into an array
 
     roles.forEach((r) => {
+      if (r.includes("admin1")) menuItems = [...menuItems, ...admin1MenuItems];
       if (r.includes("admin")) menuItems = [...menuItems, ...adminMenuItems];
       if (r.includes("cwo")) menuItems = [...menuItems, ...cwoMenuItems];
       if (r.includes("crc")) menuItems = [...menuItems, ...crcMenuItems];
