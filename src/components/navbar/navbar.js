@@ -245,8 +245,20 @@ const Navbar = () => {
       </AppBar>
 
       {}
-      <Drawer anchor="left" open={openDrawer} onClose={toggleDrawer(false)}>
-        <Box sx={{ width: 250, backgroundColor: "#222", height: "100%" }}>
+      <Drawer
+        anchor="left"
+        open={openDrawer}
+        onClose={toggleDrawer(false)}
+        PaperProps={{
+          sx: {
+            backgroundColor: "#222",
+            width: 250,
+          },
+        }}
+      >
+        <Box
+          sx={{ width: "100%", minHeight: "100vh", backgroundColor: "#222" }}
+        >
           <Typography
             variant="h6"
             sx={{ color: "#fff", p: 2, textAlign: "center" }}
