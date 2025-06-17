@@ -28,6 +28,7 @@ import RouterIcon from "@mui/icons-material/Router";
 import WarehouseIcon from "@mui/icons-material/Warehouse";
 import StraightenIcon from "@mui/icons-material/Straighten";
 import VpnKeyIcon from "@mui/icons-material/VpnKey";
+import SaveAsIcon from "@mui/icons-material/SaveAs";
 
 const Navbar = () => {
   const { user } = useContext(AuthContext);
@@ -76,7 +77,7 @@ const Navbar = () => {
     { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
     { text: "Budget", icon: <MenuBookIcon />, path: "/budget" },
     { text: "Access", icon: <VpnKeyIcon />, path: "/user-access" },
-    { text: "Masters", icon: <VpnKeyIcon />, path: "/update-masters" },
+    { text: "Masters", icon: <SaveAsIcon />, path: "/update-masters" },
   ];
 
   const adminMenuItems = [

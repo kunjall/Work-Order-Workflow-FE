@@ -727,9 +727,12 @@ const CreateMRS = () => {
                 <Autocomplete
                   value={selectedWorkOrder}
                   options={
-                    internalExternal === "internal"
+                    (internalExternal === "internal"
                       ? internalWorkOrders
                       : externalWorkOrders
+                    )
+                      .slice()
+                      .sort((a, b) => b.cwo_id - a.cwo_id) // Sort descending
                   }
                   getOptionLabel={(option) =>
                     option.cwo_id ? option.cwo_id.toString() : ""

@@ -665,11 +665,16 @@ const CreateMRS = () => {
               <Autocomplete
                 value={selectedWorkOrder}
                 options={
-                  internalExternal === "internal"
+                  (internalExternal === "internal"
                     ? internalWorkOrders
                     : externalWorkOrders
+                  )
+                    .slice()
+                    .sort((a, b) => b.cwo_id - a.cwo_id) // Sort descending
                 }
-                getOptionLabel={(option) => option.cwo_id.toString() || ""}
+                getOptionLabel={(option) =>
+                  option.cwo_id ? option.cwo_id.toString() : ""
+                }
                 onChange={(event, newValue) => {
                   handleWorkOrderSelect(event, newValue);
                 }}
@@ -679,7 +684,7 @@ const CreateMRS = () => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="CWO id"
+                    label="CWO ID"
                     variant="outlined"
                     fullWidth
                   />

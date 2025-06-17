@@ -46,7 +46,10 @@ const LocatorMaster = () => {
     type: "",
     internal_external: "",
     city: "",
+    customer_name: "",
   });
+  const [customerNames, setCustomerNames] = useState([]);
+  const [vendorNames, setVendorNames] = useState([]);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -78,8 +81,47 @@ const LocatorMaster = () => {
     }
   };
 
+  // Fetch all locators
   useEffect(() => {
     fetchLocators();
+  }, [user.authToken]);
+
+  // Fetch unique customer names for dropdown
+  useEffect(() => {
+    const fetchCustomerNames = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/unique-customer-names`,
+          {
+            headers: { Authorization: user.authToken },
+          }
+        );
+        setCustomerNames(response.data);
+      } catch (err) {
+        console.error("Error fetching customer names:", err);
+      }
+    };
+
+    fetchCustomerNames();
+  }, [user.authToken]);
+
+  // Fetch unique vendor names for dropdown
+  useEffect(() => {
+    const fetchVendorNames = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/unique-vendor-names`,
+          {
+            headers: { Authorization: user.authToken },
+          }
+        );
+        setVendorNames(response.data);
+      } catch (err) {
+        console.error("Error fetching vendor names:", err);
+      }
+    };
+
+    fetchVendorNames();
   }, [user.authToken]);
 
   // Handle form input changes
@@ -100,6 +142,7 @@ const LocatorMaster = () => {
       type: "",
       internal_external: "",
       city: "",
+      customer_name: "",
     });
     setOpenDialog(true);
   };
@@ -114,6 +157,7 @@ const LocatorMaster = () => {
       type: locator.type || "",
       internal_external: locator.internal_external || "",
       city: locator.city || "",
+      customer_name: locator.customer_name || "",
     });
     setOpenDialog(true);
   };
@@ -238,6 +282,7 @@ const LocatorMaster = () => {
       "Type",
       "Internal/External",
       "City",
+      "Customer Name",
     ].join(",");
 
     // Create CSV rows
@@ -249,6 +294,7 @@ const LocatorMaster = () => {
         `"${locator.type || ""}"`,
         `"${locator.internal_external || ""}"`,
         `"${locator.city || ""}"`,
+        `"${locator.customer_name || ""}"`,
       ].join(",");
     });
 
@@ -327,6 +373,9 @@ const LocatorMaster = () => {
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>City</TableCell>
                 <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
+                  Customer Name
+                </TableCell>
+                <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
                   Actions
                 </TableCell>
               </TableRow>
@@ -342,6 +391,9 @@ const LocatorMaster = () => {
                     {locator.internal_external}
                   </TableCell>
                   <TableCell sx={{ py: 0.5 }}>{locator.city}</TableCell>
+                  <TableCell sx={{ py: 0.5 }}>
+                    {locator.customer_name}
+                  </TableCell>
                   <TableCell sx={{ py: 0.5 }}>
                     <IconButton
                       color="primary"
@@ -378,13 +430,26 @@ const LocatorMaster = () => {
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
-              <TextField
-                name="vendor_name"
-                label="Vendor Name"
-                value={formData.vendor_name}
-                onChange={handleInputChange}
-                fullWidth
-              />
+              <FormControl fullWidth>
+                <InputLabel id="vendor-name-label">Vendor Name</InputLabel>
+                <Select
+                  labelId="vendor-name-label"
+                  id="vendor_name"
+                  name="vendor_name"
+                  value={formData.vendor_name}
+                  label="Vendor Name"
+                  onChange={handleInputChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {vendorNames.map((name) => (
+                    <MenuItem key={name} value={name}>
+                      {name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -446,7 +511,7 @@ const LocatorMaster = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={12} sm={6}>
               <TextField
                 name="city"
                 label="City"
@@ -454,6 +519,28 @@ const LocatorMaster = () => {
                 onChange={handleInputChange}
                 fullWidth
               />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl fullWidth>
+                <InputLabel id="customer-name-label">Customer Name</InputLabel>
+                <Select
+                  labelId="customer-name-label"
+                  id="customer_name"
+                  name="customer_name"
+                  value={formData.customer_name}
+                  label="Customer Name"
+                  onChange={handleInputChange}
+                >
+                  <MenuItem value="">
+                    <em>None</em>
+                  </MenuItem>
+                  {customerNames.map((name) => (
+                    <MenuItem key={name} value={name}>
+                      {name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
           </Grid>
         </DialogContent>

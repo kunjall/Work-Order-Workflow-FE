@@ -177,12 +177,15 @@ export default function AdminPanel() {
             required
           >
             <MenuItem value="admin">Admin</MenuItem>
+            <MenuItem value="actions">Actions</MenuItem>
             <MenuItem value="cwo">CWO</MenuItem>
             <MenuItem value="mwo">MWO</MenuItem>
             <MenuItem value="mb">MB</MenuItem>
-            <MenuItem value="inv">Inventory Management</MenuItem>
-            <MenuItem value="mm">Material Management</MenuItem>
-            <MenuItem value="expense">Expense Management</MenuItem>
+            <MenuItem value="inv">INV</MenuItem>
+            <MenuItem value="crm">Change Request MWO</MenuItem>
+            <MenuItem value="crc">Change Request CWO</MenuItem>
+            <MenuItem value="expense">Expense</MenuItem>
+            <MenuItem value="mm">MRS</MenuItem>
           </TextField>
 
           <TextField
