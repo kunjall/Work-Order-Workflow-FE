@@ -71,7 +71,7 @@ const Navbar = () => {
       icon: <WarehouseIcon />,
       path: "/inventory-inward",
     },
-    { text: "Mat Mov", icon: <LocalShippingIcon />, path: "/MRS" },
+    { text: "MRS", icon: <LocalShippingIcon />, path: "/MRS" },
     { text: "MB", icon: <StraightenIcon />, path: "/MB" },
     { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
     { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
