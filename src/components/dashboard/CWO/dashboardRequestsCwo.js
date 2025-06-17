@@ -643,6 +643,8 @@ const Example = ({ refreshKey }) => {
           display: "flex",
           justifyContent: "flex-end",
           marginBottom: "16px",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <Button

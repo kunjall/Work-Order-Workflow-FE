@@ -133,7 +133,7 @@ const Requests = () => {
             },
           }}
         >
-          MM
+          MRS
         </Button>
         <Button
           onClick={() => setActiveTab("MB")}

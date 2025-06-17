@@ -102,8 +102,9 @@ const DashboardRequestsCR = ({ refreshKey }) => {
           `${process.env.REACT_APP_API_URL}/change-request/find`,
           {
             params: {
-              cr_approver_email:
-                user.role === "admin" ? undefined : user.username,
+              cr_approver_email: user.role.includes("admin")
+                ? undefined
+                : user.username,
             },
             headers: { Authorization: user.authToken },
           }
@@ -436,6 +437,8 @@ const DashboardRequestsCR = ({ refreshKey }) => {
           display: "flex",
           justifyContent: "flex-end",
           marginBottom: "16px",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <Button

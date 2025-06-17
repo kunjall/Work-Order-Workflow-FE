@@ -494,7 +494,7 @@ const InventoryInward = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Select Customer ID"
+                      label="Customer/Supplier ID"
                       variant="outlined"
                       fullWidth
                     />
@@ -504,7 +504,7 @@ const InventoryInward = () => {
               <Grid item xs={12} sm={6} md={2.5}>
                 <TextField
                   id="customer-name"
-                  label="Customer Name"
+                  label="Customer/Supplier Name"
                   value={customerName}
                   variant="outlined"
                   InputProps={{
@@ -520,7 +520,7 @@ const InventoryInward = () => {
               <Grid item xs={12} sm={6} md={2}>
                 <TextField
                   id="customer-city"
-                  label="Customer State"
+                  label="Customer/Supplier State"
                   value={customerState}
                   variant="outlined"
                   InputProps={{
@@ -545,7 +545,7 @@ const InventoryInward = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Customer Warehouse ID"
+                      label="Customer/Supplier WH ID"
                       variant="outlined"
                       fullWidth
                     />
@@ -598,7 +598,7 @@ const InventoryInward = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Select Warehouse ID"
+                      label="TPS WH ID"
                       variant="outlined"
                       fullWidth
                     />

@@ -619,6 +619,8 @@ const Example = ({ refreshKey }) => {
           display: "flex",
           justifyContent: "flex-end",
           marginBottom: "16px",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <Button
@@ -641,8 +643,15 @@ const Example = ({ refreshKey }) => {
             height: "35px",
             padding: "10px 20px",
             borderRadius: "8px",
-            marginTop: "-45px",
             fontWeight: "bold",
+            position: "absolute",
+            top: "-45px",
+            right: 0,
+            "@media (max-width: 600px)": {
+              position: "static",
+              marginBottom: "10px",
+              width: "100%",
+            },
             "&:hover": {
               backgroundColor: "black",
               color: "#ec7c30",
