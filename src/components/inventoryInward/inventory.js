@@ -661,7 +661,7 @@ const InventoryInward = () => {
               <Grid item xs={12} sm={6} md={5}>
                 <TextField
                   id="MRS Number"
-                  label="MRS Number"
+                  label="CUST/SUPP DC/ MO No."
                   variant="outlined"
                   fullWidth
                   value={MRSNumber}
