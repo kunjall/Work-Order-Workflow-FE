@@ -234,137 +234,301 @@ const CrModal = ({
               >
                 Request Information
               </Typography>
-              <Paper
-                elevation={0}
+              <TableContainer
+                component={Paper}
                 sx={{
-                  p: 3,
-                  borderRadius: "8px",
-                  border: "1px solid rgba(0, 0, 0, 0.08)",
-                  backgroundColor: "#fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  borderRadius: "10px",
+                  overflow: "visible",
+                  border: "1px solid #eaeaea",
+                  width: "100%",
                   maxHeight: "500px",
-                  overflowY: "auto",
                 }}
               >
-                <Grid container spacing={2}>
-                  {rowData ? (
-                    <>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          CR ID:
-                        </Typography>
-                        <Typography variant="body1">
-                          {rowData.cr_cwo_id || "N/A"}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          CWO Number:
-                        </Typography>
-                        <Typography variant="body1">
-                          {rowData.cwo_number || "N/A"}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          Customer Name:
-                        </Typography>
-                        <Typography variant="body1">
-                          {rowData.customer_name || "N/A"}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          Total Material Cost:
-                        </Typography>
-                        <Typography variant="body1">
-                          ₹{Number(rowData.total_material_cost || 0).toFixed(2)}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          Total Service Cost:
-                        </Typography>
-                        <Typography variant="body1">
-                          ₹{Number(rowData.total_service_cost || 0).toFixed(2)}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          Created By:
-                        </Typography>
-                        <Typography variant="body1">
-                          {rowData.created_by || "N/A"}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          Created At:
-                        </Typography>
-                        <Typography variant="body1">
-                          {rowData.created_at || "N/A"}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          Approver:
-                        </Typography>
-                        <Typography variant="body1">
-                          {rowData.cr_approver_name || "N/A"}
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={6}>
-                        <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                          Approver Email:
-                        </Typography>
-                        <Typography variant="body1">
-                          {rowData.cr_approver_email || "N/A"}
-                        </Typography>
-                      </Grid>
-                      {rowData.actioned_by && (
-                        <>
-                          <Grid item xs={6}>
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: "bold" }}
-                            >
-                              Actioned By:
-                            </Typography>
-                            <Typography variant="body1">
-                              {rowData.actioned_by}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={6}>
-                            <Typography
-                              variant="body2"
-                              sx={{ fontWeight: "bold" }}
-                            >
-                              Actioned At:
-                            </Typography>
-                            <Typography variant="body1">
-                              {rowData.actioned_at}
-                            </Typography>
-                          </Grid>
-                        </>
-                      )}
-                      {rowData.approver_comments && (
-                        <Grid item xs={12}>
-                          <Typography
-                            variant="body2"
-                            sx={{ fontWeight: "bold" }}
+                <Table stickyHeader size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        sx={{
+                          backgroundColor: "#f5f5f5",
+                          fontWeight: "600",
+                          color: "#555",
+                        }}
+                      >
+                        Field
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          backgroundColor: "#f5f5f5",
+                          fontWeight: "600",
+                          color: "#555",
+                        }}
+                      >
+                        Value
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rowData ? (
+                      <>
+                        <TableRow
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "#fafafa",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                              width: "40%",
+                            }}
                           >
-                            Approver Comments:
+                            CR ID
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: "500" }}>
+                            {rowData.cr_cwo_id || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow
+                          sx={{
+                            "&:nth-of-type(even)": {
+                              backgroundColor: "#ffffff",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                            }}
+                          >
+                            CWO Number
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: "500" }}>
+                            {rowData.cwo_number || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "#fafafa",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                            }}
+                          >
+                            Customer Name
+                          </TableCell>
+                          <TableCell sx={{ color: "#d32f2f" }}>
+                            {rowData.customer_name || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow
+                          sx={{
+                            "&:nth-of-type(even)": {
+                              backgroundColor: "#ffffff",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                            }}
+                          >
+                            Total Material Cost
+                          </TableCell>
+                          <TableCell sx={{ color: "#d32f2f" }}>
+                            ₹
+                            {Number(rowData.total_material_cost || 0).toFixed(
+                              2
+                            )}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "#fafafa",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                            }}
+                          >
+                            Total Service Cost
+                          </TableCell>
+                          <TableCell sx={{ color: "#d32f2f" }}>
+                            ₹
+                            {Number(rowData.total_service_cost || 0).toFixed(2)}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow
+                          sx={{
+                            "&:nth-of-type(even)": {
+                              backgroundColor: "#ffffff",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                            }}
+                          >
+                            Created By
+                          </TableCell>
+                          <TableCell>{rowData.created_by || "N/A"}</TableCell>
+                        </TableRow>
+                        <TableRow
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "#fafafa",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                            }}
+                          >
+                            Created At
+                          </TableCell>
+                          <TableCell>
+                            {formatDate(rowData.created_at) || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow
+                          sx={{
+                            "&:nth-of-type(even)": {
+                              backgroundColor: "#ffffff",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                            }}
+                          >
+                            Approver
+                          </TableCell>
+                          <TableCell>
+                            {rowData.cr_approver_name || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        <TableRow
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "#fafafa",
+                            },
+                          }}
+                        >
+                          <TableCell
+                            sx={{
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                            }}
+                          >
+                            Approver Email
+                          </TableCell>
+                          <TableCell>
+                            {rowData.cr_approver_email || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                        {rowData.actioned_by && (
+                          <>
+                            <TableRow
+                              sx={{
+                                "&:nth-of-type(even)": {
+                                  backgroundColor: "#ffffff",
+                                },
+                              }}
+                            >
+                              <TableCell
+                                sx={{
+                                  fontWeight: "500",
+                                  textTransform: "capitalize",
+                                  color: "#555",
+                                }}
+                              >
+                                Actioned By
+                              </TableCell>
+                              <TableCell>{rowData.actioned_by}</TableCell>
+                            </TableRow>
+                            <TableRow
+                              sx={{
+                                "&:nth-of-type(odd)": {
+                                  backgroundColor: "#fafafa",
+                                },
+                              }}
+                            >
+                              <TableCell
+                                sx={{
+                                  fontWeight: "500",
+                                  textTransform: "capitalize",
+                                  color: "#555",
+                                }}
+                              >
+                                Actioned At
+                              </TableCell>
+                              <TableCell>
+                                {formatDate(rowData.actioned_at)}
+                              </TableCell>
+                            </TableRow>
+                          </>
+                        )}
+                        {rowData.approver_comments && (
+                          <TableRow
+                            sx={{
+                              "&:nth-of-type(even)": {
+                                backgroundColor: "#ffffff",
+                              },
+                            }}
+                          >
+                            <TableCell
+                              sx={{
+                                fontWeight: "500",
+                                textTransform: "capitalize",
+                                color: "#555",
+                              }}
+                            >
+                              Approver Comments
+                            </TableCell>
+                            <TableCell>{rowData.approver_comments}</TableCell>
+                          </TableRow>
+                        )}
+                      </>
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2} align="center">
+                          <Typography sx={{ color: "#666" }}>
+                            Loading row data...
                           </Typography>
-                          <Typography variant="body1">
-                            {rowData.approver_comments}
-                          </Typography>
-                        </Grid>
-                      )}
-                    </>
-                  ) : (
-                    <Typography>Loading row data...</Typography>
-                  )}
-                </Grid>
-              </Paper>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           </Grid>
 

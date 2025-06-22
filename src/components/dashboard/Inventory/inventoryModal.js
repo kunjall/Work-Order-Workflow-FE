@@ -273,60 +273,73 @@ const InventoryModal = ({
               >
                 Inventory Information
               </Typography>
-              <Paper
-                elevation={0}
+              <TableContainer
+                component={Paper}
                 sx={{
-                  p: 3,
-                  borderRadius: "8px",
-                  border: "1px solid rgba(0, 0, 0, 0.08)",
-                  backgroundColor: "#fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  borderRadius: "10px",
+                  overflow: "visible",
+                  border: "1px solid #eaeaea",
+                  width: "100%",
                   maxHeight: "500px",
-                  overflowY: "auto",
                 }}
               >
-                {rowData ? (
-                  <Grid container spacing={2}>
-                    {getFieldsToDisplay().map((key) => (
-                      <Grid item xs={12} sm={6} md={4} key={key}>
-                        <Box sx={{ mb: 1.5 }}>
-                          <Typography
-                            variant="caption"
+                <Table stickyHeader size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        sx={{
+                          backgroundColor: "#f5f5f5",
+                          fontWeight: "600",
+                          color: "#555",
+                        }}
+                      >
+                        Field
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          backgroundColor: "#f5f5f5",
+                          fontWeight: "600",
+                          color: "#555",
+                        }}
+                      >
+                        Value
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rowData ? (
+                      getFieldsToDisplay().map((key, index) => (
+                        <TableRow
+                          key={key}
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "#fafafa",
+                            },
+                          }}
+                        >
+                          <TableCell
                             sx={{
-                              fontWeight: 600,
-                              color: key.toLowerCase().includes("customer")
-                                ? "#d32f2f"
-                                : "#666",
-                              display: "block",
-                              mb: 0.5,
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                              width: "40%",
                             }}
                           >
                             {formatFieldName(key)}
-                          </Typography>
-                          <Typography
-                            variant="body2"
+                          </TableCell>
+                          <TableCell
                             sx={{
-                              color: "#333",
-                              fontWeight: key.includes("id") ? 600 : 400,
-                              backgroundColor: key.includes("id")
-                                ? "rgba(236, 124, 48, 0.08)"
-                                : key.toLowerCase().includes("customer")
-                                ? "rgba(211, 47, 47, 0.05)"
-                                : "transparent",
-                              p:
+                              color:
+                                key.toLowerCase().includes("customer") ||
+                                key.toLowerCase().includes("quantity")
+                                  ? "#d32f2f"
+                                  : "inherit",
+                              fontWeight:
                                 key.includes("id") ||
-                                key.toLowerCase().includes("customer")
-                                  ? 0.5
-                                  : 0,
-                              borderRadius:
-                                key.includes("id") ||
-                                key.toLowerCase().includes("customer")
-                                  ? 1
-                                  : 0,
-                              display:
-                                key.includes("id") ||
-                                key.toLowerCase().includes("customer")
-                                  ? "inline-block"
-                                  : "block",
+                                key === "inventory_inward_status"
+                                  ? "500"
+                                  : "normal",
                             }}
                           >
                             {key.toLowerCase().includes("date") ||
@@ -335,20 +348,22 @@ const InventoryModal = ({
                               !key.toLowerCase().includes("status") &&
                               !key.toLowerCase().includes("created_by"))
                               ? formatDate(rowData[key])
-                              : rowData[key] || "—"}
+                              : rowData[key] || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2} align="center">
+                          <Typography sx={{ color: "#666" }}>
+                            Loading inventory details...
                           </Typography>
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                ) : (
-                  <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                    <Typography sx={{ color: "#666" }}>
-                      Loading inventory details...
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           </Grid>
 
@@ -512,54 +527,53 @@ const InventoryModal = ({
                 </Box>
               )}
             </Box>
+            <Box sx={{ mt: 6 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Comments
+              </Typography>
+              <TextField
+                label="Add your comments"
+                placeholder="Enter any notes or comments about this inventory..."
+                fullWidth
+                multiline
+                rows={3}
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                variant="outlined"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "8px",
+                    "&:hover fieldset": {
+                      borderColor: "#ec7c30",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ec7c30",
+                    },
+                  },
+                }}
+              />
+            </Box>
           </Grid>
         </Grid>
 
         {/* Comments Section */}
-        <Box sx={{ mt: 2 }}>
-          <Divider sx={{ mb: 3 }} />
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 600,
-              mb: 2,
-              color: "#333",
-              display: "flex",
-              alignItems: "center",
-              "&:after": {
-                content: '""',
-                display: "block",
-                height: "2px",
-                background: "#ec7c30",
-                flexGrow: 1,
-                ml: 2,
-              },
-            }}
-          >
-            Comments
-          </Typography>
-          <TextField
-            label="Add your comments"
-            placeholder="Enter any notes or comments about this inventory..."
-            fullWidth
-            multiline
-            rows={3}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            variant="outlined"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-                "&:hover fieldset": {
-                  borderColor: "#ec7c30",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ec7c30",
-                },
-              },
-            }}
-          />
-        </Box>
       </DialogContent>
 
       <DialogActions

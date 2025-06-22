@@ -288,8 +288,8 @@ const MmModal = ({
 
       <DialogContent sx={{ padding: "24px", position: "relative" }}>
         <Grid container spacing={4}>
-          {/* Details Section */}
-          <Grid item xs={12} md={5}>
+          {/* Details Section - Left Column */}
+          <Grid item xs={12} md={6}>
             <Box sx={{ mb: 3 }}>
               <Typography
                 variant="h6"
@@ -311,65 +311,75 @@ const MmModal = ({
               >
                 Request Information
               </Typography>
-              <Paper
-                elevation={0}
+              <TableContainer
+                component={Paper}
                 sx={{
-                  p: 3,
-                  borderRadius: "8px",
-                  border: "1px solid rgba(0, 0, 0, 0.08)",
-                  backgroundColor: "#fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  borderRadius: "10px",
+                  overflow: "visible",
+                  border: "1px solid #eaeaea",
+                  width: "100%",
                   maxHeight: "500px",
-                  overflowY: "auto",
                 }}
               >
-                {rowData ? (
-                  <Grid container spacing={2}>
-                    {getFieldsToDisplay().map((key) => (
-                      <Grid item xs={12} sm={6} key={key}>
-                        <Box sx={{ mb: 1.5 }}>
-                          <Typography
-                            variant="caption"
+                <Table stickyHeader size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        sx={{
+                          backgroundColor: "#f5f5f5",
+                          fontWeight: "600",
+                          color: "#555",
+                        }}
+                      >
+                        Field
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          backgroundColor: "#f5f5f5",
+                          fontWeight: "600",
+                          color: "#555",
+                        }}
+                      >
+                        Value
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rowData ? (
+                      getFieldsToDisplay().map((key, index) => (
+                        <TableRow
+                          key={key}
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "#fafafa",
+                            },
+                          }}
+                        >
+                          <TableCell
                             sx={{
-                              fontWeight: 600,
-                              color: key.toLowerCase().includes("customer")
-                                ? "#d32f2f"
-                                : "#666",
-                              display: "block",
-                              mb: 0.5,
+                              fontWeight: "500",
+                              textTransform: "capitalize",
+                              color: "#555",
+                              width: "40%",
                             }}
                           >
                             {formatFieldName(key)}
-                          </Typography>
-                          <Typography
-                            variant="body2"
+                          </TableCell>
+                          <TableCell
                             sx={{
-                              color: "#333",
-                              fontWeight: key.includes("id") ? 600 : 400,
-                              backgroundColor: key.includes("id")
-                                ? "rgba(236, 124, 48, 0.08)"
-                                : key.toLowerCase().includes("customer")
-                                ? "rgba(211, 47, 47, 0.05)"
-                                : key === "transaction_type"
-                                ? "rgba(25, 118, 210, 0.08)"
-                                : "transparent",
-                              p:
-                                key.includes("id") ||
+                              color:
                                 key.toLowerCase().includes("customer") ||
-                                key === "transaction_type"
-                                  ? 0.5
-                                  : 0,
-                              borderRadius:
+                                key.toLowerCase().includes("amount") ||
+                                key.toLowerCase().includes("qty")
+                                  ? "#d32f2f"
+                                  : "inherit",
+                              fontWeight:
                                 key.includes("id") ||
-                                key.toLowerCase().includes("customer") ||
-                                key === "transaction_type"
-                                  ? 1
-                                  : 0,
-                              display:
-                                key.includes("id") ||
-                                key.toLowerCase().includes("customer") ||
-                                key === "transaction_type"
-                                  ? "inline-block"
-                                  : "block",
+                                key === "transaction_type" ||
+                                key === "mm_status"
+                                  ? "500"
+                                  : "normal",
                             }}
                           >
                             {key.toLowerCase() === "requested_at" ||
@@ -380,25 +390,27 @@ const MmModal = ({
                             (key.toLowerCase().includes("time") &&
                               !key.toLowerCase().includes("locator"))
                               ? formatDate(rowData[key])
-                              : rowData[key] || "—"}
+                              : rowData[key] || "N/A"}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2} align="center">
+                          <Typography sx={{ color: "#666" }}>
+                            Loading request details...
                           </Typography>
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                ) : (
-                  <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                    <Typography sx={{ color: "#666" }}>
-                      Loading request details...
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           </Grid>
 
-          {/* Materials Section */}
-          <Grid item xs={12} md={7}>
+          {/* Materials Section - Right Column */}
+          <Grid item xs={12} md={6}>
             <Box sx={{ mb: 3 }}>
               <Typography
                 variant="h6"
@@ -593,30 +605,98 @@ const MmModal = ({
                   </Typography>
                 </Paper>
               )}
-
-              {/* Approver Selection Section */}
-              {mmStatus.toLowerCase().includes("deployment head") && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 2,
-                      color: "#333",
-                      display: "flex",
-                      alignItems: "center",
-                      "&:after": {
-                        content: '""',
-                        display: "block",
-                        height: "2px",
-                        background: "#ec7c30",
-                        flexGrow: 1,
-                        ml: 2,
+            </Box>
+            <Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Comments
+              </Typography>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  borderRadius: "8px",
+                  border: "1px solid rgba(0, 0, 0, 0.08)",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <TextField
+                  label="Add your comments"
+                  placeholder="Enter any notes or comments about this material transaction..."
+                  fullWidth
+                  multiline
+                  rows={3}
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  variant="outlined"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                      "&:hover fieldset": {
+                        borderColor: "#ec7c30",
                       },
-                    }}
-                  >
-                    Select Material Incharge
-                  </Typography>
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#ec7c30",
+                      },
+                    },
+                  }}
+                />
+              </Paper>
+            </Box>
+          </Grid>
+        </Grid>
+
+        {/* Approver Selection and Comments - New Row */}
+        <Grid container spacing={4} sx={{ mt: 2 }}>
+          <Grid item xs={12}>
+            {/* Approver Selection Section */}
+            {mmStatus.toLowerCase().includes("deployment head") && (
+              <Box sx={{ mb: 4, mt: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 2,
+                    color: "#333",
+                    display: "flex",
+                    alignItems: "center",
+                    "&:after": {
+                      content: '""',
+                      display: "block",
+                      height: "2px",
+                      background: "#ec7c30",
+                      flexGrow: 1,
+                      ml: 2,
+                    },
+                  }}
+                >
+                  Select Material Incharge
+                </Typography>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    backgroundColor: "#fff",
+                  }}
+                >
                   <Autocomplete
                     disablePortal
                     id="material-incharge-select"
@@ -655,31 +735,41 @@ const MmModal = ({
                       },
                     }}
                   />
-                </Box>
-              )}
+                </Paper>
+              </Box>
+            )}
 
-              {mmStatus.toLowerCase().includes("material incharge") && (
-                <Box sx={{ mb: 3 }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 2,
-                      color: "#333",
-                      display: "flex",
-                      alignItems: "center",
-                      "&:after": {
-                        content: '""',
-                        display: "block",
-                        height: "2px",
-                        background: "#ec7c30",
-                        flexGrow: 1,
-                        ml: 2,
-                      },
-                    }}
-                  >
-                    Select Material Head
-                  </Typography>
+            {mmStatus.toLowerCase().includes("material incharge") && (
+              <Box sx={{ mb: 4, mt: 2 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 2,
+                    color: "#333",
+                    display: "flex",
+                    alignItems: "center",
+                    "&:after": {
+                      content: '""',
+                      display: "block",
+                      height: "2px",
+                      background: "#ec7c30",
+                      flexGrow: 1,
+                      ml: 2,
+                    },
+                  }}
+                >
+                  Select Material Head
+                </Typography>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    backgroundColor: "#fff",
+                  }}
+                >
                   <Autocomplete
                     disablePortal
                     id="material-head-select"
@@ -718,57 +808,13 @@ const MmModal = ({
                       },
                     }}
                   />
-                </Box>
-              )}
-            </Box>
+                </Paper>
+              </Box>
+            )}
+
+            {/* Comments Section */}
           </Grid>
         </Grid>
-
-        {/* Comments Section */}
-        <Box sx={{ mt: 2 }}>
-          <Divider sx={{ mb: 3 }} />
-          <Typography
-            variant="h6"
-            sx={{
-              fontWeight: 600,
-              mb: 2,
-              color: "#333",
-              display: "flex",
-              alignItems: "center",
-              "&:after": {
-                content: '""',
-                display: "block",
-                height: "2px",
-                background: "#ec7c30",
-                flexGrow: 1,
-                ml: 2,
-              },
-            }}
-          >
-            Comments
-          </Typography>
-          <TextField
-            label="Add your comments"
-            placeholder="Enter any notes or comments about this material transaction..."
-            fullWidth
-            multiline
-            rows={3}
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            variant="outlined"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "8px",
-                "&:hover fieldset": {
-                  borderColor: "#ec7c30",
-                },
-                "&.Mui-focused fieldset": {
-                  borderColor: "#ec7c30",
-                },
-              },
-            }}
-          />
-        </Box>
       </DialogContent>
 
       <DialogActions

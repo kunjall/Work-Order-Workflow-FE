@@ -258,115 +258,138 @@ const MbModal = ({
               >
                 Request Information
               </Typography>
-              <Paper
-                elevation={0}
+              <TableContainer
+                component={Paper}
                 sx={{
-                  p: 3,
-                  borderRadius: "8px",
-                  border: "1px solid rgba(0, 0, 0, 0.08)",
-                  backgroundColor: "#fff",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  borderRadius: "10px",
+                  overflow: "visible",
+                  border: "1px solid #eaeaea",
+                  width: "100%",
                   maxHeight: "500px",
-                  overflowY: "auto",
                 }}
               >
-                {rowData ? (
-                  <Grid container spacing={2}>
-                    {getFieldsToDisplay().map((key) => (
-                      <Grid item xs={12} sm={6} key={key}>
-                        <Box sx={{ mb: 1.5 }}>
-                          <Typography
-                            variant="caption"
+                <Table stickyHeader size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell
+                        sx={{
+                          backgroundColor: "#f5f5f5",
+                          fontWeight: "600",
+                          color: "#555",
+                        }}
+                      >
+                        Field
+                      </TableCell>
+                      <TableCell
+                        sx={{
+                          backgroundColor: "#f5f5f5",
+                          fontWeight: "600",
+                          color: "#555",
+                        }}
+                      >
+                        Value
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {rowData ? (
+                      getFieldsToDisplay().map((key, index) => (
+                        <TableRow
+                          key={key}
+                          sx={{
+                            "&:nth-of-type(odd)": {
+                              backgroundColor: "#fafafa",
+                            },
+                          }}
+                        >
+                          <TableCell
                             sx={{
-                              fontWeight: 600,
+                              fontWeight: "500",
+                              textTransform: "capitalize",
                               color:
-                                key === "attachment_url" ? "#1976d2" : "#666",
-                              display: "block",
-                              mb: 0.5,
+                                key === "attachment_url" ? "#1976d2" : "#555",
+                              width: "40%",
                             }}
                           >
                             {formatFieldName(key)}
+                          </TableCell>
+                          <TableCell>
+                            {key.toLowerCase() === "attachment_url" &&
+                            rowData[key] ? (
+                              <Link
+                                href={rowData[key]}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{
+                                  display: "inline-flex",
+                                  alignItems: "center",
+                                  color: "#1976d2",
+                                  textDecoration: "none",
+                                  fontWeight: 500,
+                                  backgroundColor: "rgba(25, 118, 210, 0.08)",
+                                  padding: "4px 8px",
+                                  borderRadius: "4px",
+                                  "&:hover": {
+                                    backgroundColor: "rgba(25, 118, 210, 0.12)",
+                                    textDecoration: "underline",
+                                  },
+                                }}
+                              >
+                                <AttachmentIcon
+                                  sx={{ mr: 0.5, fontSize: "1rem" }}
+                                />
+                                View Attachment
+                              </Link>
+                            ) : (
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  color:
+                                    key.toLowerCase().includes("customer") ||
+                                    key.toLowerCase().includes("budget") ||
+                                    key.toLowerCase().includes("cost")
+                                      ? "#d32f2f"
+                                      : "inherit",
+                                  fontWeight:
+                                    key.includes("id") ||
+                                    key.includes("number") ||
+                                    key === "mb_status"
+                                      ? "500"
+                                      : "normal",
+                                  display: "block",
+                                }}
+                              >
+                                {key.toLowerCase() === "requested_at" ||
+                                key.toLowerCase() === "approved_at" ||
+                                key.toLowerCase() === "received_at" ||
+                                (key.toLowerCase().includes("_date") &&
+                                  !key.toLowerCase().includes("mb_status")) ||
+                                (key.toLowerCase().includes("time") &&
+                                  !key.toLowerCase().includes("status"))
+                                  ? formatDate(rowData[key])
+                                  : rowData[key] !== null &&
+                                    rowData[key] !== undefined &&
+                                    rowData[key] !== ""
+                                  ? rowData[key]
+                                  : "N/A"}
+                              </Typography>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={2} align="center">
+                          <Typography sx={{ color: "#666" }}>
+                            Loading MB details...
                           </Typography>
-
-                          {key.toLowerCase() === "attachment_url" &&
-                          rowData[key] ? (
-                            <Link
-                              href={rowData[key]}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              sx={{
-                                display: "inline-flex",
-                                alignItems: "center",
-                                color: "#1976d2",
-                                textDecoration: "none",
-                                fontWeight: 500,
-                                backgroundColor: "rgba(25, 118, 210, 0.08)",
-                                padding: "4px 8px",
-                                borderRadius: "4px",
-                                "&:hover": {
-                                  backgroundColor: "rgba(25, 118, 210, 0.12)",
-                                  textDecoration: "underline",
-                                },
-                              }}
-                            >
-                              <AttachmentIcon
-                                sx={{ mr: 0.5, fontSize: "1rem" }}
-                              />
-                              View Attachment
-                            </Link>
-                          ) : (
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                color: "#333",
-                                fontWeight:
-                                  key.includes("id") || key.includes("number")
-                                    ? 600
-                                    : 400,
-                                backgroundColor:
-                                  key.includes("id") || key.includes("number")
-                                    ? "rgba(236, 124, 48, 0.08)"
-                                    : "transparent",
-                                p:
-                                  key.includes("id") || key.includes("number")
-                                    ? 0.5
-                                    : 0,
-                                borderRadius:
-                                  key.includes("id") || key.includes("number")
-                                    ? 1
-                                    : 0,
-                                display:
-                                  key.includes("id") || key.includes("number")
-                                    ? "inline-block"
-                                    : "block",
-                              }}
-                            >
-                              {key.toLowerCase() === "requested_at" ||
-                              key.toLowerCase() === "approved_at" ||
-                              key.toLowerCase() === "received_at" ||
-                              (key.toLowerCase().includes("_date") &&
-                                !key.toLowerCase().includes("mb_status")) ||
-                              (key.toLowerCase().includes("time") &&
-                                !key.toLowerCase().includes("status"))
-                                ? formatDate(rowData[key])
-                                : rowData[key] !== null &&
-                                  rowData[key] !== undefined &&
-                                  rowData[key] !== ""
-                                ? rowData[key]
-                                : "—"}
-                            </Typography>
-                          )}
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                ) : (
-                  <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
-                    <Typography sx={{ color: "#666" }}>
-                      Loading MB details...
-                    </Typography>
-                  </Box>
-                )}
-              </Paper>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             </Box>
           </Grid>
 
