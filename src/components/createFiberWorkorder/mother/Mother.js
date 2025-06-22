@@ -354,7 +354,7 @@ const DashboardWhinch = () => {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
-      timeZone: "IST",
+      timeZone: "Asia/Kolkata",
     });
 
     setLoading(true);
@@ -597,7 +597,9 @@ const DashboardWhinch = () => {
                         variant="outlined"
                         fullWidth
                         value={workOrderNumber}
-                        onChange={(e) => setWorkOrderNumber(e.target.value)}
+                        onChange={(e) =>
+                          setWorkOrderNumber(e.target.value.toUpperCase())
+                        }
                       />
                     </Grid>
 
@@ -771,9 +773,18 @@ const DashboardWhinch = () => {
                         variant="outlined"
                         fullWidth
                         value={customerProjectManager}
-                        onChange={(e) =>
-                          setCustomerProjectManager(e.target.value)
-                        }
+                        onChange={(e) => {
+                          // Convert to title case (capitalize first letter of each word)
+                          const titleCase = e.target.value
+                            .split(" ")
+                            .map(
+                              (word) =>
+                                word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase()
+                            )
+                            .join(" ");
+                          setCustomerProjectManager(titleCase);
+                        }}
                       />
                     </Grid>
                     <Grid item xs={12} md={3}>

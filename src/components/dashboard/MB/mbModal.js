@@ -30,8 +30,18 @@ import AttachmentIcon from "@mui/icons-material/Attachment";
 
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
+
+  // Check if the string is actually a date string
+  if (
+    typeof isoDateString !== "string" ||
+    !/\d{4}-\d{2}-\d{2}|^\d{4}\/\d{2}\/\d{2}/.test(isoDateString)
+  ) {
+    return isoDateString;
+  }
+
   const date = new Date(isoDateString);
   if (isNaN(date.getTime())) return "Invalid Date";
+
   return new Intl.DateTimeFormat("en-US", {
     day: "2-digit",
     month: "short",
@@ -39,7 +49,7 @@ const formatDate = (isoDateString) => {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-    timeZone: "IST",
+    timeZone: "Asia/Kolkata", // Using standard timezone identifier for IST
   }).format(date);
 };
 
@@ -135,8 +145,8 @@ const MbModal = ({
   const priorityFields = [
     "mb_id",
     "mb_sheet_number",
-    "mb_date",
     "mb_status",
+    "route_name",
     "requested_by",
     "requested_at",
     "attachment_url",
@@ -158,6 +168,8 @@ const MbModal = ({
         fields.push(key);
       }
     });
+
+    // Debug log to check if route_name exists in rowData
 
     return fields;
   };
@@ -328,11 +340,19 @@ const MbModal = ({
                                     : "block",
                               }}
                             >
-                              {key.toLowerCase().includes("date") ||
-                              key.toLowerCase().includes("time") ||
-                              key.toLowerCase().includes("at")
+                              {key.toLowerCase() === "requested_at" ||
+                              key.toLowerCase() === "approved_at" ||
+                              key.toLowerCase() === "received_at" ||
+                              (key.toLowerCase().includes("_date") &&
+                                !key.toLowerCase().includes("mb_status")) ||
+                              (key.toLowerCase().includes("time") &&
+                                !key.toLowerCase().includes("status"))
                                 ? formatDate(rowData[key])
-                                : rowData[key] || "—"}
+                                : rowData[key] !== null &&
+                                  rowData[key] !== undefined &&
+                                  rowData[key] !== ""
+                                ? rowData[key]
+                                : "—"}
                             </Typography>
                           )}
                         </Box>

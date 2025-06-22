@@ -29,6 +29,14 @@ import InfoIcon from "@mui/icons-material/Info";
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
 
+  // Check if the string is actually a date string
+  if (
+    typeof isoDateString !== "string" ||
+    !/\d{4}-\d{2}-\d{2}|^\d{4}\/\d{2}\/\d{2}/.test(isoDateString)
+  ) {
+    return isoDateString;
+  }
+
   const date = new Date(isoDateString);
 
   if (isNaN(date.getTime())) return "Invalid Date";
@@ -40,7 +48,7 @@ const formatDate = (isoDateString) => {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-    timeZone: "IST",
+    timeZone: "Asia/Kolkata", // Using standard timezone identifier for IST
   }).format(date);
 };
 
@@ -323,7 +331,9 @@ const InventoryModal = ({
                           >
                             {key.toLowerCase().includes("date") ||
                             key.toLowerCase().includes("time") ||
-                            key.toLowerCase().includes("at")
+                            (key.toLowerCase().includes("_at") &&
+                              !key.toLowerCase().includes("status") &&
+                              !key.toLowerCase().includes("created_by"))
                               ? formatDate(rowData[key])
                               : rowData[key] || "—"}
                           </Typography>

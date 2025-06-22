@@ -309,7 +309,7 @@ const InventoryInward = () => {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
-      timeZone: "IST",
+      timeZone: "Asia/Kolkata",
     });
 
     const formatDate = (date) => {
@@ -621,7 +621,7 @@ const InventoryInward = () => {
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   id="delivery-challan-number"
-                  label="Customer DC Number"
+                  label="TPS DC Number"
                   variant="outlined"
                   fullWidth
                   value={deliveryChallanNumber}

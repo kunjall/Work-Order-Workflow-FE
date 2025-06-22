@@ -30,6 +30,14 @@ import ReceiptIcon from "@mui/icons-material/Receipt";
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
 
+  // Check if the string is actually a date string
+  if (
+    typeof isoDateString !== "string" ||
+    !/\d{4}-\d{2}-\d{2}|^\d{4}\/\d{2}\/\d{2}/.test(isoDateString)
+  ) {
+    return isoDateString;
+  }
+
   const date = new Date(isoDateString);
 
   if (isNaN(date.getTime())) return "Invalid Date";
@@ -41,12 +49,31 @@ const formatDate = (isoDateString) => {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-    timeZone: "IST",
+    timeZone: "Asia/Kolkata", // Using standard timezone identifier for IST
   }).format(date);
 };
 
 // Helper function to format field names for display
 const formatFieldName = (key) => {
+  // Custom field name mappings
+  const customFieldNames = {
+    mm_id: "MRS ID",
+    mm_status: "MRS Status",
+    mm_approver1_email: "MRS Approver1 Mobile",
+    mm_approver2_email: "MRS Approver2 Mobile",
+    mm_approver3_email: "MRS Approver3 Mobile",
+    mm_approver1_name: "MRS Approver1 Name",
+    mm_approver2_name: "MRS Approver2 Name",
+    mm_approver3_name: "MRS Approver3 Name",
+    customer_dc_number: "TPS DC Number",
+  };
+
+  // Check if we have a custom name for this field
+  if (customFieldNames[key]) {
+    return customFieldNames[key];
+  }
+
+  // Default formatting for other fields
   return key
     .replace(/_/g, " ")
     .split(" ")
@@ -345,9 +372,13 @@ const MmModal = ({
                                   : "block",
                             }}
                           >
-                            {key.toLowerCase().includes("date") ||
-                            key.toLowerCase().includes("time") ||
-                            key.toLowerCase().includes("at")
+                            {key.toLowerCase() === "requested_at" ||
+                            key.toLowerCase() === "approved_at" ||
+                            key.toLowerCase() === "received_at" ||
+                            key.toLowerCase().includes("_date") ||
+                            key.toLowerCase() === "entry_time" ||
+                            (key.toLowerCase().includes("time") &&
+                              !key.toLowerCase().includes("locator"))
                               ? formatDate(rowData[key])
                               : rowData[key] || "—"}
                           </Typography>
