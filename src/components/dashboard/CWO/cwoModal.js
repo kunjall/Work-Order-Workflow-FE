@@ -146,7 +146,7 @@ const CwoModal = ({
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 600, color: "#333" }}>
-          Child Work Order Details
+          Child Work Order
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Chip

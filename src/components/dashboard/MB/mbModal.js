@@ -200,7 +200,7 @@ const MbModal = ({
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 600, color: "#333" }}>
-          Measurement Book Details
+          Measurement Book
           {rowData?.mb_sheet_number && (
             <Chip
               label={`Sheet #${rowData.mb_sheet_number}`}

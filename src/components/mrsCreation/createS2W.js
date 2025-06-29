@@ -1027,7 +1027,7 @@ const CreateMRS = () => {
                                 mmQty >
                                 Number(material.material_cwo_qty) -
                                   Number(material.material_bal_qty)
-                                  ? "MM Qty cannot exceed provided Qty"
+                                  ? "MRS Qty cannot exceed provided Qty"
                                   : "";
 
                               setMaterialLineItems((prevItems) =>

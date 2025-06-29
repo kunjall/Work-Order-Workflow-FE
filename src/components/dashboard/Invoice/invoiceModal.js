@@ -142,7 +142,7 @@ const InvoiceModal = ({
               display: "inline-block",
             }}
           >
-            Invoice Details
+            Expense Details
           </Typography>
         </Box>
 

@@ -178,7 +178,7 @@ const CrModal = ({
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 600, color: "#333" }}>
-          Change Request Details
+          Change Request CWO
           {rowData?.cr_cwo_id && (
             <Chip
               label={`CR #${rowData.cr_cwo_id}`}

@@ -17,6 +17,7 @@ import {
   Paper,
   Autocomplete,
   Divider,
+  Link,
   Chip,
   IconButton,
   Tooltip,
@@ -24,6 +25,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
+import AttachmentIcon from "@mui/icons-material/Attachment";
 import InfoIcon from "@mui/icons-material/Info";
 
 const formatDate = (isoDateString) => {
@@ -47,7 +49,7 @@ const formatFieldName = (key) => {
 
   // Special handling for email fields
   if (formattedKey.toLowerCase().includes("email")) {
-    formattedKey = formattedKey.replace(/email/gi, "mobile");
+    formattedKey = formattedKey.replace(/email/gi, "id");
   }
 
   return formattedKey
@@ -65,6 +67,8 @@ const MwoModal = ({
   motherService,
   comment,
   handleApprove,
+  setAttachmentLink,
+  attachmentLink,
   handleReject,
   // handleReturn,
   mwoStatus,
@@ -173,7 +177,7 @@ const MwoModal = ({
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 600, color: "#333" }}>
-          Mother Work Order Details
+          Mother Work Order
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <Chip
@@ -257,8 +261,8 @@ const MwoModal = ({
                       Object.keys(rowData)
                         .filter(
                           (key) => !key.includes("__") && key !== "record_id"
-                        ) // Filter out internal fields
-                        .map((key, index) => (
+                        )
+                        .map((key) => (
                           <TableRow
                             key={key}
                             sx={{
@@ -271,7 +275,8 @@ const MwoModal = ({
                               sx={{
                                 fontWeight: "500",
                                 textTransform: "capitalize",
-                                color: "#555",
+                                color:
+                                  key === "attachment_url" ? "#1976d2" : "#555",
                                 width: "40%",
                               }}
                             >
@@ -293,12 +298,50 @@ const MwoModal = ({
                                     : "normal",
                               }}
                             >
-                              {key.toLowerCase().includes("date") ||
-                              key.toLowerCase().includes("time")
-                                ? formatDate(rowData[key])
-                                : typeof rowData[key] === "string"
-                                ? rowData[key].replace(/\$/g, "") // Removes `$` from values
-                                : rowData[key] || "N/A"}
+                              {(() => {
+                                const value = rowData[key];
+
+                                if (!value) return "N/A";
+
+                                const isURL =
+                                  typeof value === "string" &&
+                                  /^https?:\/\/[^\s]+$/.test(value);
+
+                                if (isURL) {
+                                  return (
+                                    <Link
+                                      href={value}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      sx={{
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        color: "#1976d2",
+                                        textDecoration: "none",
+                                        fontWeight: 500,
+                                        "&:hover": {
+                                          textDecoration: "underline",
+                                        },
+                                      }}
+                                    >
+                                      Attachment Link
+                                    </Link>
+                                  );
+                                }
+
+                                if (
+                                  key.toLowerCase().includes("date") ||
+                                  key.toLowerCase().includes("time")
+                                ) {
+                                  return formatDate(value);
+                                }
+
+                                if (typeof value === "string") {
+                                  return value.replace(/\$/g, "") || "N/A";
+                                }
+
+                                return value;
+                              })()}
                             </TableCell>
                           </TableRow>
                         ))
@@ -669,6 +712,51 @@ const MwoModal = ({
                   }}
                 />
               </Box>
+              {mwoStatus?.toLowerCase().includes("deployment") && (
+                <Box sx={{ mt: "2rem" }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 2,
+                      color: "#333",
+                      display: "flex",
+                      alignItems: "center",
+                      "&:after": {
+                        content: '""',
+                        display: "block",
+                        height: "2px",
+                        background: "#ec7c30",
+                        flexGrow: 1,
+                        ml: 2,
+                      },
+                    }}
+                  >
+                    Attachment Link
+                  </Typography>
+                  <TextField
+                    label="Add attachment link"
+                    placeholder="Attachment Link"
+                    fullWidth
+                    multiline
+                    rows={1}
+                    value={attachmentLink}
+                    onChange={(e) => setAttachmentLink(e.target.value)}
+                    variant="outlined"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                        "&:hover fieldset": {
+                          borderColor: "#ec7c30",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#ec7c30",
+                        },
+                      },
+                    }}
+                  />
+                </Box>
+              )}
             </Box>
           </Grid>
         </Grid>

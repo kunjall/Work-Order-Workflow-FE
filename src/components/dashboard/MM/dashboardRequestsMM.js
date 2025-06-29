@@ -394,7 +394,7 @@ const Example = ({ refreshKey }) => {
   const columns = useMemo(() => [
     {
       accessorKey: "mm_id",
-      header: "MM Id",
+      header: "MRS No.",
       width: "20px",
       size: 50,
       filterFn: "contains",
@@ -407,7 +407,7 @@ const Example = ({ refreshKey }) => {
           }}
           onClick={() => handleOpenModal(row.original)}
         >
-          {"MM-" + row.original.mm_id} {}{" "}
+          {"MRS-" + row.original.mm_id} {}{" "}
         </span>
       ),
     },
@@ -432,7 +432,7 @@ const Example = ({ refreshKey }) => {
     },
     {
       accessorKey: "mm_status",
-      header: "MM Status",
+      header: "MRS Status",
       size: 200,
       filterFn: "contains",
     },

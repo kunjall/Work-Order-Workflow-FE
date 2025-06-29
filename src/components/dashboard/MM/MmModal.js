@@ -59,9 +59,9 @@ const formatFieldName = (key) => {
   const customFieldNames = {
     mm_id: "MRS ID",
     mm_status: "MRS Status",
-    mm_approver1_email: "MRS Approver1 Mobile",
-    mm_approver2_email: "MRS Approver2 Mobile",
-    mm_approver3_email: "MRS Approver3 Mobile",
+    mm_approver1_email: "MRS Approver1 id",
+    mm_approver2_email: "MRS Approver2 id",
+    mm_approver3_email: "MRS Approver3 id",
     mm_approver1_name: "MRS Approver1 Name",
     mm_approver2_name: "MRS Approver2 Name",
     mm_approver3_name: "MRS Approver3 Name",
@@ -247,7 +247,7 @@ const MmModal = ({
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: 600, color: "#333" }}>
-          Material Management Details
+          Material Requisition Slip
           {rowData?.transaction_type && (
             <Chip
               label={rowData.transaction_type}

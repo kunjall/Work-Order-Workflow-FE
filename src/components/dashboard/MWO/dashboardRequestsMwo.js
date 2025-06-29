@@ -18,6 +18,7 @@ const Example = ({ refreshKey }) => {
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const username = useMemo(() => user.username, []);
+  const [attachmentLink, setAttachmentLink] = useState("");
   const [motherMaterial, setMotherMaterial] = useState([]);
   const [motherService, setMotherService] = useState([]);
   const [allMotherMaterial, setAllMotherMaterial] = useState([]);
@@ -314,6 +315,11 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
+    if (mwoStatusPass.toLowerCase() === "pending with deployment head")
+      if (!attachmentLink) {
+        alert("add attachment link before approving");
+        return;
+      }
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
 
@@ -343,6 +349,9 @@ const Example = ({ refreshKey }) => {
       approved_at: actionedAt,
       approved_by: actionedBy,
       approver_comments: comment,
+      ...(mwoStatusPass.toLowerCase().includes("deployment") && {
+        attachment_link: attachmentLink,
+      }),
       mwo_approver1_email:
         mwoStatusPass.toLowerCase() === "pending with deployment head"
           ? selectedApproverEmail || selectedRow.mwo_approver1_email || ""
@@ -702,6 +711,8 @@ const Example = ({ refreshKey }) => {
         comment={comment}
         handleApprove={handleApprove}
         setSelectedApproverEmail={setSelectedApproverEmail}
+        setAttachmentLink={setAttachmentLink}
+        attachmentLink={attachmentLink}
         setApproverName={setApproverName}
         approvers={approvers}
         mwoStatus={mwoStatusPass}

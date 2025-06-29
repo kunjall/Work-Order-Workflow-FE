@@ -942,14 +942,14 @@ const CreateMRS = () => {
                       </Grid>
                       <Grid item xs={12} sm={6} md={1}>
                         <TextField
-                          label="MM Qty"
+                          label="MRS Qty"
                           value={materialLineItems[index]?.mm_qty || ""}
                           onChange={(e) => {
                             const value = e.target.value;
                             const mmQty = Number(value);
                             const error =
                               mmQty > Number(material.material_bal_qty)
-                                ? "MM Qty cannot exceed Bal Qty"
+                                ? "MRS Qty cannot exceed Bal Qty"
                                 : "";
 
                             setMaterialLineItems((prevItems) =>

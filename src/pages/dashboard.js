@@ -153,24 +153,7 @@ const Requests = () => {
         >
           MB
         </Button>
-        <Button
-          onClick={() => setActiveTab("CR")}
-          sx={{
-            color: activeTab === "CR" ? "#ec7c30" : "black",
-            backgroundColor: activeTab === "CR" ? "black" : "#ec7c30",
-            height: "40px",
-            padding: "10px 20px",
-            borderRadius: "5px",
-            fontWeight: "bold",
-            "&:hover": {
-              backgroundColor: "black",
-              color: "#ec7c30",
-              cursor: "pointer",
-            },
-          }}
-        >
-          CR CWO
-        </Button>
+
         <Button
           onClick={() => setActiveTab("CR MWO")}
           sx={{
@@ -188,6 +171,24 @@ const Requests = () => {
           }}
         >
           CR MWO
+        </Button>
+        <Button
+          onClick={() => setActiveTab("CR")}
+          sx={{
+            color: activeTab === "CR" ? "#ec7c30" : "black",
+            backgroundColor: activeTab === "CR" ? "black" : "#ec7c30",
+            height: "40px",
+            padding: "10px 20px",
+            borderRadius: "5px",
+            fontWeight: "bold",
+            "&:hover": {
+              backgroundColor: "black",
+              color: "#ec7c30",
+              cursor: "pointer",
+            },
+          }}
+        >
+          CR CWO
         </Button>
         <Button
           onClick={() => setActiveTab("Invoice")}
