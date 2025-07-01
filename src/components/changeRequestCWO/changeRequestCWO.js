@@ -457,7 +457,7 @@ const ChangeRequestCWO = () => {
     const fetchApprovers = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=CRCWO&city=${formData.execution_city}`,
+          `${process.env.REACT_APP_API_URL}/approver/find-reviewers?type=CRCWO`,
           {
             headers: {
               Authorization: user.authToken,
