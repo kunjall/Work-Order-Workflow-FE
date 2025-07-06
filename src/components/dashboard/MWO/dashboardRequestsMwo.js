@@ -574,6 +574,8 @@ const Example = ({ refreshKey }) => {
         },
       ],
     },
+    getRowId: (row) => row.mwo_id,
+    sortDescFirst: true,
     paginationDisplayMode: "pages",
     positionToolbarAlertBanner: "bottom",
     muiTableContainerProps: {

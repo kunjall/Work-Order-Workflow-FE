@@ -300,7 +300,7 @@ const ChangeRequestCWO = () => {
       total_material_cost: totalMaterialCost.toFixed(2),
       cr_status: "Pending for approval X",
       customer_name: formData.customer_name,
-      cr_approver_email: selectedApproverEmail,
+      cr_approver_email: selectedApproverEmail || "",
       cr_approver_name: approverName,
       created_by: createdBy,
       created_at: createdAt,
@@ -734,7 +734,7 @@ const ChangeRequestCWO = () => {
     setMaterialLineItems([]);
     setServiceLineItems([]);
     setApprovers([]);
-    setSelectedApproverEmail([]);
+    setSelectedApproverEmail(null);
     setApproverName("");
     setCrCwoMaterials([]);
     setCrCwoServices([]);
@@ -778,7 +778,7 @@ const ChangeRequestCWO = () => {
       setMaterialLineItems([]);
       setServiceLineItems([]);
       setApprovers([]);
-      setSelectedApproverEmail([]);
+      setSelectedApproverEmail(null);
       setApproverName("");
       setCrCwoMaterials([]);
       setCrCwoServices([]);

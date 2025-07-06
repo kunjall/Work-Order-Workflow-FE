@@ -350,16 +350,230 @@ const DashboardRequestsCR = ({ refreshKey }) => {
     },
   ]);
 
-  const handleExportRows = (rows) => {
-    const rowData = rows.map((row) => row.original);
+  const handleExportRows = async (rows) => {
+    try {
+      // Show loading indicator
+      setIsLoading(true);
 
-    const csvConfig = mkConfig({
-      filename: `ChangeRequests_${username}`,
-      useKeysAsHeaders: true,
-    });
+      // Prepare an array to hold all the data
+      let exportData = [];
 
-    const csv = generateCsv(csvConfig)(rowData);
-    download(csvConfig)(csv);
+      // Process each selected row
+      for (const row of rows) {
+        const crId = row.original.cr_cwo_id;
+
+        // Fetch materials for this CR
+        const materialsResponse = await axios.get(
+          `${process.env.REACT_APP_API_URL}/change-request/materials/${crId}`,
+          {
+            headers: {
+              Authorization: user.authToken,
+            },
+          }
+        );
+
+        // Fetch services for this CR
+        const servicesResponse = await axios.get(
+          `${process.env.REACT_APP_API_URL}/change-request/services/${crId}`,
+          {
+            headers: {
+              Authorization: user.authToken,
+            },
+          }
+        );
+
+        const materials = materialsResponse.data.data || [];
+        const services = servicesResponse.data.data || [];
+
+        // Add the main CR data
+        exportData.push({
+          ...row.original,
+          record_type: "CR_HEADER",
+        });
+
+        // Add materials with a type identifier
+        materials.forEach((material) => {
+          console.log("Material data:", material); // Debug log
+          exportData.push({
+            cr_id: crId,
+            record_type: "MATERIAL",
+            material_id: material.material_id || "",
+            description: material.material_desc || "",
+            uom: material.material_uom || "",
+            old_qty: material.material_old_qty || "0",
+            new_qty: material.material_cr_qty || "0",
+            unit_price: material.material_unit_price || "0",
+            old_amount: material.old_amount || "0",
+            cr_amount: material.cr_amount || "0",
+            is_removed: material.is_removed ? "Yes" : "No",
+            is_added: material.is_added ? "Yes" : "No",
+          });
+        });
+
+        // Add services with a type identifier
+        services.forEach((service) => {
+          console.log("Service data:", service); // Debug log
+          exportData.push({
+            cr_id: crId,
+            record_type: "SERVICE",
+            service_id: service.service_id || "",
+            description: service.service_desc || "",
+            uom: service.service_uom || "",
+            old_qty: service.service_old_qty || "0",
+            new_qty: service.service_cr_qty || "0",
+            unit_price: service.service_unit_price || "0",
+            old_amount: service.old_amount || "0",
+            cr_amount: service.cr_amount || "0",
+            is_removed: service.is_removed ? "Yes" : "No",
+            is_added: service.is_added ? "Yes" : "No",
+          });
+        });
+      }
+
+      // Create a single row per CR with all data
+      const formattedExportData = [];
+
+      // Group the data by CR ID
+      const groupedData = {};
+
+      for (let i = 0; i < exportData.length; i++) {
+        const item = exportData[i];
+        const crId =
+          item.record_type === "CR_HEADER" ? item.cr_cwo_id : item.cr_id;
+
+        if (!groupedData[crId]) {
+          groupedData[crId] = {
+            header: null,
+            materials: [],
+            services: [],
+          };
+        }
+
+        if (item.record_type === "CR_HEADER") {
+          groupedData[crId].header = item;
+        } else if (item.record_type === "MATERIAL") {
+          groupedData[crId].materials.push(item);
+        } else if (item.record_type === "SERVICE") {
+          groupedData[crId].services.push(item);
+        }
+      }
+
+      // For each CR, create a row with all data
+      Object.keys(groupedData).forEach((crId) => {
+        const group = groupedData[crId];
+        if (!group.header) return;
+
+        const header = group.header;
+
+        // Get the first material and service (if any)
+        const material1 =
+          group.materials.length > 0 ? group.materials[0] : null;
+        const service1 = group.services.length > 0 ? group.services[0] : null;
+
+        // Create the main row with CR header data and first material/service
+        const row = {
+          cr_id: header.cr_cwo_id || "",
+          cwo_number: header.cwo_number || "",
+          customer_name: header.customer_name || "",
+          cr_status: header.cr_status || "",
+          cr_approver_email: header.cr_approver_email || "",
+          cr_approver_name: header.cr_approver_name || "",
+          cr_approver2_email: header.cr_approver2_email || "",
+          cr_approver2_name: header.cr_approver2_name || "",
+          actioned_by: header.actioned_by || "",
+          actioned_at: header.actioned_at || "",
+          approver_comments: header.approver_comments || "",
+          created_by: header.created_by || "",
+          created_at: header.created_at || "",
+          total_material_cost: header.total_material_cost || "0",
+          total_service_cost: header.total_service_cost || "0",
+
+          // Material data (first material)
+          material_id: material1 ? material1.material_id || "" : "",
+          material_description: material1 ? material1.description || "" : "",
+          material_uom: material1 ? material1.uom || "" : "",
+          material_old_qty: material1 ? material1.old_qty || "0" : "",
+          material_new_qty: material1 ? material1.new_qty || "0" : "",
+          material_unit_price: material1 ? material1.unit_price || "0" : "",
+          material_old_amount: material1 ? material1.old_amount || "0" : "",
+          material_new_amount: material1 ? material1.cr_amount || "0" : "",
+          material_is_removed: material1 ? material1.is_removed || "No" : "",
+          material_is_added: material1 ? material1.is_added || "No" : "",
+
+          // Service data (first service)
+          service_id: service1 ? service1.service_id || "" : "",
+          service_description: service1 ? service1.description || "" : "",
+          service_uom: service1 ? service1.uom || "" : "",
+          service_old_qty: service1 ? service1.old_qty || "0" : "",
+          service_new_qty: service1 ? service1.new_qty || "0" : "",
+          service_unit_price: service1 ? service1.unit_price || "0" : "",
+          service_old_amount: service1 ? service1.old_amount || "0" : "",
+          service_new_amount: service1 ? service1.cr_amount || "0" : "",
+          service_is_removed: service1 ? service1.is_removed || "No" : "",
+          service_is_added: service1 ? service1.is_added || "No" : "",
+
+          record_type: "CR_HEADER",
+        };
+
+        formattedExportData.push(row);
+
+        // Add additional rows for remaining materials
+        for (let i = 1; i < group.materials.length; i++) {
+          const material = group.materials[i];
+          formattedExportData.push({
+            cr_id: header.cr_cwo_id || "",
+            cwo_number: header.cwo_number || "",
+            material_id: material.material_id || "",
+            material_description: material.description || "",
+            material_uom: material.uom || "",
+            material_old_qty: material.old_qty || "0",
+            material_new_qty: material.new_qty || "0",
+            material_unit_price: material.unit_price || "0",
+            material_old_amount: material.old_amount || "0",
+            material_new_amount: material.cr_amount || "0",
+            material_is_removed: material.is_removed || "No",
+            material_is_added: material.is_added || "No",
+            record_type: "MATERIAL",
+          });
+        }
+
+        // Add additional rows for remaining services
+        for (let i = 1; i < group.services.length; i++) {
+          const service = group.services[i];
+          formattedExportData.push({
+            cr_id: header.cr_cwo_id || "",
+            cwo_number: header.cwo_number || "",
+            service_id: service.service_id || "",
+            service_description: service.description || "",
+            service_uom: service.uom || "",
+            service_old_qty: service.old_qty || "0",
+            service_new_qty: service.new_qty || "0",
+            service_unit_price: service.unit_price || "0",
+            service_old_amount: service.old_amount || "0",
+            service_new_amount: service.cr_amount || "0",
+            service_is_removed: service.is_removed || "No",
+            service_is_added: service.is_added || "No",
+            record_type: "SERVICE",
+          });
+        }
+      });
+
+      // Configure and generate the CSV
+      const csvConfig = mkConfig({
+        filename: `ChangeRequests_${username}`,
+        useKeysAsHeaders: true,
+      });
+
+      const csv = generateCsv(csvConfig)(formattedExportData);
+      download(csvConfig)(csv);
+
+      // Hide loading indicator
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      alert("Failed to export data. Please try again.");
+      setIsLoading(false);
+    }
   };
 
   const table = useMaterialReactTable({
@@ -389,6 +603,8 @@ const DashboardRequestsCR = ({ refreshKey }) => {
         },
       ],
     },
+    getRowId: (row) => row.cr_cwo_id,
+    sortDescFirst: true,
     paginationDisplayMode: "pages",
     positionToolbarAlertBanner: "bottom",
     muiTableContainerProps: {
