@@ -326,7 +326,15 @@ const ChangeRequestCWO = () => {
       }
     } catch (error) {
       console.error("Error submitting change request:", error);
-      setError("An error occurred while submitting the change request.");
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        alert(`Error: ${error.response.data.message}`);
+      } else {
+        setError("An error occurred while submitting the change request.");
+      }
     }
   };
 
