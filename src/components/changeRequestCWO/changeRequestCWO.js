@@ -1218,7 +1218,7 @@ const ChangeRequestCWO = () => {
                             />
                           </Grid>
 
-                          <Grid item xs={12} sm={6} md={2}>
+                          <Grid item xs={12} sm={6} md={3}>
                             <TextField
                               label="Description"
                               value={service.service_desc || ""}
@@ -1503,7 +1503,7 @@ const ChangeRequestCWO = () => {
                         {selectedServiceId && (
                           <Grid item xs={12} sm={6} md={10}>
                             <Grid container spacing={2}>
-                              <Grid item xs={12} sm={6} md={3}>
+                              <Grid item xs={12} sm={6} md={4}>
                                 <TextField
                                   label="Description"
                                   value={
@@ -1603,7 +1603,7 @@ const ChangeRequestCWO = () => {
                           </Grid>
 
                           {/* Description */}
-                          <Grid item xs={12} sm={6} md={2}>
+                          <Grid item xs={12} sm={6} md={3}>
                             <TextField
                               disabled
                               label="Description"

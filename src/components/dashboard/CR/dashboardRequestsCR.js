@@ -95,7 +95,12 @@ const DashboardRequestsCR = ({ refreshKey }) => {
     const fetchChangeRequests = async () => {
       setIsLoading(true);
       try {
-        const statuses = ["Pending Approval", "Approved", "Rejected"];
+        const statuses = [
+          "Pending for approval X",
+          "Pending for approval Y",
+          "Approved",
+          "Rejected",
+        ];
 
         // Get change requests where the user is the approver or based on role
         const response = await axios.get(
