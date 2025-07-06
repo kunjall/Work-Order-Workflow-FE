@@ -400,15 +400,17 @@ const ChangeRequestCWO = () => {
           crResponse = { data: { data: [] } }; // Default to empty array if endpoint fails
         }
 
-        // If either MB or MM requests exist, show popup
-        const mbExists =
+        // Check for pending MB requests (status is not "Approved")
+        const pendingMbExists =
           mbResponse.data &&
-          (Array.isArray(mbResponse.data) ? mbResponse.data.length > 0 : true);
+          Array.isArray(mbResponse.data) &&
+          mbResponse.data.some((mb) => mb.mb_status !== "Approved");
 
-        const mmExists =
+        // Check for pending MM requests (status is not "Approved")
+        const pendingMmExists =
           mmResponse.data &&
           Array.isArray(mmResponse.data) &&
-          mmResponse.data.length > 0;
+          mmResponse.data.some((mm) => mm.mm_status !== "Approved");
 
         // Check if there's an existing CR that's not approved
         const pendingCrExists =
@@ -418,22 +420,30 @@ const ChangeRequestCWO = () => {
           crResponse.data.data.some((cr) => cr.cr_status !== "Approved");
 
         console.log(
-          "MB exists:",
-          mbExists,
-          "MM exists:",
-          mmExists,
+          "Pending MB exists:",
+          pendingMbExists,
+          "Pending MM exists:",
+          pendingMmExists,
           "Pending CR exists:",
           pendingCrExists
         );
 
-        // Show popup if MB, MM, or pending CR exists
-        if (mbExists || mmExists || pendingCrExists) {
+        // Show popup only if there are pending (not Approved) MB, MM, or CR requests
+        if (pendingMbExists || pendingMmExists || pendingCrExists) {
           console.log("Showing popup and resetting form");
 
           // Set different message based on what exists
           if (pendingCrExists) {
             setExistsMessage(
               "A pending change request already exists for this CWO. Please wait for it to be processed."
+            );
+          } else if (pendingMbExists) {
+            setExistsMessage(
+              "Please process pending MB requests before creating a change request."
+            );
+          } else if (pendingMmExists) {
+            setExistsMessage(
+              "Please process pending MM requests before creating a change request."
             );
           } else {
             setExistsMessage(

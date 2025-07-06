@@ -969,7 +969,7 @@ const CreateMRS = () => {
                           </Grid>
                           <Grid item xs={12} sm={6} md={1}>
                             <TextField
-                              label="MM QTY"
+                              label="CWO QTY"
                               value={service.service_bal_qty || ""}
                               InputProps={{ readOnly: true }}
                               variant="outlined"
@@ -1005,7 +1005,7 @@ const CreateMRS = () => {
                                 const mmQty = value === "" ? 0 : Number(value);
                                 const error =
                                   mmQty > Number(service.service_bal_qty)
-                                    ? "MM Qty cannot exceed CWO Qty"
+                                    ? "MB Qty cannot exceed CWO Qty"
                                     : "";
 
                                 setServiceLineItems((prevItems) =>

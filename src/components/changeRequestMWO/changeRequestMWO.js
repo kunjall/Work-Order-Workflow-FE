@@ -320,6 +320,46 @@ const ChangeRequestMWO = () => {
       try {
         console.log("Checking for CR requests for MWO:", formData.mwo_number);
 
+        // Check for any MB requests
+        let mbResponse;
+        try {
+          mbResponse = await axios.get(
+            `${process.env.REACT_APP_API_URL}/mb/find-mb-by-mwo`,
+            {
+              params: {
+                mwo_number: formData.mwo_number,
+              },
+              headers: {
+                Authorization: user.authToken,
+              },
+            }
+          );
+          console.log("MB Response:", mbResponse.data);
+        } catch (mbError) {
+          console.error("Error fetching MB data:", mbError);
+          mbResponse = { data: [] }; // Default to empty array if endpoint fails
+        }
+
+        // Check for any MM requests
+        let mmResponse;
+        try {
+          mmResponse = await axios.get(
+            `${process.env.REACT_APP_API_URL}/mm/find-mm-by-mwo`,
+            {
+              params: {
+                mwo_number: formData.mwo_number,
+              },
+              headers: {
+                Authorization: user.authToken,
+              },
+            }
+          );
+          console.log("MM Response:", mmResponse.data);
+        } catch (mmError) {
+          console.error("Error fetching MM data:", mmError);
+          mmResponse = { data: [] }; // Default to empty array if endpoint fails
+        }
+
         // Check for existing change requests that are not approved
         let crResponse;
         try {
@@ -340,6 +380,18 @@ const ChangeRequestMWO = () => {
           crResponse = { data: { data: [] } }; // Default to empty array if endpoint fails
         }
 
+        // Check for pending MB requests (status is not "Approved")
+        const pendingMbExists =
+          mbResponse.data &&
+          Array.isArray(mbResponse.data) &&
+          mbResponse.data.some((mb) => mb.mb_status !== "Approved");
+
+        // Check for pending MM requests (status is not "Approved")
+        const pendingMmExists =
+          mmResponse.data &&
+          Array.isArray(mmResponse.data) &&
+          mmResponse.data.some((mm) => mm.mm_status !== "Approved");
+
         // Check if there's an existing CR that's not approved
         const pendingCrExists =
           crResponse.data &&
@@ -347,7 +399,14 @@ const ChangeRequestMWO = () => {
           Array.isArray(crResponse.data.data) &&
           crResponse.data.data.some((cr) => cr.cr_status !== "Approved");
 
-        console.log("Pending CR exists:", pendingCrExists);
+        console.log(
+          "Pending MB exists:",
+          pendingMbExists,
+          "Pending MM exists:",
+          pendingMmExists,
+          "Pending CR exists:",
+          pendingCrExists
+        );
 
         // Check for associated CWOs and their quantities
         let cwosResponse;
@@ -453,13 +512,26 @@ const ChangeRequestMWO = () => {
           console.error("Error fetching CWO data:", cwoError);
         }
 
-        // Show popup if pending CR exists or CWO quantities are higher
-        if (pendingCrExists || cwoQuantitiesHigher) {
+        // Show popup if pending MB, MM, CR exists or CWO quantities are higher
+        if (
+          pendingMbExists ||
+          pendingMmExists ||
+          pendingCrExists ||
+          cwoQuantitiesHigher
+        ) {
           console.log("Showing popup and resetting form");
 
           if (pendingCrExists) {
             setExistsMessage(
               "A pending change request already exists for this MWO. Please wait for it to be processed."
+            );
+          } else if (pendingMbExists) {
+            setExistsMessage(
+              "Please process pending MB requests before creating a change request."
+            );
+          } else if (pendingMmExists) {
+            setExistsMessage(
+              "Please process pending MM requests before creating a change request."
             );
           } else if (cwoQuantitiesHigher) {
             setExistsMessage(
@@ -471,7 +543,7 @@ const ChangeRequestMWO = () => {
 
           setExists(true);
 
-          if (pendingCrExists) {
+          if (pendingCrExists || pendingMbExists || pendingMmExists) {
             setSelectedWorkOrder(null);
             setFormData({});
           }
