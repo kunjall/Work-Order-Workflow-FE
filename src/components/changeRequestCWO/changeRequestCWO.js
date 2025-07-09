@@ -975,11 +975,7 @@ const ChangeRequestCWO = () => {
                           <Autocomplete
                             value={selectedWorkOrder}
                             options={[...workorders].sort(
-                              (a, b) =>
-                                b.cwo_id
-                                  ?.toString()
-                                  .localeCompare(a.cwo_id?.toString() || "") ||
-                                0
+                              (a, b) => Number(b.cwo_id) - Number(a.cwo_id)
                             )}
                             getOptionLabel={(option) => option.cwo_id || ""}
                             onChange={(event, newValue) => {

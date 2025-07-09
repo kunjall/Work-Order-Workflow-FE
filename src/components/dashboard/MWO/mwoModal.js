@@ -415,6 +415,12 @@ const MwoModal = ({
                         <TableCell sx={{ fontWeight: 600, color: "#555" }}>
                           Bal QTY
                         </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Material Rate
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Material Price
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -437,6 +443,8 @@ const MwoModal = ({
                           <TableCell>{material.material_uom}</TableCell>
                           <TableCell>{material.material_wo_qty}</TableCell>
                           <TableCell>{material.material_bal_qty}</TableCell>
+                          <TableCell>{material.material_rate}</TableCell>
+                          <TableCell>{material.material_price}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -512,6 +520,12 @@ const MwoModal = ({
                         <TableCell sx={{ fontWeight: 600, color: "#555" }}>
                           Bal QTY
                         </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Service Rate
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Service Price
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -534,6 +548,8 @@ const MwoModal = ({
                           <TableCell>{service.service_uom}</TableCell>
                           <TableCell>{service.service_wo_qty}</TableCell>
                           <TableCell>{service.service_bal_qty}</TableCell>
+                          <TableCell>{service.service_rate}</TableCell>
+                          <TableCell>{service.service_price}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
