@@ -100,7 +100,7 @@ const Example = ({ refreshKey }) => {
             service_wo_qty: service.service_wo_qty,
             service_bal_qty: service.service_bal_qty,
             service_rate: service.service_rate,
-            material_price: service.service_price,
+            service_price: service.service_price,
           }));
           setMotherService(motherServiceArray);
         } catch (err) {
@@ -208,6 +208,7 @@ const Example = ({ refreshKey }) => {
           service_price: service.service_price,
         }));
         setAllMotherService(motherServiceArray);
+        console.log(motherServiceArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
         setAllMotherService([]);
