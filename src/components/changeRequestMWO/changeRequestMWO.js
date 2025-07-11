@@ -397,8 +397,10 @@ const ChangeRequestMWO = () => {
           crResponse.data &&
           crResponse.data.data &&
           Array.isArray(crResponse.data.data) &&
-          crResponse.data.data.some((cr) => cr.cr_status !== "Approved");
-
+          crResponse.data.data.some(
+            (cr) =>
+              cr.cr_status !== "Approved" || !cr.cr_status.includes("Rejected")
+          );
         console.log(
           "Pending MB exists:",
           pendingMbExists,
