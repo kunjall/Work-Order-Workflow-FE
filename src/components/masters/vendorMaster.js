@@ -340,7 +340,7 @@ const VendorMaster = () => {
                   Vendor ID
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
-                  Vendor Name
+                  TPS Emp / Vendor Name
                 </TableCell>
                 <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
                   Address
@@ -417,7 +417,7 @@ const VendorMaster = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 name="vendor_name"
-                label="Vendor Name"
+                label="TPS Emp / Vendor Name"
                 value={formData.vendor_name}
                 onChange={handleInputChange}
                 fullWidth

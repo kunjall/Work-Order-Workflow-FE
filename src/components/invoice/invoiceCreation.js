@@ -577,7 +577,10 @@ const InvoiceForm = () => {
                     },
                   },
                 }}
-                disabled={isSaved || Boolean(formData.overhead_budget)}
+                disabled={
+                  !user.role.includes("admin") &&
+                  (isSaved || Boolean(formData.overhead_budget))
+                }
                 InputProps={{
                   startAdornment:
                     isSaved || formData.overhead_budget ? (
@@ -606,10 +609,11 @@ const InvoiceForm = () => {
                   "&:hover": { backgroundColor: "#d65a00" },
                 }}
                 disabled={
-                  !overheadBudget ||
-                  isSaved ||
-                  !formData.mwo_id ||
-                  formData.overhead_budget
+                  !user.role.includes("admin") &&
+                  (!overheadBudget ||
+                    isSaved ||
+                    !formData.mwo_id ||
+                    formData.overhead_budget)
                 }
                 onClick={handleSave}
               >

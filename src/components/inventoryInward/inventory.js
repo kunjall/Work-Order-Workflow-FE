@@ -661,7 +661,7 @@ const InventoryInward = () => {
               <Grid item xs={12} sm={6} md={5}>
                 <TextField
                   id="MRS Number"
-                  label="CUST/SUPP DC/ MO No."
+                  label="CUST MO NO / SUPP DC NO"
                   variant="outlined"
                   fullWidth
                   value={MRSNumber}
@@ -677,7 +677,7 @@ const InventoryInward = () => {
               <Grid item xs={12} sm={6} md={2}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
-                    label="MRS Date"
+                    label="MO/DC Date"
                     value={mrsDate || null} // Ensures no undefined value
                     onChange={(newValue) => setMRSDate(dayjs(newValue))} // Convert to Dayjs
                     maxDate={dayjs()} // ⛔ Prevent future dates

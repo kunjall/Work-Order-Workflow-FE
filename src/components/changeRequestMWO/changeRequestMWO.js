@@ -392,15 +392,17 @@ const ChangeRequestMWO = () => {
           Array.isArray(mmResponse.data) &&
           mmResponse.data.some((mm) => mm.mm_status !== "Approved");
 
+        console.log(crResponse.data.data);
+
         // Check if there's an existing CR that's not approved
         const pendingCrExists =
           crResponse.data &&
-          crResponse.data.data &&
           Array.isArray(crResponse.data.data) &&
-          crResponse.data.data.some(
-            (cr) =>
-              cr.cr_status !== "Approved" || !cr.cr_status.includes("Rejected")
-          );
+          crResponse.data.data.some((cr) => {
+            const status = cr.cr_status?.toLowerCase();
+            return status !== "approved" && !status.includes("rejected");
+          });
+
         console.log(
           "Pending MB exists:",
           pendingMbExists,

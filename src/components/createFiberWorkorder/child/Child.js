@@ -862,14 +862,12 @@ const DashboardWhinch = () => {
                   required
                   value={childWorkOrderNumber}
                   onChange={(e) => {
-                    const input = e.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z]/g, "");
-                    if (input.length <= 2) {
-                      setChildWorkOrderNumber(input);
-                    }
+                    const input = e.target.value.toUpperCase();
+                    // Only allow 1 letter followed by up to 2 digits (A01 to Z99)
+                    const cleaned = input.replace(/[^A-Z0-9]/g, "").slice(0, 3);
+                    setChildWorkOrderNumber(cleaned);
                   }}
-                  onBlur={(e) => setIsTouched(true)} // Marks the field as touched when focus is lost
+                  onBlur={() => setIsTouched(true)}
                   InputProps={{
                     startAdornment: (
                       <span style={{ fontWeight: "bold", marginRight: "4px" }}>
@@ -878,13 +876,13 @@ const DashboardWhinch = () => {
                     ),
                   }}
                 />
-                {isTouched && childWorkOrderNumber.length !== 2 && (
+                {isTouched && !/^[A-Z][0-9]{2}$/.test(childWorkOrderNumber) && (
                   <Typography
                     variant="caption"
                     color="error"
                     style={{ marginTop: "4px" }}
                   >
-                    Please enter exactly 2 letters.
+                    Format must be 1 letter followed by 2 digits (e.g., A01).
                   </Typography>
                 )}
               </Grid>

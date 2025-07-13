@@ -341,6 +341,12 @@ const CwoModal = ({
                         <TableCell sx={{ fontWeight: 600, color: "#555" }}>
                           Bal QTY
                         </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Material Rate
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Material Price
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -363,6 +369,12 @@ const CwoModal = ({
                           <TableCell>{material.material_uom}</TableCell>
                           <TableCell>{material.material_wo_qty}</TableCell>
                           <TableCell>{material.material_bal_qty}</TableCell>
+                          <TableCell>
+                            {Number(material.material_rate).toFixed(2)}
+                          </TableCell>
+                          <TableCell>
+                            {Number(material.material_price).toFixed(2)}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -436,6 +448,12 @@ const CwoModal = ({
                         <TableCell sx={{ fontWeight: 600, color: "#555" }}>
                           Bal QTY
                         </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Service Rate
+                        </TableCell>
+                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                          Service Price
+                        </TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -458,6 +476,12 @@ const CwoModal = ({
                           <TableCell>{service.service_uom}</TableCell>
                           <TableCell>{service.service_wo_qty}</TableCell>
                           <TableCell>{service.service_bal_qty}</TableCell>
+                          <TableCell>
+                            {Number(service.service_rate).toFixed(2)}
+                          </TableCell>
+                          <TableCell>
+                            {Number(service.service_price).toFixed(2)}
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
