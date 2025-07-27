@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,11 +19,15 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import InfoIcon from "@mui/icons-material/Info";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
@@ -62,6 +66,14 @@ const CwoModal = ({
   cwoStatus,
   username,
 }) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("md", "lg"));
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
       return {
@@ -124,13 +136,18 @@ const CwoModal = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="lg"
-      fullWidth
+      maxWidth={isFullscreen ? false : "lg"}
+      fullWidth={!isFullscreen}
+      fullScreen={isFullscreen}
       PaperProps={{
         sx: {
-          borderRadius: "12px",
+          borderRadius: isFullscreen ? 0 : "12px",
           boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
           overflow: "hidden",
+          width: isFullscreen ? "100vw" : "auto",
+          height: isFullscreen ? "100vh" : "auto",
+          maxWidth: isFullscreen ? "none" : "lg",
+          maxHeight: isFullscreen ? "none" : "90vh",
         },
       }}
     >
@@ -160,16 +177,35 @@ const CwoModal = ({
             }}
             variant="outlined"
           />
+          <Tooltip
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            <IconButton onClick={toggleFullscreen} size="small">
+              {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </IconButton>
+          </Tooltip>
           <IconButton onClick={onClose} size="small" sx={{ ml: 1 }}>
             <CloseIcon />
           </IconButton>
         </Box>
       </Box>
 
-      <DialogContent sx={{ padding: "24px", position: "relative" }}>
-        <Grid container spacing={4}>
+      <DialogContent
+        sx={{
+          padding: isFullscreen ? "24px" : isMobile ? "16px" : "24px",
+          position: "relative",
+          height: isFullscreen ? "calc(100vh - 140px)" : "auto",
+          overflow: "auto",
+        }}
+      >
+        <Grid container spacing={isFullscreen ? 3 : isMobile ? 2 : 4}>
           {/* Details Section */}
-          <Grid item xs={12} md={6}>
+          <Grid
+            item
+            xs={12}
+            md={isFullscreen ? 6 : 6}
+            lg={isFullscreen ? 4 : 6}
+          >
             <Box sx={{ mb: 3 }}>
               <Typography
                 variant="h6"
@@ -289,7 +325,12 @@ const CwoModal = ({
           </Grid>
 
           {/* Materials and Services Section */}
-          <Grid item xs={12} md={6}>
+          <Grid
+            item
+            xs={12}
+            md={isFullscreen ? 6 : 6}
+            lg={isFullscreen ? 8 : 6}
+          >
             <Box sx={{ mb: 3 }}>
               <Typography
                 variant="h6"

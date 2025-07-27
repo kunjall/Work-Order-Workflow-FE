@@ -16,7 +16,18 @@ import {
   TableRow,
   Paper,
   Autocomplete,
+  IconButton,
+  Tooltip,
+  useTheme,
+  useMediaQuery,
+  Chip,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import InfoIcon from "@mui/icons-material/Info";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
@@ -51,6 +62,14 @@ const InvoiceModal = ({
   invoiceStatus,
   username,
 }) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("md", "lg"));
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
       return {
@@ -102,52 +121,93 @@ const InvoiceModal = ({
       0
     ) || 0;
 
+  const getStatusIcon = (status) => {
+    if (status.toLowerCase().includes("approved")) {
+      return <CheckCircleIcon fontSize="small" />;
+    } else if (status.toLowerCase().includes("rejected")) {
+      return <CancelIcon fontSize="small" />;
+    } else if (status.toLowerCase().includes("pending")) {
+      return <InfoIcon fontSize="small" />;
+    }
+    return null;
+  };
+
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogContent
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth={isFullscreen ? false : "lg"}
+      fullWidth={!isFullscreen}
+      fullScreen={isFullscreen}
+      PaperProps={{
+        sx: {
+          borderRadius: isFullscreen ? 0 : "12px",
+          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
+          overflow: "hidden",
+          width: isFullscreen ? "100vw" : "auto",
+          height: isFullscreen ? "100vh" : "auto",
+          maxWidth: isFullscreen ? "none" : "lg",
+          maxHeight: isFullscreen ? "none" : "90vh",
+        },
+      }}
+    >
+      {/* Header */}
+      <Box
         sx={{
-          padding: "24px",
-          position: "relative",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "16px 24px",
+          borderBottom: "1px solid rgba(0, 0, 0, 0.12)",
           backgroundColor: "#f8f9fa",
         }}
       >
-        <Box
-          sx={{
-            position: "absolute",
-            top: "16px",
-            right: "16px",
-            padding: "8px 16px",
-            borderRadius: "6px",
-            boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-            ...statusStyles,
-          }}
-        >
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: "600", letterSpacing: "0.5px" }}
-          >
-            {invoiceStatus}
-          </Typography>
-        </Box>
-
-        <Box sx={{ mb: 3 }}>
-          <Typography
-            variant="h5"
+        <Typography variant="h5" sx={{ fontWeight: 600, color: "#333" }}>
+          Expense Details
+        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Chip
+            icon={getStatusIcon(invoiceStatus)}
+            label={invoiceStatus}
             sx={{
-              fontWeight: "600",
-              marginBottom: "16px",
-              borderBottom: "2px solid #ec7c30",
-              paddingBottom: "8px",
-              color: "#333",
-              display: "inline-block",
+              fontWeight: "bold",
+              borderWidth: "1px",
+              borderStyle: "solid",
+              color: statusStyles.color,
+              backgroundColor: statusStyles.backgroundColor,
+              borderColor: statusStyles.backgroundColor,
             }}
+            variant="outlined"
+          />
+          <Tooltip
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
           >
-            Expense Details
-          </Typography>
+            <IconButton onClick={toggleFullscreen} size="small">
+              {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </IconButton>
+          </Tooltip>
+          <IconButton onClick={onClose} size="small" sx={{ ml: 1 }}>
+            <CloseIcon />
+          </IconButton>
         </Box>
+      </Box>
 
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={7}>
+      <DialogContent
+        sx={{
+          padding: isFullscreen ? "24px" : isMobile ? "16px" : "24px",
+          position: "relative",
+          height: isFullscreen ? "calc(100vh - 140px)" : "auto",
+          overflow: "auto",
+          backgroundColor: "#f8f9fa",
+        }}
+      >
+        <Grid container spacing={isFullscreen ? 3 : isMobile ? 2 : 3}>
+          <Grid
+            item
+            xs={12}
+            md={isFullscreen ? 8 : 7}
+            lg={isFullscreen ? 8 : 7}
+          >
             {rowData ? (
               <TableContainer
                 component={Paper}

@@ -57,6 +57,7 @@ const DashboardWhinch = () => {
   const [isTouched, setIsTouched] = React.useState(false);
 
   const [childWorkOrderNumber, setChildWorkOrderNumber] = useState("");
+  const [lastCwoNumber, setLastCwoNumber] = useState(null);
   const [motherServices, setMotherServices] = useState([]);
   const [motherMaterials, setMotherMaterials] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -232,6 +233,32 @@ const DashboardWhinch = () => {
     };
     fetchWorkOrders();
   }, []);
+
+  // Fetch last CWO number when MWO is selected
+  useEffect(() => {
+    const fetchLastCwoNumber = async () => {
+      if (formData.mwo_id) {
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/workorder/get-last-cwo-number?mwo_id=${formData.mwo_id}`,
+            {
+              headers: {
+                Authorization: user.authToken,
+              },
+            }
+          );
+          setLastCwoNumber(response.data.lastCwoNumber);
+        } catch (error) {
+          console.error("Failed to fetch last CWO number:", error);
+          setLastCwoNumber(null);
+        }
+      } else {
+        setLastCwoNumber(null);
+      }
+    };
+
+    fetchLastCwoNumber();
+  }, [formData.mwo_id, user.authToken]);
 
   const handleWorkOrderSelect = (event, newValue) => {
     if (newValue) {
@@ -883,6 +910,20 @@ const DashboardWhinch = () => {
                     style={{ marginTop: "4px" }}
                   >
                     Format must be 1 letter followed by 2 digits (e.g., A01).
+                  </Typography>
+                )}
+                {lastCwoNumber && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: "block",
+                      marginTop: "4px",
+                      color: "#1976d2",
+                      fontWeight: "500",
+                      fontSize: "0.75rem",
+                    }}
+                  >
+                    Last created CWO: {lastCwoNumber}
                   </Typography>
                 )}
               </Grid>

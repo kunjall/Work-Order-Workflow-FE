@@ -91,6 +91,7 @@ const InvoiceForm = () => {
         "Invoice Number": "",
         "Invoice Date": "",
         Activity: "",
+        Category: "",
         QTY: "",
         UOM: "",
         "Unit Price": "",
@@ -190,9 +191,9 @@ const InvoiceForm = () => {
         .filter((cwo) => cwo.overhead?.length) // Filter only those with overhead entries
         .flatMap((cwo) =>
           cwo.overhead.map((entry) => ({
-            cwo_id: cwo.cwo_id,
+            cwo_id: cwo.cwo_id.toString(),
             route_name: cwo.route_name,
-            mwo_id: selectedWorkOrder.mwo_id,
+            mwo_id: selectedWorkOrder.mwo_id.toString(),
             expense_status: "Pending for approval",
             service: entry["Activity"], // Ensure correct field mapping
             vendor_name: entry["Vendor Name"], // Match expected key
@@ -203,12 +204,40 @@ const InvoiceForm = () => {
             invoice_number: entry["Invoice Number"],
             invoice_date: entry["Invoice Date"], // Ensure invoice date is included
             remarks: entry["Remarks"],
+            category: entry["Category"], // Add category field
             created_by: actionedBy,
             created_at: actionedAt,
             expense_approver1_email: selectedApproverEmail,
             expense_approver1_name: approverName,
           }))
         );
+
+      // Budget validation
+      try {
+        const validationResponse = await axios.post(
+          `${process.env.REACT_APP_API_URL}/invoice/validate-budget`,
+          {
+            expenses: expenseData,
+            cwo_id: childWorkorders[0]?.cwo_id?.toString(),
+            budgeted_service_cost: parseFloat(
+              formData.bal_service_cost?.replace(/[^0-9.]/g, "") || 0
+            ),
+            misc_budget: parseFloat(overheadBudget || 0),
+          },
+          { headers: { Authorization: user.authToken } }
+        );
+
+        if (!validationResponse.data.valid) {
+          alert(`Budget validation failed: ${validationResponse.data.message}`);
+          return;
+        }
+      } catch (validationError) {
+        console.error("Budget validation error:", validationError);
+        alert(
+          "Budget validation failed. Please check your expenses and try again."
+        );
+        return;
+      }
 
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/invoice/add-overhead-expense`,
@@ -762,6 +791,7 @@ const InvoiceForm = () => {
                               "Invoice Number",
                               "Invoice Date",
                               "Activity",
+                              "Category",
                               "QTY",
                               "UOM",
                               "Unit Price",
@@ -829,6 +859,67 @@ const InvoiceForm = () => {
                                       <MenuItem value="PKT">PKT</MenuItem>
                                       <MenuItem value="CuM">CuM</MenuItem>
                                       <MenuItem value="LTR">LTR</MenuItem>
+                                    </Select>
+                                  </FormControl>
+                                ) : letter === "Category" ? (
+                                  <FormControl
+                                    fullWidth
+                                    variant="outlined"
+                                    sx={{ backgroundColor: "#f9f9f9" }}
+                                  >
+                                    <InputLabel sx={{ fontWeight: "500" }}>
+                                      {letter}
+                                    </InputLabel>
+                                    <Select
+                                      value={row[letter] || ""}
+                                      onChange={(event) => {
+                                        const newValue = event.target.value;
+                                        const updatedRows = [...cwo.overhead];
+                                        updatedRows[rowIndex][letter] =
+                                          newValue;
+
+                                        setChildWorkorders((prev) => {
+                                          const updated = [...prev];
+                                          updated[cwoIndex].overhead =
+                                            updatedRows;
+                                          return updated;
+                                        });
+                                      }}
+                                      label={letter}
+                                      sx={{
+                                        backgroundColor: "#f9f9f9",
+                                        "& .MuiOutlinedInput-root": {
+                                          borderRadius: "6px",
+                                          "&:hover fieldset": {
+                                            borderColor: "#007bff",
+                                          },
+                                          "&.Mui-focused fieldset": {
+                                            borderColor: "#007bff",
+                                            borderWidth: "2px",
+                                          },
+                                        },
+                                        "& .MuiInputBase-input": {
+                                          fontWeight: "500",
+                                          padding: "12px 14px",
+                                        },
+                                        "& .MuiInputLabel-root": {
+                                          color: "#555",
+                                          fontWeight: "500",
+                                        },
+                                        "& .MuiInputLabel-root.Mui-focused": {
+                                          color: "#007bff",
+                                        },
+                                      }}
+                                    >
+                                      <MenuItem value="">
+                                        <em>Select Category</em>
+                                      </MenuItem>
+                                      <MenuItem value="budgeted">
+                                        Budgeted
+                                      </MenuItem>
+                                      <MenuItem value="expense">
+                                        Expense
+                                      </MenuItem>
                                     </Select>
                                   </FormControl>
                                 ) : letter === "Invoice Date" ? (

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,12 +21,16 @@ import {
   IconButton,
   Tooltip,
   Link,
+  useTheme,
+  useMediaQuery,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import InfoIcon from "@mui/icons-material/Info";
 import AttachmentIcon from "@mui/icons-material/Attachment";
+import FullscreenIcon from "@mui/icons-material/Fullscreen";
+import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
@@ -78,6 +82,14 @@ const MbModal = ({
   approvers,
   setApproverName,
 }) => {
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isTablet = useMediaQuery(theme.breakpoints.between("md", "lg"));
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {
       return {
@@ -178,13 +190,18 @@ const MbModal = ({
     <Dialog
       open={open}
       onClose={onClose}
-      maxWidth="lg"
-      fullWidth
+      maxWidth={isFullscreen ? false : "lg"}
+      fullWidth={!isFullscreen}
+      fullScreen={isFullscreen}
       PaperProps={{
         sx: {
-          borderRadius: "12px",
+          borderRadius: isFullscreen ? 0 : "12px",
           boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)",
           overflow: "hidden",
+          width: isFullscreen ? "100vw" : "auto",
+          height: isFullscreen ? "100vh" : "auto",
+          maxWidth: isFullscreen ? "none" : "lg",
+          maxHeight: isFullscreen ? "none" : "90vh",
         },
       }}
     >
@@ -227,6 +244,13 @@ const MbModal = ({
             }}
             variant="outlined"
           />
+          <Tooltip
+            title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+          >
+            <IconButton onClick={toggleFullscreen} size="small">
+              {isFullscreen ? <FullscreenExitIcon /> : <FullscreenIcon />}
+            </IconButton>
+          </Tooltip>
           <IconButton onClick={onClose} size="small" sx={{ ml: 1 }}>
             <CloseIcon />
           </IconButton>

@@ -311,7 +311,7 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
             }}
             onClick={() => handleOpenModal(row.original)}
           >
-            {"CR-" + row.original.cr_mwo_id} {}{" "}
+            {"MCR-" + row.original.cr_mwo_id} {}{" "}
           </span>
         ),
       },

@@ -289,7 +289,7 @@ const DashboardRequestsCR = ({ refreshKey }) => {
           }}
           onClick={() => handleOpenModal(row.original)}
         >
-          {"CR-" + row.original.cr_cwo_id} {}{" "}
+          {"CCR-" + row.original.cr_cwo_id} {}{" "}
         </span>
       ),
     },
