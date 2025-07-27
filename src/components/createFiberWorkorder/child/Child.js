@@ -923,7 +923,7 @@ const DashboardWhinch = () => {
                       fontSize: "0.75rem",
                     }}
                   >
-                    Last created CWO: {lastCwoNumber}
+                    Last created CWO: {lastCwoNumber?.slice(-3)}
                   </Typography>
                 )}
               </Grid>
