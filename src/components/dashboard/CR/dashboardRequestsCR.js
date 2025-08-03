@@ -96,8 +96,8 @@ const DashboardRequestsCR = ({ refreshKey }) => {
       setIsLoading(true);
       try {
         const statuses = [
-          "Pending for approval X",
-          "Pending for approval Y",
+          "Pending for approval deployment head",
+          "Pending for approval acquisition head",
           "Approved",
           "Rejected",
         ];
@@ -233,8 +233,10 @@ const DashboardRequestsCR = ({ refreshKey }) => {
 
     try {
       // Determine if this is the first or second approver
-      const isPendingForX = selectedRow.cr_status === "Pending for approval X";
-      const isPendingForY = selectedRow.cr_status === "Pending for approval Y";
+      const isPendingForX =
+        selectedRow.cr_status === "Pending for approval deployment head";
+      const isPendingForY =
+        selectedRow.cr_status === "Pending for approval acquisition head";
       const isFirstApprover = isPendingForX;
 
       // Prepare request data

@@ -228,14 +228,12 @@ const InvoiceForm = () => {
         );
 
         if (!validationResponse.data.valid) {
-          alert(`Budget validation failed: ${validationResponse.data.message}`);
+          alert(`Validation failed: ${validationResponse.data.message}`);
           return;
         }
       } catch (validationError) {
         console.error("Budget validation error:", validationError);
-        alert(
-          "Budget validation failed. Please check your expenses and try again."
-        );
+        alert("Validation failed. Please check your expenses and try again.");
         return;
       }
 

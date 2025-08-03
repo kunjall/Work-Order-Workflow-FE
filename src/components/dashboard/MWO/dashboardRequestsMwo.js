@@ -29,6 +29,7 @@ const Example = ({ refreshKey }) => {
   const [selectedApproverEmail, setSelectedApproverEmail] = useState("");
   const [approverName, setApproverName] = useState("");
   const [comment, setComment] = useState("");
+  const [attachmentFiles, setAttachmentFiles] = useState([]);
 
   const [mwoStatusPass, setMwoStatusPass] = useState("");
 
@@ -316,11 +317,13 @@ const Example = ({ refreshKey }) => {
   };
 
   const handleApprove = async () => {
-    if (mwoStatusPass.toLowerCase() === "pending with deployment head")
-      if (!attachmentLink) {
-        alert("add attachment link before approving");
+    if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
+      if (!attachmentLink && attachmentFiles.length === 0) {
+        alert("Please add attachment link or upload files before approving");
         return;
       }
+    }
+
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
 
@@ -333,6 +336,7 @@ const Example = ({ refreshKey }) => {
     } else if (mwoStatusPass.toLowerCase() === "pending with billing spoc") {
       mwoStatus = "Approved";
     }
+
     const actionedBy = user.name || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
@@ -344,47 +348,113 @@ const Example = ({ refreshKey }) => {
       timeZone: "IST",
     });
 
-    const requestData = {
-      mwo_id: selectedRow.mwo_id,
-      mwo_status: mwoStatus,
-      approved_at: actionedAt,
-      approved_by: actionedBy,
-      approver_comments: comment,
-      ...(mwoStatusPass.toLowerCase().includes("deployment") && {
-        attachment_link: attachmentLink,
-      }),
-      mwo_approver1_email:
-        mwoStatusPass.toLowerCase() === "pending with deployment head"
-          ? selectedApproverEmail || selectedRow.mwo_approver1_email || ""
-          : selectedRow.mwo_approver1_email || "",
-      mwo_approver1_name:
-        mwoStatusPass.toLowerCase() === "pending with deployment head"
-          ? approverName || selectedRow.mwo_approver1_name || ""
-          : selectedRow.mwo_approver1_name || "",
-
-      mwo_approver2_email:
-        mwoStatusPass.toLowerCase() === "pending with acquisition manager"
-          ? selectedApproverEmail || selectedRow.mwo_approver2_email || ""
-          : selectedRow.mwo_approver2_email || "",
-      mwo_approver2_name:
-        mwoStatusPass.toLowerCase() === "pending with acquisition manager"
-          ? approverName || selectedRow.mwo_approver2_name || ""
-          : selectedRow.mwo_approver3_name || "",
-    };
     try {
-      await axios.patch(
-        `${process.env.REACT_APP_API_URL}/workorder/update-status`,
-        requestData,
-        {
-          headers: {
-            Authorization: user.authToken,
-          },
-        }
-      );
+      // Use FormData for file uploads if there are attachment files
+      if (
+        attachmentFiles.length > 0 &&
+        mwoStatusPass.toLowerCase().includes("deployment")
+      ) {
+        const formData = new FormData();
+        formData.append("mwo_id", selectedRow.mwo_id);
+        formData.append("mwo_status", mwoStatus);
+        formData.append("approved_at", actionedAt);
+        formData.append("approved_by", actionedBy);
+        formData.append("approver_comments", comment);
+        formData.append("attachment_link", attachmentLink);
+
+        // Add approver details
+        formData.append(
+          "mwo_approver1_email",
+          mwoStatusPass.toLowerCase() === "pending with deployment head"
+            ? selectedApproverEmail || selectedRow.mwo_approver1_email || ""
+            : selectedRow.mwo_approver1_email || ""
+        );
+        formData.append(
+          "mwo_approver1_name",
+          mwoStatusPass.toLowerCase() === "pending with deployment head"
+            ? approverName || selectedRow.mwo_approver1_name || ""
+            : selectedRow.mwo_approver1_name || ""
+        );
+        formData.append(
+          "mwo_approver2_email",
+          mwoStatusPass.toLowerCase() === "pending with acquisition manager"
+            ? selectedApproverEmail || selectedRow.mwo_approver2_email || ""
+            : selectedRow.mwo_approver2_email || ""
+        );
+        formData.append(
+          "mwo_approver2_name",
+          mwoStatusPass.toLowerCase() === "pending with acquisition manager"
+            ? approverName || selectedRow.mwo_approver2_name || ""
+            : selectedRow.mwo_approver2_name || ""
+        );
+
+        // Add attachment files
+        attachmentFiles.forEach((file) => {
+          formData.append("attachments", file);
+        });
+
+        await axios.patch(
+          `${process.env.REACT_APP_API_URL}/workorder/update-status-with-attachments`,
+          formData,
+          {
+            headers: {
+              Authorization: user.authToken,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+      } else {
+        // Use regular JSON request for non-file uploads
+        const requestData = {
+          mwo_id: selectedRow.mwo_id,
+          mwo_status: mwoStatus,
+          approved_at: actionedAt,
+          approved_by: actionedBy,
+          approver_comments: comment,
+          ...(mwoStatusPass.toLowerCase().includes("deployment") && {
+            attachment_link: attachmentLink,
+          }),
+          mwo_approver1_email:
+            mwoStatusPass.toLowerCase() === "pending with deployment head"
+              ? selectedApproverEmail || selectedRow.mwo_approver1_email || ""
+              : selectedRow.mwo_approver1_email || "",
+          mwo_approver1_name:
+            mwoStatusPass.toLowerCase() === "pending with deployment head"
+              ? approverName || selectedRow.mwo_approver1_name || ""
+              : selectedRow.mwo_approver1_name || "",
+          mwo_approver2_email:
+            mwoStatusPass.toLowerCase() === "pending with acquisition manager"
+              ? selectedApproverEmail || selectedRow.mwo_approver2_email || ""
+              : selectedRow.mwo_approver2_email || "",
+          mwo_approver2_name:
+            mwoStatusPass.toLowerCase() === "pending with acquisition manager"
+              ? approverName || selectedRow.mwo_approver2_name || ""
+              : selectedRow.mwo_approver2_name || "",
+        };
+
+        await axios.patch(
+          `${process.env.REACT_APP_API_URL}/workorder/update-status`,
+          requestData,
+          {
+            headers: {
+              Authorization: user.authToken,
+            },
+          }
+        );
+      }
+
       alert("Work order approved successfully!");
+      setComment("");
+      setAttachmentLink("");
+      setAttachmentFiles([]);
+      setSelectedApproverEmail("");
+      setApproverName("");
+
+      // Refresh the data
+      window.location.reload();
     } catch (error) {
       console.error("Error in approving: ", error);
-      setError("Failed to Approve");
+      alert("Failed to approve work order. Please try again.");
     }
   };
 
@@ -721,6 +791,8 @@ const Example = ({ refreshKey }) => {
         mwoStatus={mwoStatusPass}
         handleReject={handleReject}
         username={user}
+        attachmentFiles={attachmentFiles}
+        setAttachmentFiles={setAttachmentFiles}
       />
     </Box>
   );

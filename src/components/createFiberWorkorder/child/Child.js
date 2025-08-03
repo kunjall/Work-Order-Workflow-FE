@@ -560,7 +560,7 @@ const DashboardWhinch = () => {
       mwo_id: formData.mwo_id,
       mwo_number: formData.mwo_number,
       vendor_id: selectedVendorId,
-      vendor_route_allocation: vendorRouteAllocation,
+      // vendor_route_allocation: vendorRouteAllocation,
       total_service_cost: totalAmount,
       internal_manager: selectedManager,
       route_name: formData.route_name,
@@ -998,7 +998,7 @@ const DashboardWhinch = () => {
                   fullWidth
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={2}>
+              {/* <Grid item xs={12} sm={6} md={2}>
                 <TextField
                   id="vendor-route-allocation"
                   label="Vendor Route Allocation"
@@ -1037,7 +1037,7 @@ const DashboardWhinch = () => {
                     },
                   }}
                 />
-              </Grid>
+              </Grid> */}
 
               <Grid item xs={12} sm={6} md={4}>
                 <Autocomplete

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,7 @@ import {
   Tooltip,
   useTheme,
   useMediaQuery,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -31,6 +32,13 @@ import AttachmentIcon from "@mui/icons-material/Attachment";
 import InfoIcon from "@mui/icons-material/Info";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import CloudUploadIcon from "@mui/icons-material/CloudUpload";
+import DownloadIcon from "@mui/icons-material/Download";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import ImageIcon from "@mui/icons-material/Image";
+import DescriptionIcon from "@mui/icons-material/Description";
+import axios from "axios";
+import { AuthContext } from "../../../context/authContext";
 
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
@@ -80,11 +88,16 @@ const MwoModal = ({
   setSelectedApproverEmail,
   approvers,
   setApproverName,
+  attachmentFiles,
+  setAttachmentFiles,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [existingAttachments, setExistingAttachments] = useState([]);
+  const [loadingAttachments, setLoadingAttachments] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.between("md", "lg"));
+  const { user } = useContext(AuthContext);
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -149,6 +162,76 @@ const MwoModal = ({
     if (!isActionAllowed) return;
     handleReject();
     onClose();
+  };
+
+  // Fetch existing attachments when modal opens
+  useEffect(() => {
+    const fetchAttachments = async () => {
+      if (open && rowData?.mwo_id) {
+        setLoadingAttachments(true);
+        try {
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/workorder/mwo-attachments`,
+            {
+              params: { mwo_id: rowData.mwo_id },
+              headers: { Authorization: user.authToken },
+            }
+          );
+          setExistingAttachments(response.data);
+        } catch (error) {
+          console.error("Error fetching attachments:", error);
+        } finally {
+          setLoadingAttachments(false);
+        }
+      }
+    };
+
+    fetchAttachments();
+  }, [open, rowData?.mwo_id, user.authToken]);
+
+  // Helper function to get file type icon
+  const getFileIcon = (fileType) => {
+    if (fileType?.includes("pdf")) {
+      return <PictureAsPdfIcon sx={{ color: "#d32f2f" }} />;
+    } else if (fileType?.includes("image")) {
+      return <ImageIcon sx={{ color: "#2e7d32" }} />;
+    } else {
+      return <DescriptionIcon sx={{ color: "#1976d2" }} />;
+    }
+  };
+
+  // Helper function to format file size
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  // Handle file download
+  const handleDownload = async (attachmentId, fileName) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/workorder/mwo-attachments/${attachmentId}/download`,
+        {
+          headers: { Authorization: user.authToken },
+          responseType: "blob",
+        }
+      );
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      alert("Error downloading file");
+    }
   };
 
   // const handleReturnButton = () => {
@@ -777,6 +860,292 @@ const MwoModal = ({
                   }}
                 />
               </Box>
+              {/* File Upload Section - Only for deployment head */}
+              {mwoStatus?.toLowerCase().includes("deployment") && (
+                <Box sx={{ mt: "2rem" }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      fontWeight: 600,
+                      mb: 2,
+                      color: "#333",
+                      display: "flex",
+                      alignItems: "center",
+                      "&:after": {
+                        content: '""',
+                        display: "block",
+                        height: "2px",
+                        background: "#ec7c30",
+                        flexGrow: 1,
+                        ml: 2,
+                      },
+                    }}
+                  >
+                    Upload Attachments
+                  </Typography>
+                  <Box
+                    sx={{
+                      border: `1px dashed ${
+                        attachmentFiles.length > 0 ? "#4caf50" : "#ccc"
+                      }`,
+                      borderRadius: "4px",
+                      padding: "6px 12px",
+                      textAlign: "center",
+                      backgroundColor:
+                        attachmentFiles.length > 0
+                          ? "rgba(76, 175, 80, 0.04)"
+                          : "#fafafa",
+                      transition: "all 0.3s ease",
+                      cursor: "pointer",
+                      height: "32px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      "&:hover": {
+                        borderColor:
+                          attachmentFiles.length > 0 ? "#4caf50" : "#ec7c30",
+                        backgroundColor:
+                          attachmentFiles.length > 0
+                            ? "rgba(76, 175, 80, 0.08)"
+                            : "rgba(236, 124, 48, 0.04)",
+                      },
+                    }}
+                    component="label"
+                  >
+                    <input
+                      type="file"
+                      multiple
+                      accept=".jpeg,.jpg,.png,.pdf,.doc,.docx,.xls,.xlsx,.xlsb"
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files);
+                        if (files.length > 5) {
+                          alert("Maximum 5 files are allowed");
+                          return;
+                        }
+                        setAttachmentFiles(files);
+                      }}
+                      style={{ display: "none" }}
+                    />
+
+                    {attachmentFiles.length > 0 ? (
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <CheckCircleIcon
+                          sx={{
+                            fontSize: 16,
+                            color: "#4caf50",
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 500,
+                            color: "#4caf50",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          {attachmentFiles.length} file(s) selected
+                        </Typography>
+                      </Box>
+                    ) : (
+                      <Box
+                        sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                      >
+                        <CloudUploadIcon
+                          sx={{
+                            fontSize: 16,
+                            color: "#999",
+                          }}
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: 400,
+                            color: "#666",
+                            fontSize: "0.875rem",
+                          }}
+                        >
+                          Upload Attachments (Max 5)
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+
+                  {attachmentFiles.length > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "#666",
+                          fontWeight: 500,
+                          display: "block",
+                          mb: 1,
+                        }}
+                      >
+                        Selected Files:
+                      </Typography>
+                      <Box sx={{ maxHeight: 120, overflowY: "auto" }}>
+                        {attachmentFiles.map((file, index) => (
+                          <Box
+                            key={index}
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 1,
+                              p: 1,
+                              mb: 0.5,
+                              backgroundColor: "#f5f5f5",
+                              borderRadius: "6px",
+                              border: "1px solid #e0e0e0",
+                            }}
+                          >
+                            <AttachmentIcon
+                              sx={{ fontSize: 16, color: "#666" }}
+                            />
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                flex: 1,
+                                color: "#333",
+                                fontSize: "0.75rem",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {file.name}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                color: "#999",
+                                fontSize: "0.7rem",
+                              }}
+                            >
+                              {(file.size / 1024 / 1024).toFixed(1)}MB
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+              )}
+
+              {/* Existing Attachments Section */}
+              <Box sx={{ mt: "2rem" }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 2,
+                    color: "#333",
+                    display: "flex",
+                    alignItems: "center",
+                    "&:after": {
+                      content: '""',
+                      display: "block",
+                      height: "2px",
+                      background: "#ec7c30",
+                      flexGrow: 1,
+                      ml: 2,
+                    },
+                  }}
+                >
+                  Attachments
+                </Typography>
+                {loadingAttachments ? (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      p: 3,
+                    }}
+                  >
+                    <CircularProgress size={24} />
+                    <Typography sx={{ ml: 2, color: "#666" }}>
+                      Loading attachments...
+                    </Typography>
+                  </Box>
+                ) : existingAttachments.length > 0 ? (
+                  <Box sx={{ maxHeight: 200, overflowY: "auto" }}>
+                    {existingAttachments.map((attachment) => (
+                      <Paper
+                        key={attachment.attachment_id}
+                        elevation={0}
+                        sx={{
+                          p: 2,
+                          mb: 1,
+                          border: "1px solid rgba(0, 0, 0, 0.08)",
+                          borderRadius: "8px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          "&:hover": {
+                            backgroundColor: "rgba(236, 124, 48, 0.04)",
+                          },
+                        }}
+                      >
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 2 }}
+                        >
+                          {getFileIcon(attachment.file_type)}
+                          <Box>
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500, color: "#333" }}
+                            >
+                              {attachment.file_name}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#666" }}
+                            >
+                              {formatFileSize(attachment.file_size)}
+                            </Typography>
+                          </Box>
+                        </Box>
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            handleDownload(
+                              attachment.attachment_id,
+                              attachment.file_name
+                            )
+                          }
+                          sx={{
+                            color: "#1976d2",
+                            "&:hover": {
+                              backgroundColor: "rgba(25, 118, 210, 0.08)",
+                            },
+                          }}
+                        >
+                          <DownloadIcon fontSize="small" />
+                        </IconButton>
+                      </Paper>
+                    ))}
+                  </Box>
+                ) : (
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 3,
+                      textAlign: "center",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(0, 0, 0, 0.08)",
+                      color: "#666",
+                    }}
+                  >
+                    <AttachmentIcon
+                      sx={{ fontSize: 48, color: "#ccc", mb: 1 }}
+                    />
+                    <Typography>No attachments available</Typography>
+                  </Paper>
+                )}
+              </Box>
+
               {mwoStatus?.toLowerCase().includes("deployment") && (
                 <Box sx={{ mt: "2rem" }}>
                   <Typography

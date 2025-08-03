@@ -136,8 +136,9 @@ const CrModal = ({
   useEffect(() => {
     if (rowData && open && crStatus.toLowerCase().includes("pending")) {
       // Check if this is the first approver
-      const isPendingForX = crStatus === "Pending for approval X";
-      const isPendingForY = crStatus === "Pending for approval Y";
+      const isPendingForX = crStatus === "Pending for approval deployment head";
+      const isPendingForY =
+        crStatus === "Pending for approval acquisition head";
 
       // First approver handles status X, second approver handles status Y
       setIsFirstApprover(isPendingForX);

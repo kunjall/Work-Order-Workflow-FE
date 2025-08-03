@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Dialog,
   DialogContent,
@@ -23,6 +23,11 @@ import {
   Link,
   useTheme,
   useMediaQuery,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -31,6 +36,13 @@ import InfoIcon from "@mui/icons-material/Info";
 import AttachmentIcon from "@mui/icons-material/Attachment";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import DownloadIcon from "@mui/icons-material/Download";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import ImageIcon from "@mui/icons-material/Image";
+import DescriptionIcon from "@mui/icons-material/Description";
+import axios from "axios";
+import { AuthContext } from "../../../context/authContext";
 
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
@@ -83,9 +95,83 @@ const MbModal = ({
   setApproverName,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [attachments, setAttachments] = useState([]);
+  const [loadingAttachments, setLoadingAttachments] = useState(false);
+  const { user } = useContext(AuthContext);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.between("md", "lg"));
+
+  // Fetch attachments when modal opens and rowData is available
+  useEffect(() => {
+    const fetchAttachments = async () => {
+      if (!open || !rowData?.mb_id) return;
+
+      setLoadingAttachments(true);
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/mb/attachments`,
+          {
+            params: { mb_id: rowData.mb_id },
+            headers: { Authorization: user.authToken },
+          }
+        );
+        setAttachments(response.data);
+      } catch (error) {
+        console.error("Error fetching attachments:", error);
+        setAttachments([]);
+      } finally {
+        setLoadingAttachments(false);
+      }
+    };
+
+    fetchAttachments();
+  }, [open, rowData?.mb_id, user.authToken]);
+
+  // Function to get file icon based on file type
+  const getFileIcon = (fileType) => {
+    if (fileType?.includes("pdf")) return <PictureAsPdfIcon />;
+    if (fileType?.includes("image")) return <ImageIcon />;
+    if (fileType?.includes("document") || fileType?.includes("word"))
+      return <DescriptionIcon />;
+    if (fileType?.includes("sheet") || fileType?.includes("excel"))
+      return <DescriptionIcon />;
+    return <InsertDriveFileIcon />;
+  };
+
+  // Function to format file size
+  const formatFileSize = (bytes) => {
+    if (!bytes) return "Unknown size";
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + " " + sizes[i];
+  };
+
+  // Function to download attachment
+  const downloadAttachment = async (attachmentId, fileName) => {
+    try {
+      const response = await axios.get(
+        `${process.env.REACT_APP_API_URL}/mb/attachments/${attachmentId}/download`,
+        {
+          headers: { Authorization: user.authToken },
+          responseType: "blob",
+        }
+      );
+
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading attachment:", error);
+      alert("Failed to download attachment");
+    }
+  };
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -257,10 +343,17 @@ const MbModal = ({
         </Box>
       </Box>
 
-      <DialogContent sx={{ padding: "24px", position: "relative" }}>
-        <Grid container spacing={4}>
+      <DialogContent
+        sx={{
+          padding: "24px",
+          position: "relative",
+          height: isFullscreen ? "calc(100vh - 140px)" : "auto",
+          overflowY: "auto",
+        }}
+      >
+        <Grid container spacing={3}>
           {/* Details Section */}
-          <Grid item xs={12} md={5}>
+          <Grid item xs={12} md={isFullscreen ? 4 : 5}>
             <Box sx={{ mb: 3 }}>
               <Typography
                 variant="h6"
@@ -287,10 +380,10 @@ const MbModal = ({
                 sx={{
                   boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
                   borderRadius: "10px",
-                  overflow: "visible",
+                  overflow: "auto",
                   border: "1px solid #eaeaea",
                   width: "100%",
-                  maxHeight: "500px",
+                  maxHeight: isFullscreen ? "400px" : "300px",
                 }}
               >
                 <Table stickyHeader size="small">
@@ -415,10 +508,121 @@ const MbModal = ({
                 </Table>
               </TableContainer>
             </Box>
+
+            {/* Attachments Section */}
+            <Box sx={{ mb: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Attachments
+              </Typography>
+              {loadingAttachments ? (
+                <Box sx={{ display: "flex", justifyContent: "center", p: 3 }}>
+                  <CircularProgress size={24} />
+                  <Typography sx={{ ml: 2, color: "#666" }}>
+                    Loading attachments...
+                  </Typography>
+                </Box>
+              ) : attachments && attachments.length > 0 ? (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                  }}
+                >
+                  <List sx={{ p: 0 }}>
+                    {attachments.map((attachment, index) => (
+                      <ListItem
+                        key={attachment.attachment_id}
+                        sx={{
+                          borderBottom:
+                            index < attachments.length - 1
+                              ? "1px solid rgba(0, 0, 0, 0.08)"
+                              : "none",
+                          "&:hover": {
+                            backgroundColor: "rgba(236, 124, 48, 0.04)",
+                          },
+                        }}
+                      >
+                        <ListItemIcon sx={{ minWidth: 40 }}>
+                          {getFileIcon(attachment.file_type)}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            <Typography
+                              variant="body2"
+                              sx={{ fontWeight: 500, color: "#333" }}
+                            >
+                              {attachment.file_name}
+                            </Typography>
+                          }
+                          secondary={
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#666" }}
+                            >
+                              {formatFileSize(attachment.file_size)}
+                            </Typography>
+                          }
+                        />
+                        <IconButton
+                          size="small"
+                          onClick={() =>
+                            downloadAttachment(
+                              attachment.attachment_id,
+                              attachment.file_name
+                            )
+                          }
+                          sx={{
+                            color: "#1976d2",
+                            "&:hover": {
+                              backgroundColor: "rgba(25, 118, 210, 0.08)",
+                            },
+                          }}
+                        >
+                          <DownloadIcon fontSize="small" />
+                        </IconButton>
+                      </ListItem>
+                    ))}
+                  </List>
+                </Paper>
+              ) : (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    textAlign: "center",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    color: "#666",
+                  }}
+                >
+                  <AttachmentIcon sx={{ fontSize: 48, color: "#ccc", mb: 1 }} />
+                  <Typography>No attachments available for this MB.</Typography>
+                </Paper>
+              )}
+            </Box>
           </Grid>
 
           {/* Materials and Services Section */}
-          <Grid item xs={12} md={7}>
+          <Grid item xs={12} md={isFullscreen ? 8 : 7}>
             <Box sx={{ mb: 3 }}>
               <Typography
                 variant="h6"

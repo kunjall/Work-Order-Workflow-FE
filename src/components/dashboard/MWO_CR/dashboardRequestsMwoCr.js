@@ -227,9 +227,12 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
 
     try {
       // Determine which approver level this is
-      const isPendingForX = selectedRow.cr_status === "Pending for approval X";
-      const isPendingForY = selectedRow.cr_status === "Pending for approval Y";
-      const isPendingForZ = selectedRow.cr_status === "Pending for approval Z";
+      const isPendingForX =
+        selectedRow.cr_status === "Pending for approval deployment head";
+      const isPendingForY =
+        selectedRow.cr_status === "Pending for approval acquisition head";
+      const isPendingForZ =
+        selectedRow.cr_status === "Pending for approval head operations";
 
       console.log("Approval status check:", {
         status: selectedRow.cr_status,
@@ -253,7 +256,7 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
         }
         requestData = {
           ...requestData,
-          cr_status: "Pending for approval Y",
+          cr_status: "Pending for approval acquisition head",
           cr_approver2_email: selectedApproverEmail,
           cr_approver2_name: approverName,
         };
@@ -266,7 +269,7 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
         }
         requestData = {
           ...requestData,
-          cr_status: "Pending for approval Z",
+          cr_status: "Pending for approval head operations",
           cr_approver3_email: selectedApproverEmail,
           cr_approver3_name: approverName,
         };

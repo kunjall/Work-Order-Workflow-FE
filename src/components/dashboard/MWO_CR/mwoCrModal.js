@@ -112,9 +112,10 @@ const MwoCrModal = ({
   useEffect(() => {
     if (rowData && open && crStatus.toLowerCase().includes("pending")) {
       // Check approver level based on status
-      const isPendingForX = crStatus === "Pending for approval X";
-      const isPendingForY = crStatus === "Pending for approval Y";
-      const isPendingForZ = crStatus === "Pending for approval Z";
+      const isPendingForX = crStatus === "Pending for approval deployment head";
+      const isPendingForY =
+        crStatus === "Pending for approval acquisition head";
+      const isPendingForZ = crStatus === "Pending for approval head operations";
 
       // Set approver level states
       setIsFirstApprover(isPendingForX);

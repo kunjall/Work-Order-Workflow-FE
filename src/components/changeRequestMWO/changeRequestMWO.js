@@ -275,7 +275,7 @@ const ChangeRequestMWO = () => {
       mwo_number: formData.mwo_number,
       total_service_cost: totalServiceCost.toFixed(2),
       total_material_cost: totalMaterialCost.toFixed(2),
-      cr_status: "Pending for approval X",
+      cr_status: "Pending for approval deployment head",
       customer_name: formData.customer_name,
       cr_approver_email: selectedApproverEmail,
       cr_approver_name: approverName,

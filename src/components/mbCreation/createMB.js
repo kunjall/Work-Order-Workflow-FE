@@ -25,7 +25,13 @@ import {
   DialogTitle,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { Margin, SettingsInputCompositeSharp } from "@mui/icons-material";
+import {
+  Margin,
+  SettingsInputCompositeSharp,
+  CheckCircle as CheckCircleIcon,
+  CloudUpload as CloudUploadIcon,
+  Attachment as AttachmentIcon,
+} from "@mui/icons-material";
 
 const CreateMRS = () => {
   const { user } = useContext(AuthContext);
@@ -42,7 +48,7 @@ const CreateMRS = () => {
   const [approvers, setApprovers] = useState([]);
   const [selectedApproverEmail, setSelectedApproverEmail] = useState(null);
   const [approverName, setApproverName] = useState("");
-  const [attachmentLink, setAttachmentLink] = useState("");
+  const [attachmentFiles, setAttachmentFiles] = useState([]);
   const [selectedVendorId, setSelectedVendorId] = useState(null);
   const [formData, setFormData] = useState({});
   const [vendorOptions, setVendorOptions] = useState([]);
@@ -85,9 +91,11 @@ const CreateMRS = () => {
       !selectedApproverEmail ||
       !selectedWorkOrder ||
       !selectedLocator ||
-      !attachmentLink
+      attachmentFiles.length === 0
     ) {
-      window.alert("Please select all fields before proceeding.");
+      window.alert(
+        "Please select all fields and upload at least one attachment before proceeding."
+      );
       return;
     }
     const isConfirmed = window.confirm("Are you sure you want to submit?");
@@ -125,37 +133,50 @@ const CreateMRS = () => {
       service_mb_price: item.service_mb_price || "0",
     }));
 
-    const requestData = {
-      vendor_id: formData.vendor_id,
-      tps_pm: formData.internal_manager,
-      vendor_name: formData.vendor_name,
-      route_name: formData.route_name,
-      gis_code: formData.gis_code,
-      execution_city: formData.execution_city,
-      state: formData.state,
-      internal_external: internalExternal,
-      locator_name: selectedLocator,
-      mb_status: "Pending with deployment head",
-      customer_name: formData.customer_name,
-      requested_by: createdBy,
-      requested_at: createdAt,
-      cwo_id: formData.cwo_id,
-      cwo_number: formData.cwo_number,
-      transaction_type: "W2S",
-      mb_approver1_email: selectedApproverEmail,
-      mb_approver1_name: approverName,
-      attachment_url: attachmentLink,
-      materialItems: processedMaterialItems,
-      serviceItems: processedServiceItems,
-    };
+    // Create FormData for file upload
+    const formDataToSend = new FormData();
+
+    // Add all the form fields
+    formDataToSend.append("vendor_id", formData.vendor_id || "");
+    formDataToSend.append("tps_pm", formData.internal_manager || "");
+    formDataToSend.append("vendor_name", formData.vendor_name || "");
+    formDataToSend.append("route_name", formData.route_name || "");
+    formDataToSend.append("gis_code", formData.gis_code || "");
+    formDataToSend.append("execution_city", formData.execution_city || "");
+    formDataToSend.append("state", formData.state || "");
+    formDataToSend.append("internal_external", internalExternal);
+    formDataToSend.append("locator_name", selectedLocator || "");
+    formDataToSend.append("mb_status", "Pending with deployment head");
+    formDataToSend.append("customer_name", formData.customer_name || "");
+    formDataToSend.append("requested_by", createdBy);
+    formDataToSend.append("requested_at", createdAt);
+    formDataToSend.append("cwo_id", formData.cwo_id || "");
+    formDataToSend.append("cwo_number", formData.cwo_number || "");
+    formDataToSend.append("transaction_type", "W2S");
+    formDataToSend.append("mb_approver1_email", selectedApproverEmail || "");
+    formDataToSend.append("mb_approver1_name", approverName || "");
+    formDataToSend.append(
+      "materialItems",
+      JSON.stringify(processedMaterialItems)
+    );
+    formDataToSend.append(
+      "serviceItems",
+      JSON.stringify(processedServiceItems)
+    );
+
+    // Add attachment files
+    attachmentFiles.forEach((file) => {
+      formDataToSend.append("attachments", file);
+    });
 
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/mb/create-mb`,
-        requestData,
+        formDataToSend,
         {
           headers: {
             Authorization: user.authToken,
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -913,15 +934,153 @@ const CreateMRS = () => {
                     />
                   </Grid>
                   <Grid item xs={12} sm={6} md={3.5}>
-                    <TextField
-                      label="Attachment Link"
-                      value={attachmentLink}
-                      onChange={(event) =>
-                        setAttachmentLink(event.target.value)
-                      }
-                      variant="outlined"
-                      fullWidth
-                    />
+                    <Box
+                      sx={{
+                        border: `1px dashed ${
+                          attachmentFiles.length > 0 ? "#4caf50" : "#ccc"
+                        }`,
+                        borderRadius: "4px",
+                        padding: "6px 12px",
+                        textAlign: "center",
+                        backgroundColor:
+                          attachmentFiles.length > 0
+                            ? "rgba(76, 175, 80, 0.04)"
+                            : "#fafafa",
+                        transition: "all 0.3s ease",
+                        cursor: "pointer",
+                        height: "32px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        "&:hover": {
+                          borderColor:
+                            attachmentFiles.length > 0 ? "#4caf50" : "#ec7c30",
+                          backgroundColor:
+                            attachmentFiles.length > 0
+                              ? "rgba(76, 175, 80, 0.08)"
+                              : "rgba(236, 124, 48, 0.04)",
+                        },
+                      }}
+                      component="label"
+                    >
+                      <input
+                        type="file"
+                        multiple
+                        accept=".jpeg,.jpg,.png,.pdf,.doc,.docx,.xls,.xlsx,.xlsb"
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files);
+                          if (files.length > 5) {
+                            alert("Maximum 5 files are allowed");
+                            return;
+                          }
+                          setAttachmentFiles(files);
+                        }}
+                        style={{ display: "none" }}
+                      />
+
+                      {attachmentFiles.length > 0 ? (
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <CheckCircleIcon
+                            sx={{
+                              fontSize: 16,
+                              color: "#4caf50",
+                            }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 500,
+                              color: "#4caf50",
+                              fontSize: "0.875rem",
+                            }}
+                          >
+                            {attachmentFiles.length} file(s) selected
+                          </Typography>
+                        </Box>
+                      ) : (
+                        <Box
+                          sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                        >
+                          <CloudUploadIcon
+                            sx={{
+                              fontSize: 16,
+                              color: "#999",
+                            }}
+                          />
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontWeight: 400,
+                              color: "#666",
+                              fontSize: "0.875rem",
+                            }}
+                          >
+                            Upload Attachments (Max 5)
+                          </Typography>
+                        </Box>
+                      )}
+                    </Box>
+
+                    {attachmentFiles.length > 0 && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "#666",
+                            fontWeight: 500,
+                            display: "block",
+                            mb: 1,
+                          }}
+                        >
+                          Selected Files:
+                        </Typography>
+                        <Box sx={{ maxHeight: 120, overflowY: "auto" }}>
+                          {attachmentFiles.map((file, index) => (
+                            <Box
+                              key={index}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 1,
+                                p: 1,
+                                mb: 0.5,
+                                backgroundColor: "#f5f5f5",
+                                borderRadius: "6px",
+                                border: "1px solid #e0e0e0",
+                              }}
+                            >
+                              <AttachmentIcon
+                                sx={{ fontSize: 16, color: "#666" }}
+                              />
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  flex: 1,
+                                  color: "#333",
+                                  fontSize: "0.75rem",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {file.name}
+                              </Typography>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: "#999",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                {(file.size / 1024 / 1024).toFixed(1)}MB
+                              </Typography>
+                            </Box>
+                          ))}
+                        </Box>
+                      </Box>
+                    )}
                   </Grid>
 
                   <Grid
