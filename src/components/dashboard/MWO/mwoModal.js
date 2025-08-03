@@ -1145,52 +1145,6 @@ const MwoModal = ({
                   </Paper>
                 )}
               </Box>
-
-              {mwoStatus?.toLowerCase().includes("deployment") && (
-                <Box sx={{ mt: "2rem" }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      fontWeight: 600,
-                      mb: 2,
-                      color: "#333",
-                      display: "flex",
-                      alignItems: "center",
-                      "&:after": {
-                        content: '""',
-                        display: "block",
-                        height: "2px",
-                        background: "#ec7c30",
-                        flexGrow: 1,
-                        ml: 2,
-                      },
-                    }}
-                  >
-                    Attachment Link
-                  </Typography>
-                  <TextField
-                    label="Add attachment link"
-                    placeholder="Attachment Link"
-                    fullWidth
-                    multiline
-                    rows={1}
-                    value={attachmentLink}
-                    onChange={(e) => setAttachmentLink(e.target.value)}
-                    variant="outlined"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                        "&:hover fieldset": {
-                          borderColor: "#ec7c30",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "#ec7c30",
-                        },
-                      },
-                    }}
-                  />
-                </Box>
-              )}
             </Box>
           </Grid>
         </Grid>
