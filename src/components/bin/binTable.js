@@ -29,13 +29,22 @@ const LocatorStock = () => {
         const internalExternal =
           user.company.toLowerCase() === "tps" ? "internal" : "external";
 
+        // Check if user role contains "admin" (case insensitive)
+        const isAdmin = user.role && user.role.toLowerCase().includes("admin");
+
+        const params = {
+          internal_external: internalExternal,
+        };
+
+        // Only add vendor_name filter if user is not an admin
+        if (!isAdmin) {
+          params.vendor_name = user.name;
+        }
+
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/master/find-locators`,
           {
-            params: {
-              vendor_name: user.name,
-              internal_external: internalExternal,
-            },
+            params: params,
             headers: {
               Authorization: user.authToken,
             },
