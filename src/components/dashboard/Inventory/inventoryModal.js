@@ -58,6 +58,11 @@ const formatDate = (isoDateString) => {
 
 // Helper function to format field names for display
 const formatFieldName = (key) => {
+  // Special case for mrs_number field
+  if (key.toLowerCase() === "mrs_number") {
+    return "MO No/DC No";
+  }
+
   return key
     .replace(/_/g, " ")
     .split(" ")
@@ -178,7 +183,6 @@ const InventoryModal = ({
     "entry_date",
     "dc_date",
     "eway_bill_number",
-    "mrs_number",
     "mrs_date",
     "client_warehouse_id",
     "client_warehouse_city",
