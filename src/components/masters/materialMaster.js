@@ -26,6 +26,8 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import GetAppIcon from "@mui/icons-material/GetApp";
+import { CSVLink } from "react-csv";
 
 const InventoryMaster = () => {
   const { user } = useContext(AuthContext);
@@ -209,20 +211,46 @@ const InventoryMaster = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
+  // Prepare CSV export data
+  const csvData = materials.map((material) => ({
+    "Material ID": material.item_id,
+    "Material Name": material.item_name,
+    "Unit of Measure": material.item_uom,
+    Company: material.item_company,
+    Rate: material.item_rate,
+  }));
+
   return (
     <Box sx={{ p: 3 }}>
       <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
         <Typography variant="h5" component="h1" gutterBottom>
           Material Master
         </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleOpenCreateDialog}
-        >
-          Add Material
-        </Button>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          {materials.length > 0 && (
+            <CSVLink
+              data={csvData}
+              filename="material_master.csv"
+              style={{ textDecoration: "none" }}
+            >
+              <Button
+                variant="outlined"
+                color="primary"
+                startIcon={<GetAppIcon />}
+              >
+                Export CSV
+              </Button>
+            </CSVLink>
+          )}
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={handleOpenCreateDialog}
+          >
+            Add Material
+          </Button>
+        </Box>
       </Box>
 
       {loading ? (

@@ -157,7 +157,7 @@ const InventoryModal = ({
     "customer_name",
     "inventory_id",
     "client_warehouse_city",
-    "customer_dc_number",
+    "mrs_number",
     "dc_date",
     "warehouse_id",
     "warehouse_city",
