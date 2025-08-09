@@ -220,6 +220,42 @@ const Example = ({ refreshKey }) => {
     };
   }, [username]);
 
+  // Fetch all MM materials for export functionality
+  useEffect(() => {
+    const fetchAllMmMaterial = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/mm/find-all-mm-material`,
+          {
+            headers: {
+              Authorization: user.authToken,
+            },
+          }
+        );
+
+        const mmMaterialArray = response.data.map((material) => ({
+          record_id: material.record_id,
+          mm_id: material.mm_id,
+          cwo_id: material.cwo_id,
+          cwo_number: material.cwo_number,
+          material_id: material.material_id,
+          material_desc: material.material_desc,
+          material_uom: material.material_uom,
+          material_req_qty: material.material_req_qty,
+          material_cwo_bal_qty: material.material_cwo_bal_qty,
+          material_unit_price: material.material_unit_price,
+          material_price: material.material_price,
+          material_provided_qty: material.material_provided_qty,
+        }));
+        setAllMmMaterial(mmMaterialArray);
+      } catch (err) {
+        console.error("Error fetching all MM materials:", err);
+        setAllMmMaterial([]);
+      }
+    };
+    fetchAllMmMaterial();
+  }, [user.authToken]);
+
   useEffect(() => {
     if (selectedRow != null && selectedRow.execution_city != null) {
       const fetchApprovers = async () => {
@@ -479,6 +515,9 @@ const Example = ({ refreshKey }) => {
     const flattened = [];
 
     rows.forEach((mm) => {
+      // Remove approver_comments from mm
+      const { approver_comments, ...mmWithoutComments } = mm;
+
       const materials = allMmMaterial.filter(
         (mat) => mat.mm_id === String(mm.mm_id)
       );
@@ -486,7 +525,7 @@ const Example = ({ refreshKey }) => {
       if (materials.length > 0) {
         materials.forEach((mat) => {
           flattened.push({
-            ...mm,
+            ...mmWithoutComments,
             material_id: mat.material_id,
             material_desc: mat.material_desc,
             material_uom: mat.material_uom,
@@ -499,7 +538,7 @@ const Example = ({ refreshKey }) => {
         });
       } else {
         flattened.push({
-          ...mm,
+          ...mmWithoutComments,
           material_id: "",
           material_desc: "",
           material_uom: "",

@@ -464,6 +464,9 @@ const Example = ({ refreshKey }) => {
     const flattened = [];
 
     rows.forEach((mb) => {
+      // Destructure without approver_comments
+      const { approver_comments, ...mbWithoutComments } = mb;
+
       const materials = allMbMaterial.filter(
         (mat) => mat.mb_id === String(mb.mb_id)
       );
@@ -475,7 +478,7 @@ const Example = ({ refreshKey }) => {
       if (materials.length > 0 || services.length > 0) {
         materials.forEach((mat) => {
           flattened.push({
-            ...mb,
+            ...mbWithoutComments,
             material_id: mat.material_id,
             material_desc: mat.material_desc,
             material_uom: mat.material_uom,
@@ -493,7 +496,7 @@ const Example = ({ refreshKey }) => {
 
         services.forEach((srv) => {
           flattened.push({
-            ...mb,
+            ...mbWithoutComments,
             material_id: "",
             material_desc: "",
             material_uom: "",
@@ -510,8 +513,7 @@ const Example = ({ refreshKey }) => {
         });
       } else {
         flattened.push({
-          ...mb,
-
+          ...mbWithoutComments,
           material_id: "",
           material_desc: "",
           material_uom: "",

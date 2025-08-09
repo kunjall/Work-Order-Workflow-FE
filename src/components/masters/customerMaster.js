@@ -357,67 +357,126 @@ const CustomerMaster = () => {
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
-              <TableRow sx={{ height: "32px" }}>
-                <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
-                  Customer ID
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
-                  Customer Name
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
-                  State
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
-                  Point of Contact
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
-                  Mobile
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
-                  Email
-                </TableCell>
-                <TableCell sx={{ fontWeight: "bold", py: 0.5 }}>
-                  Actions
-                </TableCell>
+              <TableRow sx={{ height: 24 }}>
+                {[
+                  "Customer ID",
+                  "Customer Name",
+                  "State",
+                  "Point of Contact",
+                  "Mobile",
+                  "Email",
+                  "Actions",
+                ].map((header) => (
+                  <TableCell
+                    key={header}
+                    sx={{
+                      fontWeight: "bold",
+                      py: 0.5,
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      backgroundColor: "#000000", // black header
+                      color: "white", // white text
+                    }}
+                  >
+                    {header}
+                  </TableCell>
+                ))}
               </TableRow>
             </TableHead>
             <TableBody>
-              {customers.map((customer) => (
-                <TableRow key={customer.customer_id} sx={{ height: "32px" }}>
-                  <TableCell sx={{ py: 0.5 }}>{customer.customer_id}</TableCell>
-                  <TableCell sx={{ py: 0.5 }}>
-                    {customer.customer_name}
-                  </TableCell>
-                  <TableCell sx={{ py: 0.5 }}>
-                    {customer.customer_state}
-                  </TableCell>
-                  <TableCell sx={{ py: 0.5 }}>
-                    {customer.customer_poc}
-                  </TableCell>
-                  <TableCell sx={{ py: 0.5 }}>
-                    {customer.customer_mobile}
-                  </TableCell>
-                  <TableCell sx={{ py: 0.5 }}>
-                    {customer.customer_email}
-                  </TableCell>
-                  <TableCell sx={{ py: 0.5 }}>
-                    <IconButton
-                      color="primary"
-                      size="small"
-                      onClick={() => handleOpenEditDialog(customer)}
+              {customers.map((customer, index) => {
+                const bgColor = index % 2 === 0 ? "#ffe5cc" : "#ffffff"; // lighter orange & white
+
+                return (
+                  <TableRow
+                    key={customer.customer_id}
+                    sx={{
+                      height: 28,
+                      backgroundColor: bgColor,
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        py: 0.5,
+                        whiteSpace: "nowrap",
+                        overflowX: "auto",
+                        maxWidth: 120,
+                      }}
                     >
-                      <EditIcon fontSize="small" />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      size="small"
-                      onClick={() => handleDeleteCustomer(customer.customer_id)}
+                      {customer.customer_id}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        py: 0.5,
+                        whiteSpace: "nowrap",
+                        overflowX: "auto",
+                        maxWidth: 150,
+                      }}
                     >
-                      <DeleteIcon fontSize="small" />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+                      {customer.customer_name}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        py: 0.5,
+                        whiteSpace: "nowrap",
+                        overflowX: "auto",
+                        maxWidth: 100,
+                      }}
+                    >
+                      {customer.customer_state}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        py: 0.5,
+                        whiteSpace: "nowrap",
+                        overflowX: "auto",
+                        maxWidth: 150,
+                      }}
+                    >
+                      {customer.customer_poc}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        py: 0.5,
+                        whiteSpace: "nowrap",
+                        overflowX: "auto",
+                        maxWidth: 120,
+                      }}
+                    >
+                      {customer.customer_mobile}
+                    </TableCell>
+                    <TableCell
+                      sx={{
+                        py: 0.5,
+                        whiteSpace: "nowrap",
+                        overflowX: "auto",
+                        maxWidth: 180,
+                      }}
+                    >
+                      {customer.customer_email}
+                    </TableCell>
+                    <TableCell sx={{ py: 0.5, whiteSpace: "nowrap" }}>
+                      <IconButton
+                        sx={{ color: "#ff9933" }}
+                        size="small"
+                        onClick={() => handleOpenEditDialog(customer)}
+                      >
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        size="small"
+                        onClick={() =>
+                          handleDeleteCustomer(customer.customer_id)
+                        }
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>

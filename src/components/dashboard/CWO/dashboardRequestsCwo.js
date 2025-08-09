@@ -552,12 +552,15 @@ const Example = ({ refreshKey }) => {
       }
     });
 
+    // Remove approver_comments from CSV data
+    const transformed = flattened.map(({ approver_comments, ...rest }) => rest);
+
     const csvConfig = mkConfig({
       filename: `CWO_${username}`,
       useKeysAsHeaders: true,
     });
 
-    const csv = generateCsv(csvConfig)(flattened);
+    const csv = generateCsv(csvConfig)(transformed);
     download(csvConfig)(csv);
   };
 

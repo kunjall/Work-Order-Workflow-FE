@@ -484,7 +484,6 @@ const DashboardRequestsCR = ({ refreshKey }) => {
           cr_approver2_name: header.cr_approver2_name || "",
           actioned_by: header.actioned_by || "",
           actioned_at: header.actioned_at || "",
-          approver_comments: header.approver_comments || "",
           created_by: header.created_by || "",
           created_at: header.created_at || "",
           total_material_cost: header.total_material_cost || "0",

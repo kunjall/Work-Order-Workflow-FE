@@ -275,22 +275,24 @@ const LocatorStock = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {stockData.map((item, index) => (
-                  <TableRow
-                    key={index}
-                    sx={{
-                      "&:nth-of-type(even)": { backgroundColor: "#fafafa" },
-                    }}
-                  >
-                    <TableCell sx={{ borderRight: "1px solid #ddd" }}>
-                      {item.locator_name}
-                    </TableCell>
-                    <TableCell sx={{ borderRight: "1px solid #ddd" }}>
-                      {item.material_id}
-                    </TableCell>
-                    <TableCell>{item.stock_qty}</TableCell>
-                  </TableRow>
-                ))}
+                {stockData
+                  ?.filter((item) => Number(item.stock_qty) > 0)
+                  .map((item, index) => (
+                    <TableRow
+                      key={`${item.material_id}-${index}`}
+                      sx={{
+                        "&:nth-of-type(even)": { backgroundColor: "#fafafa" },
+                      }}
+                    >
+                      <TableCell sx={{ borderRight: "1px solid #ddd" }}>
+                        {item.locator_name || "-"}
+                      </TableCell>
+                      <TableCell sx={{ borderRight: "1px solid #ddd" }}>
+                        {item.material_id || "-"}
+                      </TableCell>
+                      <TableCell>{item.stock_qty ?? 0}</TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>

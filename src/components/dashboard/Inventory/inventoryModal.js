@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +22,8 @@ import {
   Tooltip,
   useTheme,
   useMediaQuery,
+  Alert,
+  CircularProgress,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -29,6 +31,12 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import InfoIcon from "@mui/icons-material/Info";
 import FullscreenIcon from "@mui/icons-material/Fullscreen";
 import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
+import AttachFileIcon from "@mui/icons-material/AttachFile";
+import DeleteIcon from "@mui/icons-material/Delete";
+import DownloadIcon from "@mui/icons-material/Download";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import ImageIcon from "@mui/icons-material/Image";
+import DescriptionIcon from "@mui/icons-material/Description";
 
 const formatDate = (isoDateString) => {
   if (!isoDateString) return "N/A";
@@ -86,9 +94,121 @@ const InventoryModal = ({
   username,
 }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileError, setFileError] = useState("");
+  const [existingAttachment, setExistingAttachment] = useState(null);
+  const [loadingAttachment, setLoadingAttachment] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.between("md", "lg"));
+
+  // File validation constants
+  const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB in bytes
+  const ALLOWED_FILE_TYPES = [
+    "application/pdf",
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  ];
+  const ALLOWED_EXTENSIONS = ["pdf", "jpeg", "jpg", "png", "xls", "xlsx"];
+
+  // API function to upload attachment
+  const uploadAttachment = async (inventoryId, file) => {
+    const formData = new FormData();
+    formData.append("attachment", file);
+    formData.append("inventory_id", inventoryId);
+
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/inventory-attachment/upload`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: username.authToken,
+        },
+        body: formData,
+      }
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to upload attachment");
+    }
+
+    return await response.json();
+  };
+
+  // Fetch existing attachments when modal opens
+  useEffect(() => {
+    const fetchAttachment = async () => {
+      if (open && rowData?.inventory_id) {
+        setLoadingAttachment(true);
+        try {
+          const response = await fetch(
+            `${process.env.REACT_APP_API_URL}/inventory-attachment/${rowData.inventory_id}`,
+            {
+              headers: { Authorization: username.authToken },
+            }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            setExistingAttachment(data.attachment);
+          } else {
+            setExistingAttachment(null);
+          }
+        } catch (error) {
+          console.error("Error fetching attachment:", error);
+          setExistingAttachment(null);
+        } finally {
+          setLoadingAttachment(false);
+        }
+      }
+    };
+
+    fetchAttachment();
+  }, [open, rowData?.inventory_id, username.authToken]);
+
+  // Helper function to get file type icon
+  const getFileIcon = (fileType) => {
+    if (fileType?.includes("pdf")) {
+      return <PictureAsPdfIcon sx={{ color: "#d32f2f" }} />;
+    } else if (fileType?.includes("image")) {
+      return <ImageIcon sx={{ color: "#2e7d32" }} />;
+    } else {
+      return <DescriptionIcon sx={{ color: "#1976d2" }} />;
+    }
+  };
+
+  // Handle file download
+  const handleDownload = async (inventoryId, fileName) => {
+    try {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL}/inventory-attachment/${inventoryId}/download`,
+        {
+          headers: { Authorization: username.authToken },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to download file");
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      alert("Error downloading file");
+    }
+  };
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
@@ -140,8 +260,28 @@ const InventoryModal = ({
     (inventoryStatus.toLowerCase() !== "pending for approval" ||
       username.username === rowData.inventory_approver_email);
 
-  const handleApproveButton = () => {
-    if (!isActionAllowed) return;
+  const handleApproveButton = async () => {
+    if (!canApprove) {
+      // Check specific validation failures and show appropriate messages
+
+      if (!selectedFile && isActionAllowed) {
+        alert("Please upload an attachment before accepting this inventory.");
+        return;
+      }
+      return;
+    }
+
+    // Upload file first if selected
+    if (selectedFile && rowData?.inventory_id) {
+      try {
+        await uploadAttachment(rowData.inventory_id, selectedFile);
+      } catch (error) {
+        console.error("Failed to upload attachment:", error);
+        setFileError("Failed to upload attachment. Please try again.");
+        return;
+      }
+    }
+
     handleApprove();
     onClose();
   };
@@ -152,6 +292,67 @@ const InventoryModal = ({
     onClose();
   };
 
+  // File handling functions
+  const validateFile = (file) => {
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      return "File size must be less than 2MB";
+    }
+
+    // Check file type
+    const fileExtension = file.name.split(".").pop().toLowerCase();
+    if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
+      return "File type not allowed. Please upload PDF, JPEG, JPG, PNG, XLS, or XLSX files only";
+    }
+
+    // Check MIME type
+    if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+      return "Invalid file format";
+    }
+
+    return null;
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const error = validateFile(file);
+    if (error) {
+      setFileError(error);
+      setSelectedFile(null);
+      event.target.value = ""; // Clear the input
+      return;
+    }
+
+    setFileError("");
+    setSelectedFile(file);
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+    setFileError("");
+    // Clear the file input
+    const fileInput = document.getElementById("inventory-file-upload");
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
+
+  const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
+
+  // Check if user can approve (must have file uploaded and approver selected if needed)
+  const canApprove =
+    isActionAllowed &&
+    ((inventoryStatus.toLowerCase() === "pending for receipt" &&
+      selectedFile !== null) ||
+      inventoryStatus.toLowerCase() === "pending for approval");
   // List of important fields to display first
   const priorityFields = [
     "customer_name",
@@ -598,6 +799,239 @@ const InventoryModal = ({
                 }}
               />
             </Box>
+
+            {/* File Upload Section - Only show for receivers who can approve */}
+            {inventoryStatus.toLowerCase() === "pending for receipt" && (
+              <Box sx={{ mt: 3 }}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    mb: 2,
+                    color: "#333",
+                    display: "flex",
+                    alignItems: "center",
+                    "&:after": {
+                      content: '""',
+                      display: "block",
+                      height: "2px",
+                      background: "#ec7c30",
+                      flexGrow: 1,
+                      ml: 2,
+                    },
+                  }}
+                >
+                  Attachment Required *
+                </Typography>
+
+                {/* File Upload Area */}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    border: `2px dashed ${fileError ? "#d32f2f" : "#ec7c30"}`,
+                    borderRadius: "8px",
+                    textAlign: "center",
+                    backgroundColor: fileError
+                      ? "rgba(211, 47, 47, 0.05)"
+                      : "rgba(236, 124, 48, 0.05)",
+                    cursor: "pointer",
+                    transition: "all 0.3s ease",
+                    "&:hover": {
+                      backgroundColor: fileError
+                        ? "rgba(211, 47, 47, 0.08)"
+                        : "rgba(236, 124, 48, 0.08)",
+                    },
+                  }}
+                  onClick={() =>
+                    document.getElementById("inventory-file-upload").click()
+                  }
+                >
+                  <input
+                    id="inventory-file-upload"
+                    type="file"
+                    accept=".pdf,.jpeg,.jpg,.png,.xls,.xlsx"
+                    onChange={handleFileSelect}
+                    style={{ display: "none" }}
+                  />
+
+                  <AttachFileIcon
+                    sx={{
+                      fontSize: 48,
+                      color: fileError ? "#d32f2f" : "#ec7c30",
+                      mb: 1,
+                    }}
+                  />
+
+                  <Typography
+                    variant="h6"
+                    sx={{ mb: 1, color: fileError ? "#d32f2f" : "#333" }}
+                  >
+                    {selectedFile ? "File Selected" : "Upload Attachment"}
+                  </Typography>
+
+                  <Typography variant="body2" sx={{ color: "#666", mb: 2 }}>
+                    Click to browse or drag and drop your file here
+                  </Typography>
+
+                  <Typography variant="caption" sx={{ color: "#888" }}>
+                    Supported formats: PDF, JPEG, JPG, PNG, XLS, XLSX (Max 2MB)
+                  </Typography>
+                </Paper>
+
+                {/* File Error Display */}
+                {fileError && (
+                  <Alert severity="error" sx={{ mt: 2 }}>
+                    {fileError}
+                  </Alert>
+                )}
+
+                {/* Selected File Display */}
+                {selectedFile && (
+                  <Paper
+                    elevation={1}
+                    sx={{
+                      mt: 2,
+                      p: 2,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      backgroundColor: "rgba(46, 125, 50, 0.05)",
+                      border: "1px solid rgba(46, 125, 50, 0.2)",
+                    }}
+                  >
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", flex: 1 }}
+                    >
+                      <AttachFileIcon sx={{ color: "#2e7d32", mr: 1 }} />
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {selectedFile.name}
+                        </Typography>
+                        <Typography variant="caption" sx={{ color: "#666" }}>
+                          {formatFileSize(selectedFile.size)}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <IconButton
+                      onClick={handleFileRemove}
+                      size="small"
+                      sx={{ color: "#d32f2f" }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Paper>
+                )}
+
+                {/* Requirement Notice */}
+                {!selectedFile && (
+                  <Alert severity="warning" sx={{ mt: 2 }}>
+                    You must upload an attachment before approving this
+                    inventory.
+                  </Alert>
+                )}
+              </Box>
+            )}
+
+            {/* Existing Attachments Section */}
+            <Box sx={{ mt: 3 }}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 600,
+                  mb: 2,
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  "&:after": {
+                    content: '""',
+                    display: "block",
+                    height: "2px",
+                    background: "#ec7c30",
+                    flexGrow: 1,
+                    ml: 2,
+                  },
+                }}
+              >
+                Attachments
+              </Typography>
+              {loadingAttachment ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    p: 3,
+                  }}
+                >
+                  <CircularProgress size={24} />
+                  <Typography sx={{ ml: 2, color: "#666" }}>
+                    Loading attachment...
+                  </Typography>
+                </Box>
+              ) : existingAttachment ? (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    borderRadius: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    "&:hover": {
+                      backgroundColor: "rgba(236, 124, 48, 0.04)",
+                    },
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    {getFileIcon(existingAttachment.file_type)}
+                    <Box>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 500, color: "#333" }}
+                      >
+                        {existingAttachment.file_name}
+                      </Typography>
+                      <Typography variant="caption" sx={{ color: "#666" }}>
+                        {formatFileSize(existingAttachment.file_size)}
+                      </Typography>
+                    </Box>
+                  </Box>
+                  <IconButton
+                    size="small"
+                    onClick={() =>
+                      handleDownload(
+                        rowData.inventory_id,
+                        existingAttachment.file_name
+                      )
+                    }
+                    sx={{
+                      color: "#1976d2",
+                      "&:hover": {
+                        backgroundColor: "rgba(25, 118, 210, 0.08)",
+                      },
+                    }}
+                  >
+                    <DownloadIcon fontSize="small" />
+                  </IconButton>
+                </Paper>
+              ) : (
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    textAlign: "center",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 0, 0, 0.08)",
+                    color: "#666",
+                  }}
+                >
+                  <AttachFileIcon sx={{ fontSize: 48, color: "#ccc", mb: 1 }} />
+                  <Typography>No attachments available</Typography>
+                </Paper>
+              )}
+            </Box>
           </Grid>
         </Grid>
 
@@ -616,6 +1050,8 @@ const InventoryModal = ({
           title={
             !isActionAllowed
               ? "You don't have permission to accept this inventory"
+              : !selectedFile && isActionAllowed
+              ? "Please upload an attachment before accepting"
               : "Accept this inventory"
           }
         >
@@ -624,7 +1060,7 @@ const InventoryModal = ({
               variant="contained"
               startIcon={<CheckCircleIcon />}
               onClick={handleApproveButton}
-              disabled={!isActionAllowed}
+              disabled={!canApprove}
               sx={{
                 backgroundColor: "#2e7d32",
                 "&:hover": {

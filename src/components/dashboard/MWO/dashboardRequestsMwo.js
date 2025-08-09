@@ -537,6 +537,9 @@ const Example = ({ refreshKey }) => {
     const flattened = [];
 
     rows.forEach((mwo) => {
+      // Remove approver_comments from each MWO object
+      const { approver_comments, ...mwoWithoutComments } = mwo;
+
       const materials = allMotherMaterial.filter(
         (mat) => mat.mwo_id === String(mwo.mwo_id)
       );
@@ -548,7 +551,7 @@ const Example = ({ refreshKey }) => {
       if (materials.length > 0 || services.length > 0) {
         materials.forEach((mat) => {
           flattened.push({
-            ...mwo,
+            ...mwoWithoutComments,
             category: "Material",
             item_id: mat.material_id,
             item_desc: mat.material_desc,
@@ -561,9 +564,8 @@ const Example = ({ refreshKey }) => {
         });
 
         services.forEach((srv) => {
-          console.log(srv);
           flattened.push({
-            ...mwo,
+            ...mwoWithoutComments,
             category: "Service",
             item_id: srv.service_id,
             item_desc: srv.service_desc,
@@ -576,7 +578,7 @@ const Example = ({ refreshKey }) => {
         });
       } else {
         flattened.push({
-          ...mwo,
+          ...mwoWithoutComments,
           material_id: "",
           material_desc: "",
           material_uom: "",

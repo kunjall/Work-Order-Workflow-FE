@@ -621,7 +621,7 @@ const InventoryInward = () => {
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   id="delivery-challan-number"
-                  label="TPS DC Number"
+                  label="Lot"
                   variant="outlined"
                   fullWidth
                   value={deliveryChallanNumber}
@@ -633,8 +633,9 @@ const InventoryInward = () => {
               <Grid item xs={12} sm={6} md={2}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
-                    label="DC Date"
-                    value={dcDate || null} // Prevents undefined issues
+                    disabled="true"
+                    label="Lot Date"
+                    value={null} // Prevents undefined issues
                     onChange={(newValue) =>
                       setDCDate(newValue ? dayjs(newValue) : null)
                     } // Convert to Dayjs

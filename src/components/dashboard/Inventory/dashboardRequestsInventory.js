@@ -257,6 +257,13 @@ const Example = ({ refreshKey }) => {
   const handleApprove = async () => {
     const isConfirmed = window.confirm("Are you sure you want to submit?");
     if (!isConfirmed) return;
+    if (
+      inventoryStatusPass.toLowerCase() === "pending for receipt" &&
+      !selectedApproverEmail
+    ) {
+      window.alert("Please select approver first");
+      return;
+    }
     const actionedBy = user.name || "unknown";
     const actionedAt = new Date().toLocaleString("en-US", {
       day: "2-digit",
@@ -414,6 +421,7 @@ const Example = ({ refreshKey }) => {
       const materials = allInventoryMaterial.filter(
         (mat) => mat.inventory_id === inventory.inventory_id
       );
+
       if (materials.length > 0) {
         materials.forEach((mat) => {
           flattened.push({
@@ -434,12 +442,28 @@ const Example = ({ refreshKey }) => {
       }
     });
 
+    // Rename & remove unwanted columns before CSV export
+    const transformed = flattened.map(
+      ({
+        mrs_number,
+        customer_dc_number,
+        receiver_comments,
+        dc_date,
+        approver_comments,
+        ...rest
+      }) => ({
+        ...rest,
+        mo_dc_number: mrs_number,
+        lot: customer_dc_number, // rename
+      })
+    );
+
     const csvConfig = mkConfig({
       filename: "inventory_with_materials",
       useKeysAsHeaders: true,
     });
 
-    const csv = generateCsv(csvConfig)(flattened);
+    const csv = generateCsv(csvConfig)(transformed);
     download(csvConfig)(csv);
   };
 
