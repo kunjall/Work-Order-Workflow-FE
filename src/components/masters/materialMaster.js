@@ -147,7 +147,7 @@ const InventoryMaster = () => {
   const handleUpdateMaterial = async () => {
     try {
       await axios.put(
-        `${process.env.REACT_APP_API_URL}/master/materials/${selectedMaterial.item_id}`,
+        `${process.env.REACT_APP_API_URL}/master/materials/${selectedMaterial.entry_id}`,
         formData,
         {
           headers: { Authorization: user.authToken },
@@ -171,11 +171,11 @@ const InventoryMaster = () => {
   };
 
   // Delete a material
-  const handleDeleteMaterial = async (materialId) => {
+  const handleDeleteMaterial = async (entryId) => {
     if (window.confirm("Are you sure you want to delete this material?")) {
       try {
         await axios.delete(
-          `${process.env.REACT_APP_API_URL}/master/materials/${materialId}`,
+          `${process.env.REACT_APP_API_URL}/master/materials/${entryId}`,
           {
             headers: { Authorization: user.authToken },
           }
@@ -278,7 +278,7 @@ const InventoryMaster = () => {
             </TableHead>
             <TableBody>
               {materials.map((material) => (
-                <TableRow key={material.item_id} sx={{ height: "32px" }}>
+                <TableRow key={material.entry_id} sx={{ height: "32px" }}>
                   <TableCell sx={{ py: 0.5 }}>{material.item_id}</TableCell>
                   <TableCell sx={{ py: 0.5 }}>{material.item_name}</TableCell>
                   <TableCell sx={{ py: 0.5 }}>{material.item_uom}</TableCell>
@@ -297,7 +297,7 @@ const InventoryMaster = () => {
                     <IconButton
                       color="error"
                       size="small"
-                      onClick={() => handleDeleteMaterial(material.item_id)}
+                      onClick={() => handleDeleteMaterial(material.entry_id)}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
