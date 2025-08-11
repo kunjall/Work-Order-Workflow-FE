@@ -623,7 +623,7 @@ const DashboardWhinch = () => {
   };
 
   const handleGoToDashboard = () => {
-    navigate("/actions");
+    navigate("/dashboard");
   };
 
   let theme = createTheme({

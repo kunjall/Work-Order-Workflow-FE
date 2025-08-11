@@ -19,12 +19,10 @@ const WithAuth = ({ children, role }) => {
     : userRoles.includes(role);
 
   if (role && !hasRequiredRole) {
-    return (
-      <div>
-        <h2>403 - Unauthorized</h2>
-        <p>You don't have permission to view this page.</p>
-      </div>
-    );
+    <div>
+      <h2>403 - Unauthorized</h2>
+      <p>You don't have permission to view this page.</p>
+    </div>;
   }
 
   return children;
