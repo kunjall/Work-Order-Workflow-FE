@@ -509,8 +509,7 @@ const DashboardWhinch = () => {
       !selectedApproverEmail ||
       !selectedWorkOrder ||
       !childWorkOrderNumber ||
-      !selectedManager ||
-      !vendorRouteAllocation
+      !selectedManager
     ) {
       window.alert("Please select all fields before proceeding.");
       return;
