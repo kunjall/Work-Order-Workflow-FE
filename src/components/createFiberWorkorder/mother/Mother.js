@@ -412,6 +412,8 @@ const DashboardWhinch = () => {
   const handlePopupClose = () => {
     setSuccessPopupOpen(false);
     resetForm();
+    // Navigate to dashboard after successful MWO creation
+    navigate("/actions");
   };
 
   let theme = createTheme({

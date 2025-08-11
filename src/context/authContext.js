@@ -13,14 +13,14 @@ export const AuthProvider = ({ children }) => {
   const URL = process.env.REACT_APP_API_URL;
   const INACTIVITY_LIMIT = 30 * 60 * 1000;
 
-  let inactivityTimer;
+  const inactivityTimerRef = React.useRef(null);
 
   const resetInactivityTimer = useCallback(() => {
-    if (inactivityTimer) clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => {
+    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
+    inactivityTimerRef.current = setTimeout(() => {
       logout();
     }, INACTIVITY_LIMIT);
-  }, []);
+  }, [INACTIVITY_LIMIT]);
 
   useEffect(() => {
     const initializeAuth = async () => {

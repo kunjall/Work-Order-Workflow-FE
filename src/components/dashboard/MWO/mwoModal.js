@@ -152,16 +152,24 @@ const MwoModal = ({
       (mwoStatus.toLowerCase().includes("pending with billing spoc") &&
         username.username === rowData?.mwo_approver2_email));
 
-  const handleApproveButton = () => {
+  const handleApproveButton = async () => {
     if (!isActionAllowed) return;
-    handleApprove();
-    onClose();
+    try {
+      await handleApprove();
+      onClose();
+    } catch (error) {
+      console.error("Error in approval:", error);
+    }
   };
 
-  const handleRejectButton = () => {
+  const handleRejectButton = async () => {
     if (!isActionAllowed) return;
-    handleReject();
-    onClose();
+    try {
+      await handleReject();
+      onClose();
+    } catch (error) {
+      console.error("Error in rejection:", error);
+    }
   };
 
   // Fetch existing attachments when modal opens

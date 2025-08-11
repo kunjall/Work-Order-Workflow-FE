@@ -623,7 +623,7 @@ const DashboardWhinch = () => {
   };
 
   const handleGoToDashboard = () => {
-    window.location.href = "../../dashboard/dashboardAdmin.js";
+    navigate("/actions");
   };
 
   let theme = createTheme({

@@ -310,6 +310,45 @@ const Example = ({ refreshKey }) => {
         }
       );
       alert("Work order rejected successfully!");
+
+      // Refresh the data by refetching
+      const fetchMwoData = async () => {
+        setIsLoading(true);
+        try {
+          const statuses = [
+            "Pending with deployment head",
+            "Pending with acquisition manager",
+            "Pending with billing spoc",
+            "Approved",
+            "Rejected by deployment head",
+            "Rejected by acquisition manager",
+            "Rejected by with billing spoc",
+          ];
+
+          const promises = statuses.map((status) =>
+            axios.get(
+              `${process.env.REACT_APP_API_URL}/workorder/find-workorder-actions?user=${user.name}&mwostatus=${status}&role=${user.role}`,
+              {
+                headers: { Authorization: user.authToken },
+              }
+            )
+          );
+
+          const responses = await Promise.all(promises);
+          const combinedData = responses.flatMap((response) =>
+            Array.isArray(response.data) ? response.data : []
+          );
+
+          setTableData(combinedData);
+          setIsLoading(false);
+        } catch (err) {
+          setError("Failed to load inventory");
+          setIsLoading(false);
+          console.error("Error fetching inventory data:", err);
+        }
+      };
+
+      fetchMwoData();
     } catch (err) {
       console.error("Error rejecting work order:", err);
       alert("Failed to reject work order. Please try again.");
@@ -450,8 +489,44 @@ const Example = ({ refreshKey }) => {
       setSelectedApproverEmail("");
       setApproverName("");
 
-      // Refresh the data
-      window.location.reload();
+      // Refresh the data by refetching
+      const fetchMwoData = async () => {
+        setIsLoading(true);
+        try {
+          const statuses = [
+            "Pending with deployment head",
+            "Pending with acquisition manager",
+            "Pending with billing spoc",
+            "Approved",
+            "Rejected by deployment head",
+            "Rejected by acquisition manager",
+            "Rejected by with billing spoc",
+          ];
+
+          const promises = statuses.map((status) =>
+            axios.get(
+              `${process.env.REACT_APP_API_URL}/workorder/find-workorder-actions?user=${user.name}&mwostatus=${status}&role=${user.role}`,
+              {
+                headers: { Authorization: user.authToken },
+              }
+            )
+          );
+
+          const responses = await Promise.all(promises);
+          const combinedData = responses.flatMap((response) =>
+            Array.isArray(response.data) ? response.data : []
+          );
+
+          setTableData(combinedData);
+          setIsLoading(false);
+        } catch (err) {
+          setError("Failed to load inventory");
+          setIsLoading(false);
+          console.error("Error fetching inventory data:", err);
+        }
+      };
+
+      fetchMwoData();
     } catch (error) {
       console.error("Error in approving: ", error);
       alert("Failed to approve work order. Please try again.");
