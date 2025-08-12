@@ -1283,19 +1283,40 @@ const ChangeRequestCWO = () => {
                                 const value = e.target.value;
                                 const crQty = Number(value);
 
+                                // Find the corresponding MWO service to get available quantity
+                                const mwoService = motherServices.find(
+                                  (mwoSvc) =>
+                                    mwoSvc.service_id === service.service_id
+                                );
+                                const availableQty = mwoService
+                                  ? Number(mwoService.service_bal_qty || 0)
+                                  : 0;
+                                const currentCwoQty = Number(
+                                  service.service_wo_qty || 0
+                                );
+                                const maxAllowedQty =
+                                  availableQty + currentCwoQty;
+
+                                let error = "";
+                                if (crQty > maxAllowedQty) {
+                                  error = `Cannot exceed available MWO quantity (${maxAllowedQty})`;
+                                }
+
                                 setCrCwoServices((prevItems) =>
                                   prevItems.map((item, idx) =>
                                     idx === index
                                       ? {
                                           ...item,
                                           cr_qty: value,
-                                          service_cr_price:
-                                            value !== ""
-                                              ? (
-                                                  crQty *
-                                                  Number(service.service_rate)
-                                                ).toFixed(2)
-                                              : "",
+                                          service_cr_price: error
+                                            ? ""
+                                            : value !== ""
+                                            ? (
+                                                crQty *
+                                                Number(service.service_rate)
+                                              ).toFixed(2)
+                                            : "",
+                                          error: error,
                                         }
                                       : item
                                   )
@@ -1306,6 +1327,8 @@ const ChangeRequestCWO = () => {
                                   e.preventDefault();
                                 }
                               }}
+                              error={!!crCwoServices[index]?.error}
+                              helperText={crCwoServices[index]?.error || ""}
                               variant="outlined"
                               fullWidth
                             />
@@ -1671,16 +1694,38 @@ const ChangeRequestCWO = () => {
                                 const value = e.target.value;
                                 const crQty = Number(value);
 
+                                // Find the corresponding MWO material to get available quantity
+                                const mwoMaterial = motherMaterials.find(
+                                  (mwoMat) =>
+                                    mwoMat.material_id === material.material_id
+                                );
+                                const availableQty = mwoMaterial
+                                  ? Number(mwoMaterial.material_bal_qty || 0)
+                                  : 0;
+                                const currentCwoQty = Number(
+                                  material.material_wo_qty || 0
+                                );
+                                const maxAllowedQty =
+                                  availableQty + currentCwoQty;
+
+                                let error = "";
+                                if (crQty > maxAllowedQty) {
+                                  error = `Cannot exceed available MWO quantity (${maxAllowedQty})`;
+                                }
+
                                 setCrCwoMaterials((prevItems) =>
                                   prevItems.map((item, idx) =>
                                     idx === index
                                       ? {
                                           ...item,
                                           cr_qty: value,
-                                          material_cr_price: (
-                                            crQty *
-                                            Number(material.material_rate)
-                                          ).toFixed(2),
+                                          material_cr_price: error
+                                            ? ""
+                                            : (
+                                                crQty *
+                                                Number(material.material_rate)
+                                              ).toFixed(2),
+                                          error: error,
                                         }
                                       : item
                                   )
@@ -1691,6 +1736,8 @@ const ChangeRequestCWO = () => {
                                   e.preventDefault();
                                 }
                               }}
+                              error={!!crCwoMaterials[index]?.error}
+                              helperText={crCwoMaterials[index]?.error || ""}
                               variant="outlined"
                               fullWidth
                             />

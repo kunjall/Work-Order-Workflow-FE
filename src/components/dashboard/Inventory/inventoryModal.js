@@ -70,6 +70,9 @@ const formatFieldName = (key) => {
   if (key.toLowerCase() === "mrs_number") {
     return "MO No/DC No";
   }
+  if (key.toLowerCase() === "mrs_date") {
+    return "MO/DC Date";
+  }
 
   return key
     .replace(/_/g, " ")
@@ -359,7 +362,7 @@ const InventoryModal = ({
     "inventory_id",
     "client_warehouse_city",
     "mrs_number",
-    "dc_date",
+    "mrs_date",
     "warehouse_id",
     "warehouse_city",
     "created_by",
@@ -384,7 +387,6 @@ const InventoryModal = ({
     "entry_date",
     "dc_date",
     "eway_bill_number",
-    "mrs_date",
     "client_warehouse_id",
     "client_warehouse_city",
     "inventory_inward_status",
