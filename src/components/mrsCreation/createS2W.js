@@ -1024,10 +1024,8 @@ const CreateMRS = () => {
                               const value = e.target.value;
                               const mmQty = Number(value);
                               const error =
-                                mmQty >
-                                Number(material.material_cwo_qty) -
-                                  Number(material.material_bal_qty)
-                                  ? "MRS Qty cannot exceed provided Qty"
+                                mmQty > material.locator_stock
+                                  ? "MRS Qty cannot exceed locator stock"
                                   : "";
 
                               setMaterialLineItems((prevItems) =>
