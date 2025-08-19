@@ -499,7 +499,7 @@ const Example = ({ refreshKey }) => {
             material_desc: mat.material_desc,
             material_uom: mat.material_uom,
             material_wo_qty: mat.material_wo_qty,
-            material_bal_qty: mat.material_wo_qty,
+            material_bal_qty: mat.material_bal_qty,
             material_price: mat.material_price,
             material_rate: mat.material_rate,
             service_id: "",
