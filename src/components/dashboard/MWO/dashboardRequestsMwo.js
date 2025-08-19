@@ -632,7 +632,7 @@ const Example = ({ refreshKey }) => {
             item_desc: mat.material_desc,
             item_uom: mat.material_uom,
             item_wo_qty: mat.material_wo_qty,
-            item_bal_qty: mat.material_wo_qty,
+            item_bal_qty: mat.material_bal_qty,
             item_price: mat.material_price,
             item_rate: mat.material_rate,
           });
