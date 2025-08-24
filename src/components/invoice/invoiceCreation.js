@@ -95,6 +95,7 @@ const InvoiceForm = () => {
         QTY: "",
         UOM: "",
         "Unit Price": "",
+        "GST Amount": "",
         Amount: "",
         Remarks: "",
       };
@@ -201,6 +202,7 @@ const InvoiceForm = () => {
             uom: entry["UOM"],
             expense_amount: entry["Amount"], // Correct field name
             unit_price: entry["Unit Price"],
+            gst_amount: entry["GST Amount"], // Add GST field
             invoice_number: entry["Invoice Number"],
             invoice_date: entry["Invoice Date"], // Ensure invoice date is included
             remarks: entry["Remarks"],
@@ -793,6 +795,7 @@ const InvoiceForm = () => {
                               "QTY",
                               "UOM",
                               "Unit Price",
+                              "GST Amount",
                               "Amount",
                               "Remarks",
                             ].map((letter) => (
@@ -1028,11 +1031,16 @@ const InvoiceForm = () => {
                                         // Calculate Amount when Unit Price changes
                                         const qty =
                                           updatedRows[rowIndex]["QTY"] || 0;
+                                        const gstAmount =
+                                          updatedRows[rowIndex]["GST Amount"] ||
+                                          0;
                                         if (qty && newValue) {
-                                          updatedRows[rowIndex]["Amount"] = (
+                                          const baseAmount =
                                             parseFloat(qty) *
-                                            parseFloat(newValue)
-                                          ).toString();
+                                            parseFloat(newValue);
+                                          updatedRows[rowIndex]["Amount"] = (
+                                            baseAmount + parseFloat(gstAmount)
+                                          ).toFixed(2);
                                         }
                                       }
                                       if (letter === "Amount") {
@@ -1055,10 +1063,41 @@ const InvoiceForm = () => {
                                         const unitPrice =
                                           updatedRows[rowIndex]["Unit Price"] ||
                                           0;
+                                        const gstAmount =
+                                          updatedRows[rowIndex]["GST Amount"] ||
+                                          0;
                                         if (unitPrice && newValue) {
-                                          updatedRows[rowIndex]["Amount"] = (
+                                          const baseAmount =
                                             parseFloat(newValue) *
-                                            parseFloat(unitPrice)
+                                            parseFloat(unitPrice);
+                                          updatedRows[rowIndex]["Amount"] = (
+                                            baseAmount + parseFloat(gstAmount)
+                                          ).toFixed(2);
+                                        }
+                                      }
+
+                                      if (letter === "GST Amount") {
+                                        newValue = newValue.replace(
+                                          /[^0-9.]/g,
+                                          ""
+                                        );
+                                        if (
+                                          (newValue.match(/\./g) || []).length >
+                                          1
+                                        )
+                                          return;
+
+                                        const qty =
+                                          updatedRows[rowIndex]["QTY"] || 0;
+                                        const unitPrice =
+                                          updatedRows[rowIndex]["Unit Price"] ||
+                                          0;
+                                        if (qty && unitPrice) {
+                                          const baseAmount =
+                                            parseFloat(qty) *
+                                            parseFloat(unitPrice);
+                                          updatedRows[rowIndex]["Amount"] = (
+                                            baseAmount + parseFloat(newValue)
                                           ).toFixed(2);
                                         }
                                       }
