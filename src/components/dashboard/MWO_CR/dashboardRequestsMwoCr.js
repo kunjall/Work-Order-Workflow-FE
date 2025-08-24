@@ -40,6 +40,10 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
 
   const handleCloseModal = () => {
     setOpen(false);
+    // Reset approver selection state when modal closes
+    setSelectedApproverEmail("");
+    setApproverName("");
+    setComment("");
   };
 
   // Fetch materials for a specific change request
@@ -93,26 +97,102 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
     const fetchChangeRequests = async () => {
       setIsLoading(true);
       try {
-        const statuses = ["Pending Approval", "Approved", "Rejected"];
+        let allChangeRequests = [];
 
-        // Get change requests where the user is the approver or based on role
-        const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/change-request/mwo/find`,
-          {
-            params: {
-              cr_approver_email: user.role.includes("admin")
-                ? undefined
-                : user.username,
-            },
-            headers: { Authorization: user.authToken },
-          }
-        );
-
-        if (isMounted) {
-          const data = Array.isArray(response.data.data)
+        if (user.role.includes("admin")) {
+          // Admin can see all change requests
+          const response = await axios.get(
+            `${process.env.REACT_APP_API_URL}/change-request/mwo/find`,
+            {
+              headers: { Authorization: user.authToken },
+            }
+          );
+          allChangeRequests = Array.isArray(response.data.data)
             ? response.data.data
             : [];
-          setTableData(data);
+        } else {
+          // For non-admin users, fetch change requests where they are involved in any capacity
+          const requests = [];
+
+          // Fetch where user is creator
+          try {
+            const creatorResponse = await axios.get(
+              `${process.env.REACT_APP_API_URL}/change-request/mwo/find`,
+              {
+                params: { created_by: user.name },
+                headers: { Authorization: user.authToken },
+              }
+            );
+            if (creatorResponse.data.data) {
+              requests.push(...creatorResponse.data.data);
+            }
+          } catch (err) {
+            console.log("No CRs found for creator");
+          }
+
+          // Fetch where user is first approver
+          try {
+            const response1 = await axios.get(
+              `${process.env.REACT_APP_API_URL}/change-request/mwo/find`,
+              {
+                params: { cr_approver_email: user.username },
+                headers: { Authorization: user.authToken },
+              }
+            );
+            if (response1.data.data) {
+              requests.push(...response1.data.data);
+            }
+          } catch (err) {
+            console.log("No CRs found for first approver");
+          }
+
+          // Fetch where user is second approver
+          try {
+            const response2 = await axios.get(
+              `${process.env.REACT_APP_API_URL}/change-request/mwo/find`,
+              {
+                params: { cr_approver2_email: user.username },
+                headers: { Authorization: user.authToken },
+              }
+            );
+            if (response2.data.data) {
+              requests.push(...response2.data.data);
+            }
+          } catch (err) {
+            console.log("No CRs found for second approver");
+          }
+
+          // Fetch where user is third approver
+          try {
+            const response3 = await axios.get(
+              `${process.env.REACT_APP_API_URL}/change-request/mwo/find`,
+              {
+                params: { cr_approver3_email: user.username },
+                headers: { Authorization: user.authToken },
+              }
+            );
+            if (response3.data.data) {
+              requests.push(...response3.data.data);
+            }
+          } catch (err) {
+            console.log("No CRs found for third approver");
+          }
+
+          // Remove duplicates based on cr_mwo_id
+          const uniqueRequests = requests.filter(
+            (request, index, self) =>
+              index === self.findIndex((r) => r.cr_mwo_id === request.cr_mwo_id)
+          );
+
+          allChangeRequests = uniqueRequests;
+        }
+
+        if (isMounted) {
+          console.log(
+            "Final change requests loaded:",
+            allChangeRequests.length
+          );
+          setTableData(allChangeRequests);
           setIsLoading(false);
         }
       } catch (err) {
@@ -129,7 +209,14 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
     return () => {
       isMounted = false;
     };
-  }, [username, user.authToken, user.role, refreshKey, user.username]);
+  }, [
+    username,
+    user.authToken,
+    user.role,
+    refreshKey,
+    user.username,
+    user.name,
+  ]);
 
   useEffect(() => {
     const fetchApprovers = async () => {
@@ -239,45 +326,40 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
         isPendingForX,
         isPendingForY,
         isPendingForZ,
+        selectedApproverEmail,
+        approverName,
       });
 
       // Prepare request data
       let requestData = {
+        cr_status: "Approved", // Always send "Approved" to let backend handle the logic
         actioned_by: actionedBy,
         actioned_at: actionedAt,
         approver_comments: comment,
       };
 
-      // If this is the first approver, set status to pending for second approver
+      // If this is the first approver, add second approver info
       if (isPendingForX) {
         if (!selectedApproverEmail || !approverName) {
           alert("Please select a second approver before approving.");
           return;
         }
-        requestData = {
-          ...requestData,
-          cr_status: "Pending for approval acquisition head",
-          cr_approver2_email: selectedApproverEmail,
-          cr_approver2_name: approverName,
-        };
+        requestData.cr_approver2_email = selectedApproverEmail;
+        requestData.cr_approver2_name = approverName;
       }
-      // If this is the second approver, set status to pending for third approver
+      // If this is the second approver, add third approver info
       else if (isPendingForY) {
         if (!selectedApproverEmail || !approverName) {
           alert("Please select a third approver before approving.");
           return;
         }
-        requestData = {
-          ...requestData,
-          cr_status: "Pending for approval head operations",
-          cr_approver3_email: selectedApproverEmail,
-          cr_approver3_name: approverName,
-        };
+        requestData.cr_approver3_email = selectedApproverEmail;
+        requestData.cr_approver3_name = approverName;
       }
-      // If this is the third approver, set status to approved
-      else if (isPendingForZ) {
-        requestData.cr_status = "Approved";
-      }
+      // If this is the third approver, no additional approver info needed
+      // Backend will handle final approval
+
+      console.log("Final request data being sent to backend:", requestData);
 
       const response = await axios.put(
         `${process.env.REACT_APP_API_URL}/change-request/mwo/update-status/${selectedRow.cr_mwo_id}`,

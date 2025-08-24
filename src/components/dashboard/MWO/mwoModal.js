@@ -94,6 +94,8 @@ const MwoModal = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [existingAttachments, setExistingAttachments] = useState([]);
   const [loadingAttachments, setLoadingAttachments] = useState(false);
+  const [editableServices, setEditableServices] = useState([]);
+  const [hasServiceChanges, setHasServiceChanges] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const isTablet = useMediaQuery(theme.breakpoints.between("md", "lg"));
@@ -147,9 +149,9 @@ const MwoModal = ({
     rowData.created_by !== username.name &&
     ((mwoStatus.toLowerCase().includes("pending with deployment head") &&
       username.username === rowData?.mwo_approver_email) ||
-      (mwoStatus.toLowerCase().includes("pending with acquisition manager") &&
+      (mwoStatus.toLowerCase().includes("pending with ops head") &&
         username.username === rowData?.mwo_approver1_email) ||
-      (mwoStatus.toLowerCase().includes("pending with billing spoc") &&
+      (mwoStatus.toLowerCase().includes("pending with acq head") &&
         username.username === rowData?.mwo_approver2_email));
 
   const handleApproveButton = async () => {
@@ -169,6 +171,96 @@ const MwoModal = ({
       onClose();
     } catch (error) {
       console.error("Error in rejection:", error);
+    }
+  };
+
+  // Initialize editable services when motherService changes
+  useEffect(() => {
+    if (motherService && motherService.length > 0) {
+      setEditableServices(
+        motherService.map((service) => ({
+          ...service,
+          originalRate: service.service_rate,
+          originalPrice: service.service_price,
+        }))
+      );
+      setHasServiceChanges(false);
+    }
+  }, [motherService]);
+
+  // Check if user can edit service rates (OPs head with pending status)
+  const canEditServiceRates = mwoStatus
+    .toLowerCase()
+    .includes("pending with ops head");
+
+  // Handle service rate change
+  const handleServiceRateChange = (index, newRate) => {
+    const updatedServices = [...editableServices];
+    const service = updatedServices[index];
+    const quantity = parseFloat(service.service_wo_qty) || 0;
+    const rate = parseFloat(newRate) || 0;
+    const newPrice = (rate * quantity).toFixed(2);
+
+    updatedServices[index] = {
+      ...service,
+      service_rate: newRate,
+      service_price: newPrice,
+    };
+
+    setEditableServices(updatedServices);
+
+    // Check if there are changes
+    const hasChanges = updatedServices.some(
+      (service) =>
+        parseFloat(service.service_rate) !== parseFloat(service.originalRate)
+    );
+    setHasServiceChanges(hasChanges);
+  };
+
+  // Save service rate changes
+  const handleSaveServiceRates = async () => {
+    if (!hasServiceChanges || !rowData?.mwo_id) return;
+
+    try {
+      const serviceUpdates = editableServices
+        .filter(
+          (service) =>
+            parseFloat(service.service_rate) !==
+            parseFloat(service.originalRate)
+        )
+        .map((service) => ({
+          record_id: service.record_id,
+          service_rate: service.service_rate,
+          service_wo_qty: service.service_wo_qty,
+        }));
+
+      if (serviceUpdates.length === 0) return;
+
+      const response = await axios.patch(
+        `${process.env.REACT_APP_API_URL}/workorder/update-service-rates`,
+        {
+          mwo_id: rowData.mwo_id,
+          serviceUpdates: serviceUpdates,
+        },
+        {
+          headers: { Authorization: user.authToken },
+        }
+      );
+
+      alert("Service rates updated successfully!");
+      setHasServiceChanges(false);
+
+      // Update original values
+      setEditableServices((prev) =>
+        prev.map((service) => ({
+          ...service,
+          originalRate: service.service_rate,
+          originalPrice: service.service_price,
+        }))
+      );
+    } catch (error) {
+      console.error("Error updating service rates:", error);
+      alert("Failed to update service rates. Please try again.");
     }
   };
 
@@ -624,77 +716,173 @@ const MwoModal = ({
               >
                 Services
               </Typography>
-              {motherService && motherService.length > 0 ? (
-                <TableContainer
-                  component={Paper}
-                  sx={{
-                    boxShadow: "none",
-                    border: "1px solid rgba(0, 0, 0, 0.08)",
-                    borderRadius: "8px",
-                    mb: 3,
-                    maxHeight: 300,
-                    overflowY: "auto",
-                  }}
-                >
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow
-                        sx={{ backgroundColor: "rgba(236, 124, 48, 0.08)" }}
-                      >
-                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
-                          Service ID
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
-                          Description
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
-                          UOM
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
-                          W/O QTY
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
-                          Bal QTY
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
-                          Service Rate
-                        </TableCell>
-                        <TableCell sx={{ fontWeight: 600, color: "#555" }}>
-                          Service Price
-                        </TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {motherService.map((service, index) => (
+              {editableServices && editableServices.length > 0 ? (
+                <Box>
+                  <TableContainer
+                    component={Paper}
+                    sx={{
+                      boxShadow: "none",
+                      border: "1px solid rgba(0, 0, 0, 0.08)",
+                      borderRadius: "8px",
+                      mb: 2,
+                      maxHeight: 300,
+                      overflowY: "auto",
+                    }}
+                  >
+                    <Table size="small">
+                      <TableHead>
                         <TableRow
-                          key={service.record_id}
-                          sx={{
-                            "&:nth-of-type(odd)": {
-                              backgroundColor: "rgba(0, 0, 0, 0.02)",
-                            },
-                            "&:hover": {
-                              backgroundColor: "rgba(236, 124, 48, 0.04)",
-                            },
-                          }}
+                          sx={{ backgroundColor: "rgba(236, 124, 48, 0.08)" }}
                         >
-                          <TableCell sx={{ fontWeight: 500 }}>
-                            {service.service_id}
+                          <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                            Service ID
                           </TableCell>
-                          <TableCell>{service.service_desc}</TableCell>
-                          <TableCell>{service.service_uom}</TableCell>
-                          <TableCell>{service.service_wo_qty}</TableCell>
-                          <TableCell>{service.service_bal_qty}</TableCell>
-                          <TableCell>
-                            {Number(service.service_rate).toFixed(2)}
+                          <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                            Description
                           </TableCell>
-                          <TableCell>
-                            {Number(service.service_price).toFixed(2)}
+                          <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                            UOM
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                            W/O QTY
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                            Bal QTY
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                            Service Rate
+                            {canEditServiceRates && (
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  display: "block",
+                                  color: "#ec7c30",
+                                  fontStyle: "italic",
+                                }}
+                              >
+                                (Editable)
+                              </Typography>
+                            )}
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: "#555" }}>
+                            Service Price
                           </TableCell>
                         </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
+                      </TableHead>
+                      <TableBody>
+                        {editableServices.map((service, index) => (
+                          <TableRow
+                            key={service.record_id}
+                            sx={{
+                              "&:nth-of-type(odd)": {
+                                backgroundColor: "rgba(0, 0, 0, 0.02)",
+                              },
+                              "&:hover": {
+                                backgroundColor: "rgba(236, 124, 48, 0.04)",
+                              },
+                            }}
+                          >
+                            <TableCell sx={{ fontWeight: 500 }}>
+                              {service.service_id}
+                            </TableCell>
+                            <TableCell>{service.service_desc}</TableCell>
+                            <TableCell>{service.service_uom}</TableCell>
+                            <TableCell>{service.service_wo_qty}</TableCell>
+                            <TableCell>{service.service_bal_qty}</TableCell>
+                            <TableCell>
+                              {canEditServiceRates ? (
+                                <TextField
+                                  type="number"
+                                  value={service.service_rate}
+                                  onChange={(e) =>
+                                    handleServiceRateChange(
+                                      index,
+                                      e.target.value
+                                    )
+                                  }
+                                  size="small"
+                                  inputProps={{
+                                    step: "0.01",
+                                    min: "0",
+                                  }}
+                                  sx={{
+                                    width: "100px",
+                                    "& .MuiOutlinedInput-root": {
+                                      fontSize: "0.875rem",
+                                      "&:hover fieldset": {
+                                        borderColor: "#ec7c30",
+                                      },
+                                      "&.Mui-focused fieldset": {
+                                        borderColor: "#ec7c30",
+                                      },
+                                    },
+                                  }}
+                                />
+                              ) : (
+                                Number(service.service_rate).toFixed(2)
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 1,
+                                }}
+                              >
+                                {Number(service.service_price).toFixed(2)}
+                                {canEditServiceRates &&
+                                  parseFloat(service.service_rate) !==
+                                    parseFloat(service.originalRate) && (
+                                    <Chip
+                                      label="Modified"
+                                      size="small"
+                                      sx={{
+                                        height: "20px",
+                                        fontSize: "0.7rem",
+                                        backgroundColor: "#fff3cd",
+                                        color: "#856404",
+                                        border: "1px solid #ffeaa7",
+                                      }}
+                                    />
+                                  )}
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+
+                  {/* Save Changes Button */}
+                  {canEditServiceRates &&
+                    hasServiceChanges &&
+                    isActionAllowed && (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "flex-end",
+                          mb: 2,
+                        }}
+                      >
+                        <Button
+                          variant="contained"
+                          onClick={handleSaveServiceRates}
+                          sx={{
+                            backgroundColor: "#2e7d32",
+                            "&:hover": {
+                              backgroundColor: "#1b5e20",
+                            },
+                            borderRadius: "8px",
+                            textTransform: "none",
+                            fontWeight: 600,
+                          }}
+                        >
+                          Save Service Rate Changes
+                        </Button>
+                      </Box>
+                    )}
+                </Box>
               ) : (
                 <Paper
                   elevation={0}

@@ -327,6 +327,7 @@ const InventoryInward = () => {
         material_desc: item.itemName,
         material_uom: item.itemUom,
         material_wo_qty: item.itemQTY,
+        supplier_name: item.supplierName || customerName, // Use supplier name if selected, otherwise use customer name
       }));
 
       const payload = {
@@ -758,6 +759,8 @@ const InventoryInward = () => {
                 <AddMaterials
                   materialCodes={materialCodes}
                   onUpdate={handleLineItemsUpdate}
+                  customerName={customerName}
+                  authToken={user.authToken}
                 />
               </Box>
               <Grid

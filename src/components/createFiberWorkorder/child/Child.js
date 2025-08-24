@@ -219,7 +219,7 @@ const DashboardWhinch = () => {
     const fetchWorkOrders = async () => {
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_API_URL}/workorder/find-workorder`,
+          `${process.env.REACT_APP_API_URL}/workorder/find-workorder-acq`,
           {
             headers: {
               Authorization: user.authToken,

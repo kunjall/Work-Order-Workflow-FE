@@ -142,30 +142,41 @@ const MwoCrModal = ({
     const isNotCreator = rowData.created_by !== username.name;
     if (!isNotCreator) return false;
 
-    // Check if user is admin or one of the approvers
+    // Check if user is admin
     const isAdmin = username.role === "admin";
-    const isFirstApprover = username.username === rowData.cr_approver_email;
-    const isSecondApprover =
-      rowData.cr_approver2_email &&
-      username.username === rowData.cr_approver2_email;
-    const isThirdApprover =
-      rowData.cr_approver3_email &&
-      username.username === rowData.cr_approver3_email;
+    if (isAdmin) return true;
+
+    // Check specific approver based on current status
+    let isCorrectApprover = false;
+
+    if (crStatus === "Pending for approval deployment head") {
+      // First approval level - check if user is the first approver
+      isCorrectApprover = username.username === rowData.cr_approver_email;
+    } else if (crStatus === "Pending for approval acquisition head") {
+      // Second approval level - check if user is the second approver
+      isCorrectApprover =
+        rowData.cr_approver2_email &&
+        username.username === rowData.cr_approver2_email;
+    } else if (crStatus === "Pending for approval head operations") {
+      // Third approval level - check if user is the third approver
+      isCorrectApprover =
+        rowData.cr_approver3_email &&
+        username.username === rowData.cr_approver3_email;
+    }
 
     console.log("Auth check:", {
+      crStatus,
       isPending,
       isNotCreator,
       isAdmin,
-      isFirstApprover,
-      isSecondApprover,
-      isThirdApprover,
+      isCorrectApprover,
       username: username.username,
       approver1: rowData.cr_approver_email,
       approver2: rowData.cr_approver2_email,
       approver3: rowData.cr_approver3_email,
     });
 
-    return isAdmin || isFirstApprover || isSecondApprover || isThirdApprover;
+    return isCorrectApprover;
   }, [rowData, crStatus, username]);
 
   const handleApproveButton = () => {
@@ -1031,20 +1042,61 @@ const MwoCrModal = ({
                       : "third-approver-select"
                   }
                   options={approvers}
-                  getOptionLabel={(option) =>
-                    isFirstApprover
-                      ? option.approver2_email
-                        ? `${option.reviewer_name} (${option.reviewer_email})`
-                        : ""
-                      : option.approver3_email
-                      ? `${option.reviewer_name} (${option.reviewer_email})`
-                      : ""
-                  }
+                  getOptionLabel={(option) => {
+                    if (isFirstApprover) {
+                      // For first approver, show second approver options
+                      return option.approver2_name && option.approver2_email
+                        ? `${option.approver2_name} (${option.approver2_email})`
+                        : "";
+                    } else {
+                      // For second approver, show third approver options
+                      return option.approver3_name && option.approver3_email
+                        ? `${option.approver3_name} (${option.approver3_email})`
+                        : "";
+                    }
+                  }}
                   onChange={(event, newValue) => {
-                    setSelectedApproverEmail(
-                      newValue ? newValue.reviewer_email : null
-                    );
-                    setApproverName(newValue ? newValue.reviewer_name : "");
+                    console.log("Autocomplete onChange:", {
+                      newValue,
+                      isFirstApprover,
+                      isSecondApprover,
+                    });
+                    if (isFirstApprover) {
+                      const email = newValue ? newValue.approver2_email : "";
+                      const name = newValue ? newValue.approver2_name : "";
+                      console.log("Setting first approver values:", {
+                        email,
+                        name,
+                      });
+                      setSelectedApproverEmail(email);
+                      setApproverName(name);
+                    } else {
+                      const email = newValue ? newValue.approver3_email : "";
+                      const name = newValue ? newValue.approver3_name : "";
+                      console.log("Setting second approver values:", {
+                        email,
+                        name,
+                      });
+                      setSelectedApproverEmail(email);
+                      setApproverName(name);
+                    }
+                  }}
+                  isOptionEqualToValue={(option, value) => {
+                    if (isFirstApprover) {
+                      return option.approver2_email === value?.approver2_email;
+                    } else {
+                      return option.approver3_email === value?.approver3_email;
+                    }
+                  }}
+                  filterOptions={(options) => {
+                    // Filter options to only show those that have the required approver level
+                    return options.filter((option) => {
+                      if (isFirstApprover) {
+                        return option.approver2_name && option.approver2_email;
+                      } else {
+                        return option.approver3_name && option.approver3_email;
+                      }
+                    });
                   }}
                   renderInput={(params) => (
                     <TextField

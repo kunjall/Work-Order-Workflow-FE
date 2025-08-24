@@ -226,12 +226,12 @@ const Example = ({ refreshKey }) => {
       try {
         const statuses = [
           "Pending with deployment head",
-          "Pending with acquisition manager",
-          "Pending with billing spoc",
+          "Pending with OPs head",
+          "Pending with Acq head",
           "Approved",
           "Rejected by deployment head",
-          "Rejected by acquisition manager",
-          "Rejected by with billing spoc",
+          "Rejected by OPs head",
+          "Rejected by Acq head",
         ];
 
         const promises = statuses.map((status) =>
@@ -285,11 +285,9 @@ const Example = ({ refreshKey }) => {
     });
     if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
       mwoStatus = "Rejected by deployment head";
-    } else if (
-      mwoStatusPass.toLowerCase() === "pending with acquisition manager"
-    ) {
+    } else if (mwoStatusPass.toLowerCase() === "pending with ops head") {
       mwoStatus = "Rejected by acquisition manager";
-    } else if (mwoStatusPass.toLowerCase() === "pending with billing spoc") {
+    } else if (mwoStatusPass.toLowerCase() === "pending with acq head") {
       mwoStatus = "Rejected by billing spoc";
     }
 
@@ -317,12 +315,12 @@ const Example = ({ refreshKey }) => {
         try {
           const statuses = [
             "Pending with deployment head",
-            "Pending with acquisition manager",
-            "Pending with billing spoc",
+            "Pending with OPs head",
+            "Pending with Acq head",
             "Approved",
             "Rejected by deployment head",
-            "Rejected by acquisition manager",
-            "Rejected by with billing spoc",
+            "Rejected by OPs head",
+            "Rejected by Acq head",
           ];
 
           const promises = statuses.map((status) =>
@@ -367,12 +365,10 @@ const Example = ({ refreshKey }) => {
     if (!isConfirmed) return;
 
     if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
-      mwoStatus = "Pending with acquisition manager";
-    } else if (
-      mwoStatusPass.toLowerCase() === "pending with acquisition manager"
-    ) {
-      mwoStatus = "Pending with billing spoc";
-    } else if (mwoStatusPass.toLowerCase() === "pending with billing spoc") {
+      mwoStatus = "Pending with OPs head";
+    } else if (mwoStatusPass.toLowerCase() === "Pending with OPs head") {
+      mwoStatus = "Pending with Acq head";
+    } else if (mwoStatusPass.toLowerCase() === "Pending with Acq head") {
       mwoStatus = "Approved";
     }
 
@@ -416,13 +412,13 @@ const Example = ({ refreshKey }) => {
         );
         formData.append(
           "mwo_approver2_email",
-          mwoStatusPass.toLowerCase() === "pending with acquisition manager"
+          mwoStatusPass.toLowerCase() === "pending with ops head"
             ? selectedApproverEmail || selectedRow.mwo_approver2_email || ""
             : selectedRow.mwo_approver2_email || ""
         );
         formData.append(
           "mwo_approver2_name",
-          mwoStatusPass.toLowerCase() === "pending with acquisition manager"
+          mwoStatusPass.toLowerCase() === "pending with acq head"
             ? approverName || selectedRow.mwo_approver2_name || ""
             : selectedRow.mwo_approver2_name || ""
         );
@@ -462,11 +458,11 @@ const Example = ({ refreshKey }) => {
               ? approverName || selectedRow.mwo_approver1_name || ""
               : selectedRow.mwo_approver1_name || "",
           mwo_approver2_email:
-            mwoStatusPass.toLowerCase() === "pending with acquisition manager"
+            mwoStatusPass.toLowerCase() === "pending with ops head"
               ? selectedApproverEmail || selectedRow.mwo_approver2_email || ""
               : selectedRow.mwo_approver2_email || "",
           mwo_approver2_name:
-            mwoStatusPass.toLowerCase() === "pending with acquisition manager"
+            mwoStatusPass.toLowerCase() === "pending with acq head"
               ? approverName || selectedRow.mwo_approver2_name || ""
               : selectedRow.mwo_approver2_name || "",
         };
@@ -495,12 +491,12 @@ const Example = ({ refreshKey }) => {
         try {
           const statuses = [
             "Pending with deployment head",
-            "Pending with acquisition manager",
-            "Pending with billing spoc",
+            "Pending with Ops head",
+            "Pending with Acq head",
             "Approved",
             "Rejected by deployment head",
-            "Rejected by acquisition manager",
-            "Rejected by with billing spoc",
+            "Rejected by Ops head",
+            "Rejected by Acq head",
           ];
 
           const promises = statuses.map((status) =>

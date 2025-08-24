@@ -7,6 +7,7 @@ import LocatorMaster from "../components/masters/locatorMaster";
 import WarehouseMaster from "../components/masters/warehouseMaster";
 import CustomerMaster from "../components/masters/customerMaster";
 import CustomerWhMaster from "../components/masters/customerWhMaster";
+import SupplierMaster from "../components/masters/supplierMaster";
 
 // TabPanel component to handle tab content
 function TabPanel(props) {
@@ -57,6 +58,7 @@ const Masters = () => {
           <Tab label="TPS WH" {...a11yProps(4)} />
           <Tab label="Customers" {...a11yProps(5)} />
           <Tab label="Cust WH" {...a11yProps(6)} />
+          <Tab label="Supplier" {...a11yProps(7)} />
 
           {/* Add more tabs here as needed for future master modules */}
         </Tabs>
@@ -82,6 +84,9 @@ const Masters = () => {
       </TabPanel>
       <TabPanel value={tabValue} index={6}>
         <CustomerWhMaster />{" "}
+      </TabPanel>
+      <TabPanel value={tabValue} index={7}>
+        <SupplierMaster />{" "}
       </TabPanel>
 
       {/* Add more TabPanels here as needed for future master modules */}

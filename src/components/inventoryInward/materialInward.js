@@ -9,16 +9,40 @@ import {
   Divider,
 } from "@mui/material";
 import { AddCircleOutline, RemoveCircleOutline } from "@mui/icons-material";
+import axios from "axios";
 
-const AddMaterials = ({ materialCodes, onUpdate }) => {
+const AddMaterials = ({ materialCodes, onUpdate, customerName, authToken }) => {
   const [lineItems, setLineItems] = useState([
     {
       materialCode: "",
       itemName: "",
       itemUom: "",
       itemQTY: "",
+      supplierName: "",
     },
   ]);
+  const [suppliers, setSuppliers] = useState([]);
+
+  // Fetch suppliers when component mounts
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_URL}/master/supplier`,
+          {
+            headers: { Authorization: authToken },
+          }
+        );
+        setSuppliers(response.data);
+      } catch (err) {
+        console.error("Error fetching suppliers:", err);
+      }
+    };
+
+    if (authToken) {
+      fetchSuppliers();
+    }
+  }, [authToken]);
 
   useEffect(() => {
     onUpdate(lineItems);
@@ -32,6 +56,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
         itemName: "",
         itemUom: "",
         itemQTY: "",
+        supplierName: "",
       },
     ];
     setLineItems(newLineItems);
@@ -86,7 +111,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
                 {index + 1}
               </Typography>
             </Grid>
-            <Grid item xs={12} sm={6} md={3}>
+            <Grid item xs={12} sm={6} md={2.5}>
               <Autocomplete
                 options={materialCodes}
                 getOptionLabel={(option) => `${option.id}`}
@@ -103,7 +128,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6} md={3.5}>
+            <Grid item xs={12} sm={6} md={2.5}>
               <TextField
                 label="Material Desc"
                 value={item.itemName}
@@ -115,7 +140,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
               />
             </Grid>
 
-            <Grid item xs={6} sm={3} md={1.5}>
+            <Grid item xs={6} sm={3} md={1}>
               <TextField
                 label="UOM"
                 value={item.itemUom}
@@ -124,7 +149,7 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
                 disabled
               />
             </Grid>
-            <Grid item xs={6} sm={3} md={3}>
+            <Grid item xs={6} sm={3} md={1.5}>
               <TextField
                 label="QTY"
                 value={item.itemQTY}
@@ -135,6 +160,33 @@ const AddMaterials = ({ materialCodes, onUpdate }) => {
                 onInput={(e) => {
                   if (e.target.value < 0) e.target.value = 0; // Reset negative input
                 }}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6} md={3.5}>
+              <Autocomplete
+                options={suppliers}
+                getOptionLabel={(option) => option.supplier_name || ""}
+                value={
+                  suppliers.find(
+                    (sup) => sup.supplier_name === item.supplierName
+                  ) || null
+                }
+                onChange={(e, newValue) => {
+                  handleChange(
+                    index,
+                    "supplierName",
+                    newValue ? newValue.supplier_name : ""
+                  );
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Supplier (Optional)"
+                    fullWidth
+                    placeholder={`Default: ${customerName}`}
+                  />
+                )}
               />
             </Grid>
 
