@@ -24,6 +24,7 @@ import Invoice from "./pages/createInvoice";
 import CrCWO from "./pages/changeRequest";
 import CrMWO from "./pages/changeRequestMwo";
 import Masters from "./pages/masters";
+import InvoiceForm from "./pages/invoiceCreationSP";
 import { Repeat } from "@mui/icons-material";
 
 const App = () => {
@@ -174,6 +175,14 @@ const App = () => {
                   </WithAuth>
                 }
               /> */}
+              <Route
+                path="/expense-sp"
+                element={
+                  <WithAuth role="admin">
+                    <InvoiceForm />
+                  </WithAuth>
+                }
+              />
               <Route
                 path="/budget"
                 element={
