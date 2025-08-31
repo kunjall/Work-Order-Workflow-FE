@@ -367,21 +367,32 @@ const InvoiceForm = () => {
         return;
       }
 
-      const csvContent =
-        "data:text/csv;charset=utf-8," +
-        [
-          Object.keys(data[0]).join(","),
-          ...data.map((row) => Object.values(row).join(",")),
-        ].join("\n");
+      // Escape and format each field
+      const escapeCSVValue = (value) => {
+        if (value === null || value === undefined) return "";
+        const str = String(value);
+        if (/["\n,]/.test(str)) {
+          return `"${str.replace(/"/g, '""')}"`;
+        }
+        return str;
+      };
 
+      const headers = Object.keys(data[0]);
+      const csvRows = [
+        headers.join(","), // Header row
+        ...data.map((row) =>
+          headers.map((field) => escapeCSVValue(row[field])).join(",")
+        ),
+      ];
+
+      const csvContent = "data:text/csv;charset=utf-8," + csvRows.join("\n");
       const encodedUri = encodeURI(csvContent);
+
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
       link.setAttribute("download", "expenses_report.csv");
       document.body.appendChild(link);
-
       link.click();
-
       document.body.removeChild(link);
     } catch (err) {
       console.error("Error fetching expenses:", err);
