@@ -43,14 +43,6 @@ const LocatorStock = () => {
           params.vendor_name = user.name;
         }
 
-        console.log("Fetching locators with params:", params);
-        console.log("User details:", {
-          company: user.company,
-          role: user.role,
-          name: user.name,
-          isAdmin,
-        });
-
         const response = await axios.get(
           `${process.env.REACT_APP_API_URL}/master/find-locators`,
           {
@@ -60,10 +52,6 @@ const LocatorStock = () => {
             },
           }
         );
-
-        console.log("Locators received from API:", response.data);
-        console.log("Number of locators:", response.data.length);
-
         setLocators(response.data);
 
         // Extract unique customers from locator names
