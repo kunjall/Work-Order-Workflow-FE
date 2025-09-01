@@ -60,7 +60,7 @@ const LocatorMaster = () => {
   const typeOptions = ["Fiber", "Gas"];
 
   // Internal/External options
-  const internalExternalOptions = ["Internal", "External"];
+  const internalExternalOptions = ["internal", "external"];
 
   // Fetch all locators
   const fetchLocators = async () => {
