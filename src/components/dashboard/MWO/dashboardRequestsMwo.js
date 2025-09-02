@@ -366,9 +366,9 @@ const Example = ({ refreshKey }) => {
 
     if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
       mwoStatus = "Pending with OPs head";
-    } else if (mwoStatusPass.toLowerCase() === "Pending with OPs head") {
+    } else if (mwoStatusPass.toLowerCase() === "pending with ops head") {
       mwoStatus = "Pending with Acq head";
-    } else if (mwoStatusPass.toLowerCase() === "Pending with Acq head") {
+    } else if (mwoStatusPass.toLowerCase() === "pending with acq head") {
       mwoStatus = "Approved";
     }
 
