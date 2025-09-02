@@ -903,7 +903,7 @@ const MwoModal = ({
 
               {/* Approver Selection Section */}
               {(mwoStatus.toLowerCase().includes("deployment head") ||
-                mwoStatus.toLowerCase().includes("acquisition")) && (
+                mwoStatus.toLowerCase().includes("ops")) && (
                 <Box sx={{ mb: 3 }}>
                   <Typography
                     variant="h6"
@@ -924,14 +924,14 @@ const MwoModal = ({
                     }}
                   >
                     {mwoStatus.toLowerCase().includes("deployment head")
-                      ? "Select Acquisition Manager"
-                      : "Select Billing SPOC"}
+                      ? "Select Ops head"
+                      : "Select Acq manager"}
                   </Typography>
 
                   {mwoStatus.toLowerCase().includes("deployment head") && (
                     <Autocomplete
                       disablePortal
-                      id="acquisition-manager-select"
+                      id="ops-head-select"
                       options={approvers}
                       getOptionLabel={(option) =>
                         option.approver_email.toString()
@@ -945,7 +945,7 @@ const MwoModal = ({
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="Acquisition Manager"
+                          label="Ops head"
                           variant="outlined"
                           fullWidth
                           sx={{
@@ -969,10 +969,10 @@ const MwoModal = ({
                     />
                   )}
 
-                  {mwoStatus.toLowerCase().includes("acquisition") && (
+                  {mwoStatus.toLowerCase().includes("ops") && (
                     <Autocomplete
                       disablePortal
-                      id="billing-spoc-select"
+                      id="acq-head-select"
                       options={approvers}
                       getOptionLabel={(option) =>
                         option.approver2_email.toString()
@@ -988,7 +988,7 @@ const MwoModal = ({
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          label="Billing SPOC"
+                          label="Acq head"
                           variant="outlined"
                           fullWidth
                           sx={{
