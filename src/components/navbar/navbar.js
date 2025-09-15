@@ -76,7 +76,7 @@ const Navbar = () => {
     { text: "Locator", icon: <FolderOpenIcon />, path: "/locator" },
     { text: "Warehouse", icon: <InventoryIcon />, path: "/warehouse-stock" },
     { text: "Budget", icon: <MenuBookIcon />, path: "/budget" },
-    { text: "Expense SP", icon: <MenuBookIcon />, path: "/expense-sp" },
+    { text: "Invoice Receipt", icon: <MenuBookIcon />, path: "/expense-sp" },
     { text: "Access", icon: <VpnKeyIcon />, path: "/user-access" },
     { text: "Masters", icon: <SaveAsIcon />, path: "/update-masters" },
   ];

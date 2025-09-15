@@ -340,53 +340,75 @@ const DashboardWhinch = () => {
       window.alert("Please select all fields before proceeding.");
       return;
     }
-    const isConfirmed = window.confirm("Are you sure you want to submit?");
 
-    if (!isConfirmed) {
-      return;
-    }
-
-    const createdBy = user.name || "unknown";
-    const createdAt = new Date().toLocaleString("en-US", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Kolkata",
-    });
+    const initialConfirm = window.confirm("Are you sure you want to submit?");
+    if (!initialConfirm) return;
 
     setLoading(true);
 
-    const requestData = {
-      mwo_number: workOrderNumber,
-      workorder_type: "Fiber",
-      mwo_status: "Pending with deployment head",
-      gis_code: gisCode,
-      route_name: routeName,
-      route_length: routeLength,
-      homepass_count: homepassCount,
-      activity: activity,
-      type: type,
-      customer_id: selectedCustomerId,
-      execution_city: selectedCity,
-      total_service_cost: totalAmount,
-      total_material_cost: totalMaterialAmount,
-      customer_project_manager: customerProjectManager,
-      customer_name: customerName,
-      customer_state: customerState,
-      customer_approval_date: selectedDate,
-      mwo_approver_email: selectedApproverEmail,
-      mwo_approver_name: approverName,
-      created_by: createdBy,
-      created_at: createdAt,
-      state: selectedState,
-      materialRecords: lineItems,
-      serviceRecords: serviceLineItems,
-    };
-
     try {
+      const checkResponse = await axios.get(
+        `${process.env.REACT_APP_API_URL}/workorder/check-mwo-number`,
+        {
+          params: { mwo_number: workOrderNumber },
+          headers: {
+            Authorization: user.authToken,
+          },
+        }
+      );
+
+      const alreadyExists = checkResponse.data.exists;
+
+      if (alreadyExists) {
+        const userConfirmed = window.confirm(
+          "This MWO Number is already created. Do you still want to submit?"
+        );
+        if (!userConfirmed) {
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Step 2: Prepare request data
+      const createdBy = user.name || "unknown";
+      const createdAt = new Date().toLocaleString("en-US", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata",
+      });
+
+      const requestData = {
+        mwo_number: workOrderNumber,
+        workorder_type: "Fiber",
+        mwo_status: "Pending with deployment head",
+        gis_code: gisCode,
+        route_name: routeName,
+        route_length: routeLength,
+        homepass_count: homepassCount,
+        activity: activity,
+        type: type,
+        customer_id: selectedCustomerId,
+        execution_city: selectedCity,
+        total_service_cost: totalAmount,
+        total_material_cost: totalMaterialAmount,
+        customer_project_manager: customerProjectManager,
+        customer_name: customerName,
+        customer_state: customerState,
+        customer_approval_date: selectedDate,
+        mwo_approver_email: selectedApproverEmail,
+        mwo_approver_name: approverName,
+        created_by: createdBy,
+        created_at: createdAt,
+        state: selectedState,
+        materialRecords: lineItems,
+        serviceRecords: serviceLineItems,
+      };
+
+      // Step 3: Submit the MWO
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/workorder/create`,
         requestData,
@@ -396,8 +418,9 @@ const DashboardWhinch = () => {
           },
         }
       );
-      setMwoId(response.data.workorderId);
+
       if (response.status === 201) {
+        setMwoId(response.data.workorderId);
         setSuccessPopupOpen(true);
         resetForm();
       }

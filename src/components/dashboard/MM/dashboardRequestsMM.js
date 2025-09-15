@@ -325,6 +325,7 @@ const Example = ({ refreshKey }) => {
           actioned_at: actionedAt,
           actioned_by: actionedBy,
           approver_comments: comment,
+          transaction_type: selectedRow.transaction_type,
         },
         {
           headers: {

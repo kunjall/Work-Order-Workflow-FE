@@ -681,164 +681,168 @@ const MmModal = ({
                     },
                   }}
                 />
+                <Grid container spacing={4} sx={{ mt: 2 }}>
+                  <Grid item xs={12}>
+                    {/* Approver Selection Section */}
+                    {mmStatus.toLowerCase().includes("deployment head") && (
+                      <Box sx={{ mb: 4, mt: 2 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 600,
+                            mb: 2,
+                            color: "#333",
+                            display: "flex",
+                            alignItems: "center",
+                            "&:after": {
+                              content: '""',
+                              display: "block",
+                              height: "2px",
+                              background: "#ec7c30",
+                              flexGrow: 1,
+                              ml: 2,
+                            },
+                          }}
+                        >
+                          Select Material Incharge
+                        </Typography>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 3,
+                            borderRadius: "8px",
+                            border: "1px solid rgba(0, 0, 0, 0.08)",
+                            backgroundColor: "#fff",
+                          }}
+                        >
+                          <Autocomplete
+                            disablePortal
+                            id="material-incharge-select"
+                            options={approvers}
+                            getOptionLabel={(option) =>
+                              option.approver_email.toString()
+                            }
+                            onChange={(event, newValue) => {
+                              setSelectedApproverEmail(
+                                newValue ? newValue.approver_email : null
+                              );
+                              setApproverName(
+                                newValue ? newValue.approver_name : ""
+                              );
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Material Incharge"
+                                variant="outlined"
+                                fullWidth
+                                sx={{
+                                  "& .MuiOutlinedInput-root": {
+                                    borderRadius: "8px",
+                                    "&:hover fieldset": {
+                                      borderColor: "#ec7c30",
+                                    },
+                                    "&.Mui-focused fieldset": {
+                                      borderColor: "#ec7c30",
+                                    },
+                                  },
+                                }}
+                              />
+                            )}
+                            sx={{
+                              "& .MuiAutocomplete-inputRoot": {
+                                color: "#333",
+                              },
+                            }}
+                          />
+                        </Paper>
+                      </Box>
+                    )}
+
+                    {mmStatus.toLowerCase().includes("material incharge") && (
+                      <Box sx={{ mb: 4, mt: 2 }}>
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 600,
+                            mb: 2,
+                            color: "#333",
+                            display: "flex",
+                            alignItems: "center",
+                            "&:after": {
+                              content: '""',
+                              display: "block",
+                              height: "2px",
+                              background: "#ec7c30",
+                              flexGrow: 1,
+                              ml: 2,
+                            },
+                          }}
+                        >
+                          Select Material Head
+                        </Typography>
+                        <Paper
+                          elevation={0}
+                          sx={{
+                            p: 3,
+                            borderRadius: "8px",
+                            border: "1px solid rgba(0, 0, 0, 0.08)",
+                            backgroundColor: "#fff",
+                          }}
+                        >
+                          <Autocomplete
+                            disablePortal
+                            id="material-head-select"
+                            options={approvers}
+                            getOptionLabel={(option) =>
+                              option.approver2_email.toString()
+                            }
+                            onChange={(event, newValue) => {
+                              setSelectedApproverEmail(
+                                newValue ? newValue.approver2_email : null
+                              );
+                              setApproverName(
+                                newValue ? newValue.approver2_name : ""
+                              );
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                label="Material Head"
+                                variant="outlined"
+                                fullWidth
+                                sx={{
+                                  "& .MuiOutlinedInput-root": {
+                                    borderRadius: "8px",
+                                    "&:hover fieldset": {
+                                      borderColor: "#ec7c30",
+                                    },
+                                    "&.Mui-focused fieldset": {
+                                      borderColor: "#ec7c30",
+                                    },
+                                  },
+                                }}
+                              />
+                            )}
+                            sx={{
+                              "& .MuiAutocomplete-inputRoot": {
+                                color: "#333",
+                              },
+                            }}
+                          />
+                        </Paper>
+                      </Box>
+                    )}
+
+                    {/* Comments Section */}
+                  </Grid>
+                </Grid>
               </Paper>
             </Box>
           </Grid>
         </Grid>
 
         {/* Approver Selection and Comments - New Row */}
-        <Grid container spacing={4} sx={{ mt: 2 }}>
-          <Grid item xs={12}>
-            {/* Approver Selection Section */}
-            {mmStatus.toLowerCase().includes("deployment head") && (
-              <Box sx={{ mb: 4, mt: 2 }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                    color: "#333",
-                    display: "flex",
-                    alignItems: "center",
-                    "&:after": {
-                      content: '""',
-                      display: "block",
-                      height: "2px",
-                      background: "#ec7c30",
-                      flexGrow: 1,
-                      ml: 2,
-                    },
-                  }}
-                >
-                  Select Material Incharge
-                </Typography>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    borderRadius: "8px",
-                    border: "1px solid rgba(0, 0, 0, 0.08)",
-                    backgroundColor: "#fff",
-                  }}
-                >
-                  <Autocomplete
-                    disablePortal
-                    id="material-incharge-select"
-                    options={approvers}
-                    getOptionLabel={(option) =>
-                      option.approver_email.toString()
-                    }
-                    onChange={(event, newValue) => {
-                      setSelectedApproverEmail(
-                        newValue ? newValue.approver_email : null
-                      );
-                      setApproverName(newValue ? newValue.approver_name : "");
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Material Incharge"
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                            "&:hover fieldset": {
-                              borderColor: "#ec7c30",
-                            },
-                            "&.Mui-focused fieldset": {
-                              borderColor: "#ec7c30",
-                            },
-                          },
-                        }}
-                      />
-                    )}
-                    sx={{
-                      "& .MuiAutocomplete-inputRoot": {
-                        color: "#333",
-                      },
-                    }}
-                  />
-                </Paper>
-              </Box>
-            )}
-
-            {mmStatus.toLowerCase().includes("material incharge") && (
-              <Box sx={{ mb: 4, mt: 2 }}>
-                <Typography
-                  variant="h6"
-                  sx={{
-                    fontWeight: 600,
-                    mb: 2,
-                    color: "#333",
-                    display: "flex",
-                    alignItems: "center",
-                    "&:after": {
-                      content: '""',
-                      display: "block",
-                      height: "2px",
-                      background: "#ec7c30",
-                      flexGrow: 1,
-                      ml: 2,
-                    },
-                  }}
-                >
-                  Select Material Head
-                </Typography>
-                <Paper
-                  elevation={0}
-                  sx={{
-                    p: 3,
-                    borderRadius: "8px",
-                    border: "1px solid rgba(0, 0, 0, 0.08)",
-                    backgroundColor: "#fff",
-                  }}
-                >
-                  <Autocomplete
-                    disablePortal
-                    id="material-head-select"
-                    options={approvers}
-                    getOptionLabel={(option) =>
-                      option.approver2_email.toString()
-                    }
-                    onChange={(event, newValue) => {
-                      setSelectedApproverEmail(
-                        newValue ? newValue.approver2_email : null
-                      );
-                      setApproverName(newValue ? newValue.approver2_name : "");
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Material Head"
-                        variant="outlined"
-                        fullWidth
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                            "&:hover fieldset": {
-                              borderColor: "#ec7c30",
-                            },
-                            "&.Mui-focused fieldset": {
-                              borderColor: "#ec7c30",
-                            },
-                          },
-                        }}
-                      />
-                    )}
-                    sx={{
-                      "& .MuiAutocomplete-inputRoot": {
-                        color: "#333",
-                      },
-                    }}
-                  />
-                </Paper>
-              </Box>
-            )}
-
-            {/* Comments Section */}
-          </Grid>
-        </Grid>
       </DialogContent>
 
       <DialogActions
