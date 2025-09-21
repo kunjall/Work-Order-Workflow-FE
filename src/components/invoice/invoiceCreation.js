@@ -1035,9 +1035,21 @@ const InvoiceForm = () => {
 
                                       if (letter === "Unit Price") {
                                         newValue = newValue.replace(
-                                          /[^0-9]/g,
+                                          /[^0-9.]/g,
                                           ""
-                                        );
+                                        ); // Remove all non-numeric except '.'
+
+                                        // Ensure only one decimal point
+                                        const parts = newValue.split(".");
+                                        if (parts.length > 2) {
+                                          newValue = parts[0] + "." + parts[1]; // Keep only the first decimal point
+                                        }
+
+                                        // Limit to 2 decimal places
+                                        if (parts.length === 2) {
+                                          parts[1] = parts[1].slice(0, 2);
+                                          newValue = parts[0] + "." + parts[1];
+                                        }
 
                                         // Calculate Amount when Unit Price changes
                                         const qty =
