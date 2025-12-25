@@ -75,7 +75,7 @@ const ChangeRequestMWO = () => {
             headers: { Authorization: user.authToken },
           }
         );
-        console.log("Materials fetched:", response.data);
+        // console.log("Materials fetched:", response.data);
         setAllMaterials(response.data);
       } catch (err) {
         console.error("Failed to fetch materials:", err);
@@ -93,7 +93,7 @@ const ChangeRequestMWO = () => {
             headers: { Authorization: user.authToken },
           }
         );
-        console.log("Services fetched:", response.data);
+        // console.log("Services fetched:", response.data);
         setAllServices(response.data);
       } catch (err) {
         console.error("Failed to fetch services:", err);
@@ -181,7 +181,7 @@ const ChangeRequestMWO = () => {
     const mappedMaterials = Array.isArray(crMwoMaterials)
       ? crMwoMaterials.map((material) => {
           // Log each material to debug
-          console.log("Material being mapped:", material);
+          // console.log("Material being mapped:", material);
 
           return {
             record_id: `${formData.mwo_number}-${
@@ -216,19 +216,19 @@ const ChangeRequestMWO = () => {
       : [];
 
     // Log the final mapped materials to verify is_added flag
-    console.log(
-      "Final mapped materials:",
-      mappedMaterials.map((m) => ({
-        material_id: m.material_id,
-        is_added: m.is_added,
-      }))
-    );
+    // console.log(
+    //   "Final mapped materials:",
+    //   mappedMaterials.map((m) => ({
+    //     material_id: m.material_id,
+    //     is_added: m.is_added,
+    //   }))
+    // );
 
     // Prepare services data with correct field mappings
     const mappedServices = Array.isArray(crMwoServices)
       ? crMwoServices.map((service) => {
           // Log each service to debug
-          console.log("Service being mapped:", service);
+          // console.log("Service being mapped:", service);
 
           return {
             record_id: `${formData.mwo_number}-${
@@ -263,13 +263,13 @@ const ChangeRequestMWO = () => {
       : [];
 
     // Log the final mapped services to verify is_added flag
-    console.log(
-      "Final mapped services:",
-      mappedServices.map((s) => ({
-        service_id: s.service_id,
-        is_added: s.is_added,
-      }))
-    );
+    // console.log(
+    //   "Final mapped services:",
+    //   mappedServices.map((s) => ({
+    //     service_id: s.service_id,
+    //     is_added: s.is_added,
+    //   }))
+    // );
 
     const requestData = {
       mwo_number: formData.mwo_number,
@@ -318,7 +318,7 @@ const ChangeRequestMWO = () => {
   useEffect(() => {
     const checkPendingRequests = async () => {
       try {
-        console.log("Checking for CR requests for MWO:", formData.mwo_number);
+        // console.log("Checking for CR requests for MWO:", formData.mwo_number);
 
         // Check for any MB requests
         let mbResponse;
@@ -334,7 +334,7 @@ const ChangeRequestMWO = () => {
               },
             }
           );
-          console.log("MB Response:", mbResponse.data);
+          // console.log("MB Response:", mbResponse.data);
         } catch (mbError) {
           console.error("Error fetching MB data:", mbError);
           mbResponse = { data: [] }; // Default to empty array if endpoint fails
@@ -354,7 +354,7 @@ const ChangeRequestMWO = () => {
               },
             }
           );
-          console.log("MM Response:", mmResponse.data);
+          // console.log("MM Response:", mmResponse.data);
         } catch (mmError) {
           console.error("Error fetching MM data:", mmError);
           mmResponse = { data: [] }; // Default to empty array if endpoint fails
@@ -374,7 +374,7 @@ const ChangeRequestMWO = () => {
               },
             }
           );
-          console.log("CR Response:", crResponse.data);
+          // console.log("CR Response:", crResponse.data);
         } catch (crError) {
           console.error("Error fetching CR data:", crError);
           crResponse = { data: { data: [] } }; // Default to empty array if endpoint fails
@@ -392,7 +392,7 @@ const ChangeRequestMWO = () => {
           Array.isArray(mmResponse.data) &&
           mmResponse.data.some((mm) => mm.mm_status !== "Approved");
 
-        console.log(crResponse.data.data);
+        // console.log(crResponse.data.data);
 
         // Check if there's an existing CR that's not approved
         const pendingCrExists =
@@ -403,14 +403,14 @@ const ChangeRequestMWO = () => {
             return status !== "approved" && !status.includes("rejected");
           });
 
-        console.log(
-          "Pending MB exists:",
-          pendingMbExists,
-          "Pending MM exists:",
-          pendingMmExists,
-          "Pending CR exists:",
-          pendingCrExists
-        );
+        // console.log(
+        //   "Pending MB exists:",
+        //   pendingMbExists,
+        //   "Pending MM exists:",
+        //   pendingMmExists,
+        //   "Pending CR exists:",
+        //   pendingCrExists
+        // );
 
         // Check for associated CWOs and their quantities
         let cwosResponse;
@@ -434,7 +434,7 @@ const ChangeRequestMWO = () => {
           );
 
           const cwos = cwosResponse.data;
-          console.log("Associated CWOs:", cwos);
+          // console.log("Associated CWOs:", cwos);
 
           if (cwos && cwos.length > 0) {
             // For each CWO, fetch materials and services
@@ -523,7 +523,7 @@ const ChangeRequestMWO = () => {
           pendingCrExists ||
           cwoQuantitiesHigher
         ) {
-          console.log("Showing popup and resetting form");
+          // console.log("Showing popup and resetting form");
 
           if (pendingCrExists) {
             setExistsMessage(
@@ -1088,8 +1088,8 @@ const ChangeRequestMWO = () => {
   });
   theme = responsiveFontSizes(theme);
 
-  console.log(crMwoMaterials);
-  console.log(crMwoServices);
+  // console.log(crMwoMaterials);
+  // console.log(crMwoServices);
 
   return (
     <ThemeProvider theme={theme}>

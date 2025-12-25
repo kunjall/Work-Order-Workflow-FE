@@ -209,7 +209,7 @@ const Example = ({ refreshKey }) => {
           service_price: service.service_price,
         }));
         setAllMotherService(motherServiceArray);
-        console.log(motherServiceArray);
+        // console.log(motherServiceArray);
       } catch (err) {
         console.error("Error fetching inventory materials:", err);
         setAllMotherService([]);
@@ -357,6 +357,15 @@ const Example = ({ refreshKey }) => {
     if (mwoStatusPass.toLowerCase() === "pending with deployment head") {
       if (!attachmentLink && attachmentFiles.length === 0) {
         alert("Please add attachment link or upload files before approving");
+        return;
+      }
+    }
+    if (
+      mwoStatusPass.toLowerCase() === "pending with deployment head" ||
+      mwoStatusPass.toLowerCase() === "pending with ops head"
+    ) {
+      if (!selectedApproverEmail) {
+        alert("Please select approver before proceeding");
         return;
       }
     }

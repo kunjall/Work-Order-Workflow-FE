@@ -188,10 +188,10 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
         }
 
         if (isMounted) {
-          console.log(
-            "Final change requests loaded:",
-            allChangeRequests.length
-          );
+          // console.log(
+          //   "Final change requests loaded:",
+          //   allChangeRequests.length
+          // );
           setTableData(allChangeRequests);
           setIsLoading(false);
         }
@@ -230,7 +230,7 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
           }
         );
 
-        console.log("Approvers response:", response.data);
+        // console.log("Approvers response:", response.data);
 
         const approverArray = response.data.map((reviewer) => ({
           id: reviewer.record_id,
@@ -244,7 +244,7 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
           approver3_name: reviewer.approver3_name,
         }));
 
-        console.log("Mapped approvers:", approverArray);
+        // console.log("Mapped approvers:", approverArray);
         setApprovers(approverArray);
       } catch (err) {
         console.error("Error fetching reviewer:", err);
@@ -321,14 +321,14 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
       const isPendingForZ =
         selectedRow.cr_status === "Pending for approval head operations";
 
-      console.log("Approval status check:", {
-        status: selectedRow.cr_status,
-        isPendingForX,
-        isPendingForY,
-        isPendingForZ,
-        selectedApproverEmail,
-        approverName,
-      });
+      // console.log("Approval status check:", {
+      //   status: selectedRow.cr_status,
+      //   isPendingForX,
+      //   isPendingForY,
+      //   isPendingForZ,
+      //   selectedApproverEmail,
+      //   approverName,
+      // });
 
       // Prepare request data
       let requestData = {
@@ -359,7 +359,7 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
       // If this is the third approver, no additional approver info needed
       // Backend will handle final approval
 
-      console.log("Final request data being sent to backend:", requestData);
+      // console.log("Final request data being sent to backend:", requestData);
 
       const response = await axios.put(
         `${process.env.REACT_APP_API_URL}/change-request/mwo/update-status/${selectedRow.cr_mwo_id}`,
@@ -502,7 +502,7 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
 
         // Add materials with a type identifier
         materials.forEach((material) => {
-          console.log("MWO CR Material data:", material); // Debug log
+          // console.log("MWO CR Material data:", material); // Debug log
           exportData.push({
             cr_id: crId,
             record_type: "MATERIAL",
@@ -521,7 +521,7 @@ const DashboardRequestsMwoCr = ({ refreshKey }) => {
 
         // Add services with a type identifier
         services.forEach((service) => {
-          console.log("MWO CR Service data:", service); // Debug log
+          // console.log("MWO CR Service data:", service); // Debug log
           exportData.push({
             cr_id: crId,
             record_type: "SERVICE",

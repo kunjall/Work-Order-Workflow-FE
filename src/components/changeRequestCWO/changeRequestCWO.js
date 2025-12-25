@@ -207,7 +207,7 @@ const ChangeRequestCWO = () => {
     // Prepare materials data with correct field mappings
     const mappedMaterials = crCwoMaterials.map((material) => {
       // Log each material to debug
-      console.log("Material being mapped:", material);
+      // console.log("Material being mapped:", material);
 
       return {
         record_id: `${formData.cwo_number}-${
@@ -241,18 +241,18 @@ const ChangeRequestCWO = () => {
     });
 
     // Log the final mapped materials to verify is_added flag
-    console.log(
-      "Final mapped materials:",
-      mappedMaterials.map((m) => ({
-        material_id: m.material_id,
-        is_added: m.is_added,
-      }))
-    );
+    // console.log(
+    //   "Final mapped materials:",
+    //   mappedMaterials.map((m) => ({
+    //     material_id: m.material_id,
+    //     is_added: m.is_added,
+    //   }))
+    // );
 
     // Prepare services data with correct field mappings
     const mappedServices = crCwoServices.map((service) => {
       // Log each service to debug
-      console.log("Service being mapped:", service);
+      // console.log("Service being mapped:", service);
 
       return {
         record_id: `${formData.cwo_number}-${
@@ -286,13 +286,13 @@ const ChangeRequestCWO = () => {
     });
 
     // Log the final mapped services to verify is_added flag
-    console.log(
-      "Final mapped services:",
-      mappedServices.map((s) => ({
-        service_id: s.service_id,
-        is_added: s.is_added,
-      }))
-    );
+    // console.log(
+    //   "Final mapped services:",
+    //   mappedServices.map((s) => ({
+    //     service_id: s.service_id,
+    //     is_added: s.is_added,
+    //   }))
+    // );
 
     const requestData = {
       cwo_number: formData.cwo_number,
@@ -341,10 +341,10 @@ const ChangeRequestCWO = () => {
   useEffect(() => {
     const checkPendingRequests = async () => {
       try {
-        console.log(
-          "Checking for MB/MM/CR requests for CWO:",
-          formData.cwo_number
-        );
+        // console.log(
+        //   "Checking for MB/MM/CR requests for CWO:",
+        //   formData.cwo_number
+        // );
 
         // Check for any MB requests
         const mbResponse = await axios.get(
@@ -359,14 +359,14 @@ const ChangeRequestCWO = () => {
           }
         );
 
-        console.log("MB Response:", mbResponse.data);
-        console.log("MB Response type:", typeof mbResponse.data);
-        console.log(
-          "MB Response length:",
-          Array.isArray(mbResponse.data)
-            ? mbResponse.data.length
-            : "Not an array"
-        );
+        // console.log("MB Response:", mbResponse.data);
+        // console.log("MB Response type:", typeof mbResponse.data);
+        // console.log(
+        //   "MB Response length:",
+        //   Array.isArray(mbResponse.data)
+        //     ? mbResponse.data.length
+        //     : "Not an array"
+        // );
 
         // Check for any MM requests
         let mmResponse;
@@ -382,7 +382,7 @@ const ChangeRequestCWO = () => {
               },
             }
           );
-          console.log("MM Response:", mmResponse.data);
+          // console.log("MM Response:", mmResponse.data);
         } catch (mmError) {
           console.error("Error fetching MM data:", mmError);
           mmResponse = { data: [] }; // Default to empty array if endpoint fails
@@ -402,7 +402,7 @@ const ChangeRequestCWO = () => {
               },
             }
           );
-          console.log("CR Response:", crResponse.data);
+          // console.log("CR Response:", crResponse.data);
         } catch (crError) {
           console.error("Error fetching CR data:", crError);
           crResponse = { data: { data: [] } }; // Default to empty array if endpoint fails
@@ -431,18 +431,18 @@ const ChangeRequestCWO = () => {
               !cr.cr_status.startsWith("Rejected")
           );
 
-        console.log(
-          "Pending MB exists:",
-          pendingMbExists,
-          "Pending MM exists:",
-          pendingMmExists,
-          "Pending CR exists:",
-          pendingCrExists
-        );
+        // console.log(
+        //   "Pending MB exists:",
+        //   pendingMbExists,
+        //   "Pending MM exists:",
+        //   pendingMmExists,
+        //   "Pending CR exists:",
+        //   pendingCrExists
+        // );
 
         // Show popup only if there are pending (not Approved) MB, MM, or CR requests
         if (pendingMbExists || pendingMmExists || pendingCrExists) {
-          console.log("Showing popup and resetting form");
+          // console.log("Showing popup and resetting form");
 
           // Set different message based on what exists
           if (pendingCrExists) {
@@ -503,7 +503,7 @@ const ChangeRequestCWO = () => {
     if (formData.execution_city && formData.internal_manager) fetchApprovers();
   }, [formData.execution_city, formData.internal_manager, selectedWorkOrder]);
 
-  console.log(crCwoMaterials);
+  // console.log(crCwoMaterials);
 
   useEffect(() => {
     if (selectedApproverEmail) {
@@ -678,8 +678,8 @@ const ChangeRequestCWO = () => {
     selectedWorkOrder,
   ]);
 
-  console.log(crCwoMaterials);
-  console.log(crCwoServices);
+  // console.log(crCwoMaterials);
+  // console.log(crCwoServices);
 
   useEffect(() => {
     const fetchWorkOrders = async () => {
@@ -902,7 +902,7 @@ const ChangeRequestCWO = () => {
   });
   theme = responsiveFontSizes(theme);
 
-  console.log(exists);
+  // console.log(exists);
 
   return (
     <ThemeProvider theme={theme}>

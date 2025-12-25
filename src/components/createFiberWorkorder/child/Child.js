@@ -511,13 +511,13 @@ const DashboardWhinch = () => {
       !childWorkOrderNumber ||
       !selectedManager
     ) {
-      console.log("Missing fields:");
-      if (!selectedApproverEmail)
-        console.log(" - selectedApproverEmail is missing");
-      if (!selectedWorkOrder) console.log(" - selectedWorkOrder is missing");
-      if (!childWorkOrderNumber)
-        console.log(" - childWorkOrderNumber is missing");
-      if (!selectedManager) console.log(" - selectedManager is missing");
+      // console.log("Missing fields:");
+      // if (!selectedApproverEmail)
+      //   console.log(" - selectedApproverEmail is missing");
+      // if (!selectedWorkOrder) console.log(" - selectedWorkOrder is missing");
+      // if (!childWorkOrderNumber)
+      //   console.log(" - childWorkOrderNumber is missing");
+      // if (!selectedManager) console.log(" - selectedManager is missing");
 
       window.alert("Please select all fields before proceeding.");
       return;

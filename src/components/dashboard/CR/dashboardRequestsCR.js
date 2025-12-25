@@ -34,7 +34,7 @@ const DashboardRequestsCR = ({ refreshKey }) => {
     setOpen(true);
   };
 
-  console.log(selectedRow);
+  // console.log(selectedRow);
 
   useEffect(() => {
     setComment("");
@@ -171,7 +171,7 @@ const DashboardRequestsCR = ({ refreshKey }) => {
     fetchApprovers();
   }, [selectedRow]);
 
-  console.log(approvers);
+  // console.log(approvers);
 
   const handleReject = async () => {
     const isConfirmed = window.confirm(
@@ -395,7 +395,7 @@ const DashboardRequestsCR = ({ refreshKey }) => {
 
         // Add materials with a type identifier
         materials.forEach((material) => {
-          console.log("Material data:", material); // Debug log
+          // console.log("Material data:", material); // Debug log
           exportData.push({
             cr_id: crId,
             record_type: "MATERIAL",
@@ -414,7 +414,7 @@ const DashboardRequestsCR = ({ refreshKey }) => {
 
         // Add services with a type identifier
         services.forEach((service) => {
-          console.log("Service data:", service); // Debug log
+          // console.log("Service data:", service); // Debug log
           exportData.push({
             cr_id: crId,
             record_type: "SERVICE",

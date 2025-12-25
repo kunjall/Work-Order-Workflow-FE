@@ -79,7 +79,7 @@ const CrModal = ({
     setIsFullscreen(!isFullscreen);
   };
 
-  console.log(approvers);
+  // console.log(approvers);
 
   const getStatusStyles = (status) => {
     if (status.toLowerCase().includes("pending")) {

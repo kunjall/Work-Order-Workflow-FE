@@ -92,7 +92,7 @@ const InvoiceModal = ({
       color: "white",
     };
   };
-  console.log(approvers);
+  // console.log(approvers);
   const statusStyles = getStatusStyles(invoiceStatus);
 
   const isActionAllowed =

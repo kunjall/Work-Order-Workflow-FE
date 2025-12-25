@@ -141,9 +141,9 @@ const DashboardWhinch = () => {
     }));
   };
 
-  useEffect(() => {
-    console.log("Updated formData:", formData);
-  }, [formData]);
+  // useEffect(() => {
+  //   console.log("Updated formData:", formData);
+  // }, [formData]);
 
   useEffect(() => {
     if (!user) {

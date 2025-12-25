@@ -164,17 +164,17 @@ const MwoCrModal = ({
         username.username === rowData.cr_approver3_email;
     }
 
-    console.log("Auth check:", {
-      crStatus,
-      isPending,
-      isNotCreator,
-      isAdmin,
-      isCorrectApprover,
-      username: username.username,
-      approver1: rowData.cr_approver_email,
-      approver2: rowData.cr_approver2_email,
-      approver3: rowData.cr_approver3_email,
-    });
+    // console.log("Auth check:", {
+    //   crStatus,
+    //   isPending,
+    //   isNotCreator,
+    //   isAdmin,
+    //   isCorrectApprover,
+    //   username: username.username,
+    //   approver1: rowData.cr_approver_email,
+    //   approver2: rowData.cr_approver2_email,
+    //   approver3: rowData.cr_approver3_email,
+    // });
 
     return isCorrectApprover;
   }, [rowData, crStatus, username]);
@@ -1056,27 +1056,27 @@ const MwoCrModal = ({
                     }
                   }}
                   onChange={(event, newValue) => {
-                    console.log("Autocomplete onChange:", {
-                      newValue,
-                      isFirstApprover,
-                      isSecondApprover,
-                    });
+                    // console.log("Autocomplete onChange:", {
+                    //   newValue,
+                    //   isFirstApprover,
+                    //   isSecondApprover,
+                    // });
                     if (isFirstApprover) {
                       const email = newValue ? newValue.approver2_email : "";
                       const name = newValue ? newValue.approver2_name : "";
-                      console.log("Setting first approver values:", {
-                        email,
-                        name,
-                      });
+                      // console.log("Setting first approver values:", {
+                      //   email,
+                      //   name,
+                      // });
                       setSelectedApproverEmail(email);
                       setApproverName(name);
                     } else {
                       const email = newValue ? newValue.approver3_email : "";
                       const name = newValue ? newValue.approver3_name : "";
-                      console.log("Setting second approver values:", {
-                        email,
-                        name,
-                      });
+                      // console.log("Setting second approver values:", {
+                      //   email,
+                      //   name,
+                      // });
                       setSelectedApproverEmail(email);
                       setApproverName(name);
                     }
